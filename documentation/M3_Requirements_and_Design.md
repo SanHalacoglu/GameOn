@@ -57,7 +57,7 @@
     - **Detailed Flow for Each Independent Scenario**: 
         1. **View and Change Settings**:
             - **Description**: When clicking their avatar in the top right of the screen, users are taken to their account settings page, where they can change their avatar, spoken language preferences, and time zone.
-            - **Primary actor(s)**: User, Admin 
+            - **Primary actor(s)**: User
             - **Main success scenario**:
                 1. Actor presses submit on user settings and data is updated in the User database.
             - **Failure scenario(s)**:
@@ -275,6 +275,7 @@
     - **Many-to-many matching**: Unlike traditional Gale-Shapley (one-to-one), this involves grouping multiple users.
     - **Dynamic group formation**: Instead of ranking users, groups fill up based on availability, requiring a mechanism for reassignment.
     - **Fairness and stability**: Users must be placed in the best possible group without needing an explicit ranking system.
+    - **Real time matchmaking**: The algorithm must match people in real-time as they join or leave the queue.
 - **Design**:
     - **Input**:
         1. A list of users with:
