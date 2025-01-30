@@ -218,9 +218,7 @@
 
 ### **4.2. Databases**
 1. **GameOnDB (MySQL)**
-    - **Purpose**: It will store three main tables: user profile information, matchmaking/group details, and reports on users who have violated application guidelines. We will use SQL since this data is relational and well-suited to our needs.
-2. **SessionDB (MySQL)**
-    - **Purpose**: It will store one main table, which stores session details. We will use SQL since this data is relational and well-suited to our needs.
+    - **Purpose**: It will store four main tables: user profile information, matchmaking/group details, session details and reports on users who have violated application guidelines. We will use SQL since this data is relational and well-suited to our needs.
 
 
 ### **4.3. External Modules**
