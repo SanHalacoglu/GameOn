@@ -36,7 +36,7 @@
         2. **Register**:
             - **Description**: Users are prompted to sign in with Discord. If they have not they are taken to the account creation screen and are prompted to enter a screen name, upload an avatar, provide spoken language preference(s), time zone, and date of birth.
             - **Primary actor(s)**: User 
-            - **Main success scenario**:
+            - **Main success scenario(s)**:
                 1. Successful sign-in via Discord authentication.
                 2. Actor successfully fills out form submission and account is registered.
             - **Failure scenario(s)**:
@@ -141,14 +141,14 @@
 <a name="#nfr1"></a>
 
 1. **Matchmaking Time**
-    - **Description**:  People looking for a group should not have to wait longer than 5 minutes to find a group. 
+    - **Description**:  Users looking for a group should be matched within 5 minutes of initiating the matchmaking process. 
     - **Justification**: Reduces user frustration and ensures a smooth experience when matchmaking. Long wait times could make users not want to use our app.
 
 <a name="#nfr2"></a>
 
 2. **Arbitrary Group Limit**
     - **Description**: Users should not be limited to an arbitrary number of groups. They should always have the option to find a new group and the technology should support this.
-    - **Justification**: Many gamers play a ton of different games and running into a group ceiling would be frustrating. 
+    - **Justification**: Many gamers play a variety of games, and arbitrary group limitations could frustrate users.
 
 
 ## 4. Designs Specification
@@ -218,7 +218,9 @@
 
 ### **4.2. Databases**
 1. **GameOnDB (MySQL)**
-    - **Purpose**: It will store four main tables: user profile information, matchmaking/group details, and reports on users who have violated application guidelines. We will use SQL since this data is relational and well-suited to our needs.
+    - **Purpose**: It will store three main tables: user profile information, matchmaking/group details, and reports on users who have violated application guidelines. We will use SQL since this data is relational and well-suited to our needs.
+2. **SessionDB (MySQL)**
+    - **Purpose**: It will store one main table, which stores session details. We will use SQL since this data is relational and well-suited to our needs.
 
 
 ### **4.3. External Modules**
@@ -261,7 +263,7 @@
 
 ### **4.7. Non-Functional Requirements Design**
 1. [**Matchmaking Time**](#nfr1)
-    - **Validation**: We will ensure matchmaking times stay under 5 minutes by monitoring real-time user activity and dynamically adjusting matching criteria if needed. If a group is not found within 10 minutes, the system will automatically time out and notify the user to try again later.
+    - **Validation**: We will ensure matchmaking times stay under 5 minutes by monitoring real-time user activity and dynamically adjusting matching criteria if needed. If a group is not found within 5 minutes, the system will automatically time out and notify the user to try again later.
 2. [**Arbitrary Group Limit**](#nfr2)
     - **Validation**: Our MySQL database on Azure will auto-scale, optimizing read/write operations to support unlimited group participation.
 
