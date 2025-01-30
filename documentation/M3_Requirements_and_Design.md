@@ -141,7 +141,7 @@
 <a name="#nfr1"></a>
 
 1. **Matchmaking Time**
-    - **Description**:  Users looking for a group should be matched within 5 minutes of initiating the matchmaking process. 
+    - **Description**:  Users looking for a group should be matched within 10 minutes of initiating the matchmaking process. 
     - **Justification**: Reduces user frustration and ensures a smooth experience when matchmaking. Long wait times could make users not want to use our app.
 
 <a name="#nfr2"></a>
@@ -263,7 +263,7 @@
 
 ### **4.7. Non-Functional Requirements Design**
 1. [**Matchmaking Time**](#nfr1)
-    - **Validation**: We will ensure matchmaking times stay under 5 minutes by monitoring real-time user activity and dynamically adjusting matching criteria if needed. If a group is not found within 5 minutes, the system will automatically time out and notify the user to try again later.
+    - **Validation**: We will ensure matchmaking times stay under 10 minutes by monitoring real-time user activity and dynamically adjusting matching criteria if needed. If a group is not found within 10 minutes, the system will automatically time out and notify the user to try again later.
 2. [**Arbitrary Group Limit**](#nfr2)
     - **Validation**: Our MySQL database on Azure will auto-scale, optimizing read/write operations to support unlimited group participation.
 
