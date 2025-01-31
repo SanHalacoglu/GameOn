@@ -8,7 +8,7 @@
 
 ## 3. Requirements Specification
 ### **3.1. Use-Case Diagram**
-![Use-Case Diagram](/assets/M3_User_Diagram_1.png)
+![Use-Case Diagram](images/M3_User_Diagram_1.png)
 
 ### **3.2. Actors Description**
 1. **User**: A player who uses Discord authentication to access the app. They can set preferences, join groups via group matching, interact with other users, and report users if needed.
@@ -242,21 +242,21 @@
 
 
 ### **4.5. Dependencies Diagram**
-![Dependencies Diagram](/assets/M3_Interface_Diagram.png)
+![Dependencies Diagram](images/M3_Interface_Diagram.png)
 
 ### **4.6. Functional Requirements Sequence Diagram**
 1. [**Sign In**](#fr1)\
-![Sign In SD](/assets/SignIn.svg)
+![Sign In SD](images/SignIn.svg)
 2. [**User Settings**](#fr2)\
-![User Settings SD](/assets/UserSettings.svg)
+![User Settings SD](images/UserSettings.svg)
 3. [**Find Group**](#fr4)\
-![Find Group SD](/assets/FindGroup.svg)
+![Find Group SD](images/FindGroup.svg)
 4. [**Navigate to Existing Group**](#fr4)\
-![Nav to Existing SD](/assets/NavToExistingGroup.svg)
+![Nav to Existing SD](images/NavToExistingGroup.svg)
 5. [**Report User**](#fr5)\
-![Report User](/assets/ReportUser.svg)
+![Report User](images/ReportUser.svg)
 6. [**View Reports**](#fr6)\
-![View Reports](/assets/ViewReports.svg)
+![View Reports](images/ViewReports.svg)
 
 
 ### **4.7. Non-Functional Requirements Design**
