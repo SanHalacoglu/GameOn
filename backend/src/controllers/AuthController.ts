@@ -1,10 +1,5 @@
-import express, { Request, Response, Router } from "express";
-import dotenv from "dotenv";
+import { Request, Response } from "express";
 import axios from "axios";
-
-dotenv.config();
-
-export const authRouter: Router = Router();
 
 const DISCORD_AUTH_URL = "https://discord.com/api/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
@@ -33,7 +28,7 @@ function createSearchParamsAuthToken(code: string): URLSearchParams {
  * @param code - The authorization code.
  * @returns A promise with token data.
  */
-async function exchangeCodeForAccessToken(code: string): Promise<any> {
+export async function exchangeCodeForAccessToken(code: string): Promise<any> {
   const params = createSearchParamsAuthToken(code);
   const response = await axios.post(DISCORD_TOKEN_URL, params.toString(), {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -46,7 +41,7 @@ async function exchangeCodeForAccessToken(code: string): Promise<any> {
  * @param accessToken - The access token.
  * @returns A promise with user data.
  */
-async function fetchDiscordUser(accessToken: string): Promise<any> {
+export async function fetchDiscordUser(accessToken: string): Promise<any> {
   const response = await axios.get(DISCORD_USER_URL, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -54,24 +49,23 @@ async function fetchDiscordUser(accessToken: string): Promise<any> {
 }
 
 /**
- * Route: GET /auth/login
- * Redirects the user to Discord's authorization URL.
+ * Handles the login redirect. This function sends the user to Discord's OAuth page.
  */
-authRouter.get("/login", (req: Request, res: Response) => {
-  //TODO: Check if valid session exists
+export function loginRedirect(req: Request, res: Response): void {
+  // Optionally add session validations here
   const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email`;
   res.redirect(authURL);
-});
+}
 
 /**
- * Route: GET /auth/callback_discord
- * Handles the Discord callback by exchanging the code and retrieving user info.
+ * Handles the Discord callback. This function exchanges the code for an access token,
+ * fetches user data, and then sends it in the response.
  */
-authRouter.get("/callback_discord", async (req: Request, res: Response) => {
+export async function handleDiscordCallback(req: Request, res: Response): Promise<void> {
   const code = req.query.code as string;
 
   if (!code) {
-    res.status(400).send("Error fetching auth_code");
+    res.status(400).send("Error fetching auth code");
     return;
   }
 
@@ -86,11 +80,12 @@ authRouter.get("/callback_discord", async (req: Request, res: Response) => {
 
     const userData = await fetchDiscordUser(tokenData.access_token);
     console.log("User Data:", userData);
-    
-    //TODO: Check if user registered with system if not redirect to registration page
+
+    // TODO: Check if user is registered in your system,
+    // if not redirect them to a registration page
     res.send(userData);
   } catch (error) {
     console.error("Error during Discord OAuth process:", error);
     res.status(500).send("Internal Server Error");
   }
-});
+}
