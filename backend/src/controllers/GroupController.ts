@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Group } from "../entity/Group";
+import { Game } from "../entity/Game";
 import { User } from "../entity/User";
 import { GroupMember } from "../entity/GroupMember";
 
@@ -24,8 +25,30 @@ export const getGroupById = async (req: Request, res: Response): Promise<void> =
 };
 
 export const createGroup = async (req: Request, res: Response): Promise<void> => {
+  const { game_id, group_name, max_players } = req.body;
+
+  if (!game_id || !group_name || !max_players) {
+    res.status(400).json({ message: "All fields are required" });
+    return;
+  }
+
   const groupRepository = AppDataSource.getRepository(Group);
-  const group = groupRepository.create(req.body);
+  const gameRepository = AppDataSource.getRepository(Game);
+
+  const game = await gameRepository.findOne({
+    where: { game_id: parseInt(game_id) },
+  });
+
+  if (!game) {
+    res.status(404).json({ message: "Game not found" });
+    return;
+  }
+
+  const group = groupRepository.create({
+    game,
+    group_name,
+    max_players
+  });
   await groupRepository.save(group);
   res.status(201).json(group);
 };

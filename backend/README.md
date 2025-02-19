@@ -3,7 +3,7 @@
     ```
     npm install
     ```
-2. **Enviornment Variables:**
+2. **Environment Variables:**
    Create a .env file in the project root (backend folder) with the following variables:
     ```
     DISCORD_CLIENT_ID=your_discord_client_id
@@ -84,6 +84,8 @@ node dist/index.js
 
 Alternatively, you can use ts-node to run the server directly without compiling:
 ```bash
+npm start
+# OR
 npx ts-node src/index.ts
 ```
 
@@ -123,13 +125,35 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
 }
 ```
 
-**Example: Create Preferences**
+**Example: Create a Game**
 
-**Endpoint:** `POST /users/:id/preferences`
+**Endpoint:** `POST /games`
 
 **Request Body:**
 ```json
 {
+    "game_name": "League of Legends",
+    "description": "A fast-paced, team-based MOBA where players control unique champions in 5v5 battles, aiming to destroy the enemy Nexus."
+}
+```
+
+**Response:**
+```json
+{
+    "game_id": 1,
+    "game_name": "League of Legends",
+    "description": "A fast-paced, team-based MOBA where players control unique champions in 5v5 battles, aiming to destroy the enemy Nexus."
+}
+```
+
+**Example: Create Preferences**
+
+**Endpoint:** `POST /preferences`
+
+**Request Body:**
+```json
+{
+    "user_id": 1,
     "spoken_language": "English",
     "time_zone": "UTC+1",
     "skill_level": "competitive",
@@ -146,12 +170,16 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
     "skill_level": "competitive",
     "user": {
         "user_id": 1,
+        "discord_id": "123456789012345678",
         "username": "gamer123",
-        "email": "gamer123@example.com"
+        "email": "gamer123@example.com",
+        "created_at": "2025-02-19T09:10:28.222Z",
+        "banned": false
     },
     "game": {
         "game_id": 1,
-        "game_name": "League of Legends"
+        "game_name": "League of Legends",
+        "description": "A fast-paced, team-based MOBA where players control unique champions in 5v5 battles, aiming to destroy the enemy Nexus."
     }
 }
 ```
@@ -173,7 +201,11 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
 ```json
 {
     "group_id": 1,
-    "game_id": 1,
+    "game": {
+        "game_id": 1,
+        "game_name": "League of Legends",
+        "description": "A fast-paced, team-based MOBA where players control unique champions in 5v5 battles, aiming to destroy the enemy Nexus."
+    },
     "group_name": "LoL Competitive Group",
     "created_at": "2023-10-01T12:00:00Z",
     "max_players": 5
