@@ -1,5 +1,6 @@
 package com.example.gameon
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,20 +24,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.res.ResourcesCompat.getFont
-import com.example.gameon.ui.theme.Blue
-import com.example.gameon.ui.theme.BlueDarker
-import com.example.gameon.ui.theme.BlueLight
-import com.example.gameon.ui.theme.DiscordBlurple
+import com.example.gameon.ui.theme.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +48,12 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Logo()
-                LoginButton()
+                LoginButton({
+                    startActivity(Intent(
+                        this@MainActivity,
+                        PreferencesActivity::class.java
+                    ))
+                })
             }
         }
     }
@@ -59,6 +61,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Logo() {
+    val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
     Box (
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
@@ -68,10 +71,7 @@ fun Logo() {
             text = "GameOn",
             color = BlueLight,
             style = TextStyle(
-                fontFamily = FontFamily(getFont(
-                    LocalContext.current,
-                    R.font.barlow_condensed_bold
-                )!!),
+                fontFamily = fontFamily,
                 fontSize = 96.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
@@ -86,10 +86,7 @@ fun Logo() {
             text = "GameOn",
             color = Blue,
             style = TextStyle(
-                fontFamily = FontFamily(getFont(
-                    LocalContext.current,
-                    R.font.barlow_condensed_bold
-                )!!),
+                fontFamily = fontFamily,
                 fontSize = 96.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
@@ -102,15 +99,15 @@ fun Logo() {
             modifier = Modifier
                 .width(51.dp)
                 .height(38.dp)
-                .offset(75.dp, 20.dp),
+                .offset(76.dp, 20.dp),
         )
     }
 }
 
 @Composable
-fun LoginButton() {
+fun LoginButton(onClick: () -> Unit) {
     Button(
-        onClick = { },
+        onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = DiscordBlurple
         ),
@@ -130,10 +127,8 @@ fun LoginButton() {
             )
             Text(
                 "Sign in with Discord",
-                fontFamily = FontFamily(getFont(
-                    LocalContext.current,
-                    R.font.lato_bold
-                )!!),
+                fontFamily = FontFamily(Font(R.font.lato_bold)),
+                fontWeight = FontWeight.Bold,
             )
         }
     }
@@ -150,6 +145,6 @@ fun MainPreview() {
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Logo()
-        LoginButton()
+        LoginButton({})
     }
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GameOn</string>
+    <string name="title_activity_preferences">PreferencesActivity</string>
 </resources>
