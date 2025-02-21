@@ -90,7 +90,7 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
   });
 
   const user = await userRepository.findOne({
-    where: { user_id: parseInt(req.body.user_id) },
+    where: { discord_id: req.body.discord_id },
   });
 
   if (!group || !user) {
@@ -113,7 +113,7 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
   const groupMember = await groupMemberRepository.findOne({
     where: {
       group: { group_id: parseInt(req.params.id) },
-      user: { user_id: parseInt(req.body.user_id) },
+      user: { discord_id: req.body.discord_id },
     },
   });
 

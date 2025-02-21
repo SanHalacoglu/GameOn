@@ -11,7 +11,7 @@ export const getUsers = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
   const userRepository = AppDataSource.getRepository(User);
   const user = await userRepository.findOne({
-    where: { user_id: parseInt(req.params.id) },
+    where: { discord_id: req.params.id },
     relations: ["preferences"],
   });
   if (user) {
@@ -31,7 +31,7 @@ export const createUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
   const userRepository = AppDataSource.getRepository(User);
   const user = await userRepository.findOne({
-    where: { user_id: parseInt(req.params.id) },
+    where: { discord_id: req.params.id },
   });
   if (user) {
     userRepository.merge(user, req.body);
@@ -45,7 +45,7 @@ export const updateUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   const userRepository = AppDataSource.getRepository(User);
   const user = await userRepository.findOne({
-    where: { user_id: parseInt(req.params.id) },
+    where: { discord_id: req.params.id },
   });
   if (user) {
     await userRepository.remove(user);
