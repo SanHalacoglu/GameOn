@@ -70,10 +70,20 @@ export async function fetchDiscordUser(accessToken: string): Promise<any> {
 }
 
 /**
- * Redirects the client to Discord's OAuth2 login if the session does not indicate a logged-in user.
- * If a session user exists, it attempts to fetch the user profile from the DB service.
- * If the user is not registered, it sends a response indicating that the user is not registered.
- **/
+ * 
+ * 1. Checks if a session already exists.
+ *    - If a session exists:
+ *      - Determines the session type:
+ *        - If the session indicates a logged-in user, fetch their profile from the database.
+ *        - If the session is temporary (user needs to register), redirect them to the frontend registration page.
+ * 
+ * 2. If no session exists:
+ *    - Redirects the client to Discord's OAuth2 login.
+ *    - After successful authentication:
+ *      - Checks if the user exists in the database.
+ *        - If the user exists, create a session for them and log them in.
+ *        - If the user does not exist, create a temporary session indicating registration is needed and redirect them to the frontend registration page.
+ */
 export async function handleLoginOrRedirect(req: Request, res: Response): Promise<void> {
   if (req.session.user){
     if(req.session.user.temp_session){
@@ -108,8 +118,14 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
 }
 
 /**
- * Handles the Discord callback. This function exchanges the code for an access token,
- * fetches user data, and then sends it in the response.
+ * Handles the Discord OAuth2 callback.
+ * 
+ * 1. Exchanges the authorization code for an access token.
+ * 2. Fetches the user's profile from Discord.
+ * 3. Checks if the user exists in the database:
+ *    - If yes, creates a session and logs them in.
+ *    - If no, creates a temporary session for registration.
+ * 4. Sends the user data or redirects as needed.
  */
 export async function handleDiscordCallback(req: Request, res: Response): Promise<void> {
   const code = req.query.code as string;
@@ -181,6 +197,15 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
   }
 }
 
+/**
+ * Handles user registration.
+ * 
+ * 1. Redirects to the homepage if no session user exists.
+ * 2. Extracts user data from the request body and attaches Discord info from the session.
+ * 3. Sends a request to the database service to create a new user.
+ * 4. If successful, updates the session and responds with the user data.
+ * 5. Otherwise, forwards the error response.
+ */
 export async function handleRegister(req: Request, res: Response): Promise<void> {
   console.log("In handle register.");
   if (!req.session.user){
