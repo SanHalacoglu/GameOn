@@ -52,8 +52,21 @@ MYSQL_USER=root
 MYSQL_PASSWORD=yourpassword
 MYSQL_DB=gameon_db
 ```
+### Step 2: Set Up the Redis Instance for Sessions
 
-### Step 2: Install Dependencies
+**Install Redis:**
+
+```
+docker run --name gameon-redis -p 6379:6379 -d redis redis-server --requirepass yourRedisPassword
+```
+
+**Access Redis CLI**
+
+```
+docker exec -it gameon-redis redis-cli
+```
+
+### Step 3: Install Dependencies
 
 **Install Node.js:**
 
@@ -66,7 +79,7 @@ Navigate to your project directory and run:
 npm install
 ```
 
-### Step 3: Start the Server
+### Step 4: Start the Server
 
 **Compile TypeScript:**
 
@@ -96,7 +109,7 @@ The server should start and log a message like:
 Server is running on http://localhost:3000
 ```
 
-### Step 4: Test the API Endpoints
+### Step 5: Test the API Endpoints
 
 You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to test your API endpoints.
 
@@ -210,7 +223,7 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
 }
 ```
 
-### Step 5: Stop the Server
+### Step 6: Stop the Server
 
 To stop the server, press `Ctrl + C` in the terminal where the server is running.
 

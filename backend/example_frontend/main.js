@@ -1,12 +1,7 @@
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loginBtn').onclick = () => {
-      window.location.href = 'http://localhost:3000/auth/login';
-    };
-    
-    console.log('hello');
-    const urlParams = new URLSearchParams(window.location.search);
-    console.log('urlParams', urlParams);
-  
-    const code = urlParams.get('code');
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
 
-  });
+  loginBtn.onclick = () => {
+    window.location.href = "http://localhost:3000/auth/login";  // This will handle the redirect
+  };
+});
