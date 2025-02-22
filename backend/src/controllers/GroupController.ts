@@ -109,7 +109,7 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
   }
 
   //Check if group member limit has been reached
-  if (group.members.length >= group.max_players) {
+  if (group.members && group.members.length >= group.max_players) {
     res.status(400).json({ message: "Group member limit has been reached." })
     return
   }
