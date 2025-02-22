@@ -24,9 +24,9 @@ export const getPreferencesById = async (req: Request, res: Response): Promise<v
 };
 
 export const createPreferences = async (req: Request, res: Response): Promise<void> => {
-  const { user_id, spoken_language, time_zone, skill_level, game_id } = req.body;
+  const { discord_id, spoken_language, time_zone, skill_level, game_id } = req.body;
 
-  if (!user_id || !spoken_language || !time_zone || !skill_level || !game_id) {
+  if (!discord_id || !spoken_language || !time_zone || !skill_level || !game_id) {
     res.status(400).json({ message: "All fields are required" });
     return;
   }
@@ -37,7 +37,7 @@ export const createPreferences = async (req: Request, res: Response): Promise<vo
 
   try {
     const user = await userRepository.findOne({
-      where: { user_id: parseInt(user_id) },
+      where: { discord_id: discord_id },
     });
 
     if (!user) {

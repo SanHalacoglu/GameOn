@@ -90,12 +90,28 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
   });
 
   const user = await userRepository.findOne({
-    where: { user_id: parseInt(req.body.user_id) },
+    where: { discord_id: req.body.discord_id },
   });
 
   if (!group || !user) {
     res.status(404).json({ message: "Group or user not found" });
     return;
+  }
+
+  //Check if user has already joined the group
+  const existingGroupMember = await groupMemberRepository.findOne({
+    where: { 
+      group: { group_id: group.group_id }, 
+      user: { discord_id: user.discord_id } }
+  })
+  if (existingGroupMember) {
+    res.status(400).json({ message: "User has already joined this group." })
+  }
+
+  //Check if group member limit has been reached
+  if (group.members && group.members.length >= group.max_players) {
+    res.status(400).json({ message: "Group member limit has been reached." })
+    return
   }
 
   const groupMember = groupMemberRepository.create({
@@ -113,7 +129,7 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
   const groupMember = await groupMemberRepository.findOne({
     where: {
       group: { group_id: parseInt(req.params.id) },
-      user: { user_id: parseInt(req.body.user_id) },
+      user: { discord_id: req.body.discord_id },
     },
   });
 

@@ -23,18 +23,18 @@ There is an example_frontend folder that replicates a simple frontend. Open the 
 
 ### Step 1: Set Up the Database
 
-**Install PostgreSQL:**
+**Install MySQL:**
 
-If you don't already have PostgreSQL installed, download and install it from the official website.
+If you don't already have MySQL installed, download and install it from the official website.
 
-Alternatively, you can use a Docker container for PostgreSQL:
+Alternatively, you can use a Docker container for MySQL:
 ```bash
-docker run --name gameon-db -e POSTGRES_PASSWORD=yourpassword -p 5432:5432 -d postgres
+docker run --name gameon-db -e MYSQL_ROOT_PASSWORD=yourpassword -p 3306:3306 -d mysql
 ```
 
 **Create a Database:**
 
-Connect to your PostgreSQL instance using a client like psql or a GUI tool like pgAdmin.
+Connect to your MySQL instance using a client like mysql or a GUI tool like MySQL Workbench.
 
 Create a database for your project:
 ```sql
@@ -46,11 +46,11 @@ CREATE DATABASE gameon_db;
 Create or update your `.env` file with the following database connection details:
 
 ```
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=yourpassword
-POSTGRES_DB=gameon_db
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=yourpassword
+MYSQL_DB=gameon_db
 ```
 
 ### Step 2: Install Dependencies
@@ -116,7 +116,6 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
 **Response:**
 ```json
 {
-    "user_id": 1,
     "discord_id": "123456789012345678",
     "username": "gamer123",
     "email": "gamer123@example.com",
@@ -153,7 +152,7 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
 **Request Body:**
 ```json
 {
-    "user_id": 1,
+    "discord_id": "123456789012345678",
     "spoken_language": "English",
     "time_zone": "UTC+1",
     "skill_level": "competitive",
@@ -169,7 +168,6 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
     "time_zone": "UTC+1",
     "skill_level": "competitive",
     "user": {
-        "user_id": 1,
         "discord_id": "123456789012345678",
         "username": "gamer123",
         "email": "gamer123@example.com",
@@ -220,7 +218,7 @@ To stop the server, press `Ctrl + C` in the terminal where the server is running
 
 **Stop the Database:**
 
-If you're using Docker, stop the PostgreSQL container:
+If you're using Docker, stop the MySQL container:
 ```bash
 docker stop gameon-db
 ```

@@ -7,7 +7,7 @@ export class Admin {
   admin_id: number;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "user_id" })
+  @JoinColumn({ name: "discord_id" })
   user: User;
 
   @Column()

@@ -17,7 +17,7 @@ export class Preferences {
   skill_level: "casual" | "competitive";
 
   @ManyToOne(() => User, user => user.preferences)
-  @JoinColumn({ name: "user_id" })
+  @JoinColumn({ name: "discord_id" })
   user: User;
 
   @ManyToOne(() => Game)
