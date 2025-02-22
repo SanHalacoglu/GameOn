@@ -98,6 +98,22 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  //Check if user has already joined the group
+  const existingGroupMember = await groupMemberRepository.findOne({
+    where: { 
+      group: { group_id: group.group_id }, 
+      user: { discord_id: user.discord_id } }
+  })
+  if (existingGroupMember) {
+    res.status(400).json({ message: "User has already joined this group." })
+  }
+
+  //Check if group member limit has been reached
+  if (group.members.length >= group.max_players) {
+    res.status(400).json({ message: "Group member limit has been reached." })
+    return
+  }
+
   const groupMember = groupMemberRepository.create({
     group,
     user,
