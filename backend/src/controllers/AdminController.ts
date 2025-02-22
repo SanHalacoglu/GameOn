@@ -23,10 +23,10 @@ export const getAdminById = async (req: Request, res: Response): Promise<void> =
 };
 
 export const createAdmin = async (req: Request, res: Response): Promise<void> => {
-  const { user_id, permissions } = req.body;
+  const { discord_id, permissions } = req.body;
 
-  if (!user_id || !permissions) {
-    res.status(400).json({ message: "user_id and permissions are required" });
+  if (!discord_id || !permissions) {
+    res.status(400).json({ message: "discord_id and permissions are required" });
     return;
   }
 
@@ -35,7 +35,7 @@ export const createAdmin = async (req: Request, res: Response): Promise<void> =>
 
   try {
     const user = await userRepository.findOne({
-      where: { user_id: parseInt(user_id) },
+      where: { discord_id: discord_id },
     });
 
     if (!user) {

@@ -8,11 +8,11 @@ export class Report {
   report_id!: number;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "reporter_id" })
+  @JoinColumn({ name: "reporter_discord_id" })
   reporter!: User;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "reported_user_id" })
+  @JoinColumn({ name: "reported_discord_id" })
   reported_user!: User;
 
   @ManyToOne(() => Group)
