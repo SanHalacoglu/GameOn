@@ -51,6 +51,8 @@ MYSQL_PORT=3306
 MYSQL_USER=root
 MYSQL_PASSWORD=yourpassword
 MYSQL_DB=gameon_db
+
+DB_SERVICE_URL=http://localhost:3000
 ```
 ### Step 2: Set Up the Redis Instance for Sessions
 
