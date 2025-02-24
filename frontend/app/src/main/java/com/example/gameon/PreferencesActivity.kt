@@ -22,6 +22,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -48,7 +49,6 @@ import com.example.gameon.PreferenceComposables.Header
 import com.example.gameon.PreferenceComposables.Preferences
 import com.example.gameon.ui.theme.*
 import kotlinx.datetime.TimeZone
-import java.time.ZoneId
 
 class PreferencesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,7 +92,7 @@ object PreferenceComposables {
     private val selectedGame = mutableStateOf("")
 
     private val canConfirm = mutableStateOf(false)
-
+    
     @Composable
     fun Preferences(modifier: Modifier) {
         //Enables Footer's confirm button when all preferences selected
@@ -163,7 +163,7 @@ object PreferenceComposables {
         val fontFamily = FontFamily(Font(R.font.lato_regular))
         val blank = Color(0)
 
-        Column() {
+        Column {
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded },
@@ -195,7 +195,7 @@ object PreferenceComposables {
                         )
                     },
                     textStyle = TextStyle(fontFamily = fontFamily),
-                    modifier = Modifier.menuAnchor()
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,

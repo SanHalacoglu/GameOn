@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +10,11 @@ android {
     namespace = "com.example.gameon"
     compileSdk = 35
 
+    val file = rootProject.file("local.properties")
+    val properties = Properties()
+    properties.load(file.inputStream())
+    properties.remove(key = "sdk.dir")
+
     defaultConfig {
         applicationId = "com.example.gameon"
         minSdk = 31
@@ -16,6 +23,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        for (propertyName in properties.stringPropertyNames())
+            buildConfigField(
+                "String",
+                propertyName,
+                properties.getProperty(propertyName)
+            )
     }
 
     buildTypes {
@@ -36,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -51,6 +66,10 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.kotlinx.datetime)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.retrofit2.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

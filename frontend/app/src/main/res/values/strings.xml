@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">GameOn</string>
     <string name="title_activity_preferences">PreferencesActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_auth">AuthActivity</string>
+    <string name="title_activity_startup">StartupActivity</string>
+    <string name="title_activity_discord_web_view">DiscordWebViewActivity</string>
 </resources>
