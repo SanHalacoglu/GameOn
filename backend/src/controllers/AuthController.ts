@@ -88,6 +88,7 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
   if (req.session.user){
     if(req.session.user.temp_session){
       console.log("User has a temp session. Redirecting to register page.");
+      //TODO FRONT END: CHANGE NAVIGATION LOGIC TO REGISTER PAGE FRONTEND
       res.redirect(`${FRONT_END_URL}/register.html`);
       return
 
@@ -101,6 +102,7 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
         const userProfileData = response.data
         userProfileData.is_registered = true
       
+        //TODO FRONT END: CHANGE NAVIGATION LOGIC TO LOGIN/USERPAGE
         res.send(userProfileData);
       }else{
         console.log("Something has went horribly wrong.");
@@ -113,6 +115,7 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
   console.log("No Session User");
 
   const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email`;
+  //TODO FRONT END: KEEP OR CHANGE TO COMMUNICATE WITH DISCORD
   res.redirect(authURL);
   return;
 }
@@ -168,7 +171,7 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
         temp_session: true
       }
 
-      //TODO: Change to frontend register page
+      //TODO FRONT END: CHANGE NAVIGATION LOGIC TO REGISTER PAGE FRONTEND
       res.redirect(`${FRONT_END_URL}/register.html`);
       return;
       
@@ -184,6 +187,7 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
       const userProfileData = dbResponse.data
       userProfileData.is_registered = true
 
+      //TODO FRONT END: CHANGE NAVIGATION LOGIC TO LOGIN/USERPAGE
       res.send(userProfileData);
     }else{
       res.status(dbResponse.status).send(dbResponse.data);
@@ -213,18 +217,23 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
     return;
   }
 
-  //TODO: Think about how to handle this as you will need email and, username info.
+  //TODO: This Requires Changes To The Front End To Send The Correct Data
+  console.log("User has session and is in register");
   const userData = req.body;
   userData.discord_id = req.session.user.discord_id;
   userData.discord_email = req.session.user.discord_email;
   userData.discord_username = req.session.user.discord_username;
+  console.log(userData);
 
   const response = await axios.post(`${DB_SERVICE_URL}/users`, userData, {
     responseType: 'json'
   });
 
+  console.log(response)
+
   if(response.status == 201){
     req.session.user.temp_session = false;
+    //TODO FRONT END: CHANGE NAVIGATION LOGIC TO LOGIN/USERPAGE
     res.send(response.data);
   }else{
     res.status(response.status).send(response.data);

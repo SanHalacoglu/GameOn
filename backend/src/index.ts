@@ -38,7 +38,7 @@ app.use(
     cookie: {
       secure: false,            // Should be set to true to prevent session hijacking attacks.
       httpOnly: true,           // JS cannot access cookie
-      sameSite: 'strict',       // CSRF protection
+      sameSite: 'lax',       // CSRF protection
       maxAge: 1000 * 60 * 60 * 24, // 1 day expiration
     },
   })
