@@ -27,11 +27,6 @@ class LoginActivity : ComponentActivity() {
         val discordUrl = intent.getStringExtra("DiscordLoginUrl")!!
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(discordUrl))
 
-//        val webViewIntent = Intent(
-//            this@LoginActivity,
-//            DiscordWebViewActivity::class.java
-//        ).apply { putExtra("DiscordLoginUrl", discordUrl) }
-
         setContent {
             Column (
                 modifier = Modifier
@@ -43,6 +38,7 @@ class LoginActivity : ComponentActivity() {
                 Logo()
                 LoginButton {
                     startActivity(browserIntent)
+                    finish()
                 }
             }
         }

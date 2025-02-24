@@ -19,8 +19,9 @@ class AuthActivity : ComponentActivity() {
             LoadingScreen()
         }
 
+        // Kills the activity if accessed "illegally"
         val uri: Uri? = intent.data
-        if (uri == null || uri.scheme != "gameon") {
+        if (uri == null || uri.scheme != "gameoncpen") {
             finish()
             return
         }
@@ -30,17 +31,6 @@ class AuthActivity : ComponentActivity() {
             finish()
             return
         }
-
-//        val code = intent.getStringExtra("Code")
-//        if (code == null) {
-//            val discordUrl = intent.getStringExtra("DiscordLoginUrl")
-//            startActivity(
-//                Intent(
-//                this@AuthActivity, LoginActivity::class.java
-//            ).apply { putExtra("DiscordLoginUrl", discordUrl) })
-//            finish()
-//            return
-//        }
 
         lifecycleScope.launch {
             finishLogin(code, this@AuthActivity)

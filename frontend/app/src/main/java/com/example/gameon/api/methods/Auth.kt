@@ -55,6 +55,8 @@ suspend fun finishLogin (
     val authApi = Api.init(context).getInstance(false).create(AuthApi::class.java)
     val result = authApi.discordCallback(code)
 
+    Log.d("Auth", result.code().toString())
+
     // If successful continue
     val intent: Intent = if (result.isSuccessful) {
         Intent(context, MainActivity::class.java)

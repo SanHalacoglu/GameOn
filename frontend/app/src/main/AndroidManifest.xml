@@ -29,18 +29,13 @@
             android:name=".AuthActivity"
             android:exported="true"
             android:theme="@style/Theme.GameOn">
-            <intent-filter android:autoVerify="true">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="http"/>
-                <data android:host="10.0.2.2:3000"/>
-                <data android:pathPrefix="/redirect"/>
-
-                <data android:scheme="gameoncpen"/>
-                <data android:host="redirect"/>
+                <data android:scheme="gameoncpen" android:host="redirect"/>
             </intent-filter>
         </activity>
         <activity
@@ -48,11 +43,6 @@
             android:exported="true"
             android:label="@string/title_activity_login"
             android:theme="@style/Theme.GameOn" />
-        <activity
-            android:name=".DiscordWebViewActivity"
-            android:exported="false"
-            android:label="@string/title_activity_discord_web_view"
-            android:theme="@style/Theme.GameOn"/>
         <activity
             android:name=".PreferencesActivity"
             android:exported="true"
