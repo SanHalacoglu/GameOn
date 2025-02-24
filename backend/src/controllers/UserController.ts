@@ -24,7 +24,7 @@ export const getUserById = async (req: Request, res: Response) => {
 export const createUser = async (req: Request, res: Response) => {
   const userRepository = AppDataSource.getRepository(User);
   const user = userRepository.create(req.body as User);
-  
+
   const existingUser = await userRepository.findOne({
     where: { discord_id: user.discord_id },
     relations: ["preferences"],
