@@ -66,7 +66,25 @@ docker run --name gameon-redis -p 6379:6379 -d redis redis-server --requirepass 
 docker exec -it gameon-redis redis-cli
 ```
 
-### Step 3: Install Dependencies
+**Update Redis Configuration:**
+
+Create or update your `.env` file with the following redis connection details:
+
+```
+REDIS_URL=redis://:yourRedisPassword@localhost:6379
+```
+
+### Step 3: Session Configurations
+
+**Update Session Configuration:**
+
+Create or update your `.env` file with the following express-session details:
+
+```
+SESSION_SECRET=yourSessionSecret
+```
+
+### Step 4: Install Dependencies
 
 **Install Node.js:**
 
@@ -79,7 +97,7 @@ Navigate to your project directory and run:
 npm install
 ```
 
-### Step 4: Start the Server
+### Step 5: Start the Server
 
 **Compile TypeScript:**
 
@@ -109,7 +127,7 @@ The server should start and log a message like:
 Server is running on http://localhost:3000
 ```
 
-### Step 5: Test the API Endpoints
+### Step 6: Test the API Endpoints
 
 You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to test your API endpoints.
 
@@ -223,11 +241,11 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
 }
 ```
 
-### Step 6: Stop the Server
+### Step 7: Stop the Server
 
 To stop the server, press `Ctrl + C` in the terminal where the server is running.
 
-### Step 6: Clean Up
+### Step 8: Clean Up
 
 **Stop the Database:**
 
