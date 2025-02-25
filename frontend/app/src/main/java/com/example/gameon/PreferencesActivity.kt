@@ -49,21 +49,24 @@ import androidx.lifecycle.lifecycleScope
 import com.example.gameon.PreferenceComposables.Footer
 import com.example.gameon.PreferenceComposables.Header
 import com.example.gameon.PreferenceComposables.Preferences
-import com.example.gameon.api.methods.createUserPreferences
 import com.example.gameon.api.methods.fetchGames
+import com.example.gameon.api.methods.register
 import com.example.gameon.classes.Game
 import com.example.gameon.classes.Preferences
 import com.example.gameon.ui.theme.*
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 
 class PreferencesActivity : ComponentActivity() {
+    companion object {
+        private const val TAG = "PreferencesActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        val discordId = intent.getStringExtra("DiscordId")!!
         val gamesListState = mutableStateOf<List<Game>>(emptyList())
 
         val selectedLanguage = mutableStateOf("")
@@ -75,8 +78,10 @@ class PreferencesActivity : ComponentActivity() {
         lifecycleScope.launch {
             val gamesList = fetchGames(this@PreferencesActivity) // Call API
             gamesListState.value = gamesList // Update state
-            Log.d("PreferencesActivity", "Received games: $gamesList")
+            Log.d(TAG, "Received games: $gamesList")
         }
+
+        Log.d(TAG, "Discord ID: $discordId")
 
         setContent {
             Column (
@@ -100,7 +105,7 @@ class PreferencesActivity : ComponentActivity() {
                     val gameId = selectedGameObject?.game_id ?: 0 // Default to 0 if not found
 
                     val preferences = Preferences(
-                        discord_id = "123456789012345678", // Replace with actual user ID
+                        discord_id = discordId,
                         spoken_language = selectedLanguage.value,
                         time_zone = selectedTimezone.value,
                         skill_level = selectedSkillLevel.value,
@@ -108,7 +113,7 @@ class PreferencesActivity : ComponentActivity() {
                     )
 
                     lifecycleScope.launch {
-                        createUserPreferences(this@PreferencesActivity, preferences)
+                        register(this@PreferencesActivity, preferences)
                     }
                 })
             }
@@ -131,12 +136,6 @@ object PreferenceComposables {
         "Pacific",
         "Etc"
     )
-
-//    private val selectedLanguage = mutableStateOf("")
-//    private val selectedRegion = mutableStateOf("")
-//    private val selectedTimezone = mutableStateOf("")
-//    private val selectedSkillLevel = mutableStateOf("")
-//    private val selectedGame = mutableStateOf("")
 
     private val canConfirm = mutableStateOf(false)
     
@@ -383,18 +382,31 @@ object PreferenceComposables {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreferencesPreview() {
-//    val sampleGames = listOf("League of Legends", "Dota 2", "Minecraft")
-//    Column (
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(color = BlueDarker),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ){
-//        Header()
-//        Preferences(Modifier.weight(1F, true), gamesList = sampleGames)
-//        Footer()
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun PreferencesPreview() {
+    val selectedLanguage = remember {mutableStateOf("English")}
+    val selectedRegion = remember {mutableStateOf("Arctic")}
+    val selectedTimezone = remember {mutableStateOf("Arctic/Longyearbyen")}
+    val selectedSkillLevel = remember {mutableStateOf("Competitive")}
+    val selectedGameName = remember {mutableStateOf("The Sims")}
+    val sampleGames = listOf<Game>()
+    Column (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = BlueDarker),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Header()
+        Preferences(
+            modifier = Modifier.weight(1F, true),
+            gamesList = sampleGames,
+            selectedLanguage = selectedLanguage,
+            selectedRegion = selectedRegion,
+            selectedTimezone = selectedTimezone,
+            selectedSkillLevel = selectedSkillLevel,
+            selectedGameName = selectedGameName
+        )
+        Footer{}
+    }
+}
