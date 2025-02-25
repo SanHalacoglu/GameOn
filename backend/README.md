@@ -10,126 +10,33 @@
     DISCORD_CLIENT_SECRET=your_discord_client_secret
     DISCORD_REDIRECT_URI=http://localhost:3000/auth/callback_discord
     PORT=3000
+    MYSQL_HOST=mysql
+    MYSQL_PORT=3306
+    MYSQL_USER=gameon_user
+    MYSQL_PASSWORD=gameon_password
+    MYSQL_DB=gameon_db
+    SESSION_SECRET=yourSessionSecret
+    REDIS_URL=redis://redis:6379
     ```
-3. **Running the Project:**
-   ```
-   npx ts-node src/index.ts
-   ```
+3. **Run Docker Compose:**
+    In the root directory of the project:
+    ```
+    docker-compose up --build -d    
+    ```
+    Once this completes the server should be online and accessible.
+
+    To take it down, run:
+
+    ```
+    docker-compose down -v
+    ```
+
+    the -v flag will clear the volumes associated with the SQL DB, leave it out if you want to keep that data.
 
 ## Example Folder
-There is an example_frontend folder that replicates a simple frontend. Open the html file in your browser and make sure the backend is running on the specified port.
+There is an example_frontend folder that replicates a simple frontend. Open the html file in your browser and make sure the backend is running
 
-## Database Setup and Running the Server
-
-### Step 1: Set Up the Database
-
-**Install MySQL:**
-
-If you don't already have MySQL installed, download and install it from the official website.
-
-Alternatively, you can use a Docker container for MySQL:
-```bash
-docker run --name gameon-db -e MYSQL_ROOT_PASSWORD=yourpassword -p 3306:3306 -d mysql
-```
-
-**Create a Database:**
-
-Connect to your MySQL instance using a client like mysql or a GUI tool like MySQL Workbench.
-
-Create a database for your project:
-```sql
-CREATE DATABASE gameon_db;
-```
-
-**Update Database Configuration:**
-
-Create or update your `.env` file with the following database connection details:
-
-```
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=yourpassword
-MYSQL_DB=gameon_db
-
-DB_SERVICE_URL=http://localhost:3000
-```
-### Step 2: Set Up the Redis Instance for Sessions
-
-**Install Redis:**
-
-```
-docker run --name gameon-redis -p 6379:6379 -d redis redis-server --requirepass yourRedisPassword
-```
-
-**Access Redis CLI**
-
-```
-docker exec -it gameon-redis redis-cli
-```
-
-**Update Redis Configuration:**
-
-Create or update your `.env` file with the following redis connection details:
-
-```
-REDIS_URL=redis://:yourRedisPassword@localhost:6379
-```
-
-### Step 3: Session Configurations
-
-**Update Session Configuration:**
-
-Create or update your `.env` file with the following express-session details:
-
-```
-SESSION_SECRET=yourSessionSecret
-```
-
-### Step 4: Install Dependencies
-
-**Install Node.js:**
-
-If you don't have Node.js installed, download and install it from the official website.
-
-**Install Project Dependencies:**
-
-Navigate to your project directory and run:
-```bash
-npm install
-```
-
-### Step 5: Start the Server
-
-**Compile TypeScript:**
-
-Run the TypeScript compiler to generate the JavaScript files:
-```bash
-npx tsc
-```
-
-**Start the Server:**
-
-Run the compiled JavaScript files:
-```bash
-node dist/index.js
-```
-
-Alternatively, you can use ts-node to run the server directly without compiling:
-```bash
-npm start
-# OR
-npx ts-node src/index.ts
-```
-
-**Verify the Server:**
-
-The server should start and log a message like:
-```
-Server is running on http://localhost:3000
-```
-
-### Step 6: Test the API Endpoints
+### Step : Test the API Endpoints
 
 You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to test your API endpoints.
 
@@ -241,24 +148,4 @@ You can use tools like Postman, cURL, or Thunder Client (VSCode extension) to te
     "created_at": "2023-10-01T12:00:00Z",
     "max_players": 5
 }
-```
-
-### Step 7: Stop the Server
-
-To stop the server, press `Ctrl + C` in the terminal where the server is running.
-
-### Step 8: Clean Up
-
-**Stop the Database:**
-
-If you're using Docker, stop the MySQL container:
-```bash
-docker stop gameon-db
-```
-
-**Delete the Database (Optional):**
-
-If you want to start fresh, you can drop the database:
-```sql
-DROP DATABASE gameon_db;
 ```

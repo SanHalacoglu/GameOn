@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from "dotenv";
 import authRouter from "./routes/AuthRoutes";
 import { AppDataSource } from "./data-source"
-import {RedisStore} from "connect-redis"
+import { RedisStore } from "connect-redis"
 import session from "express-session"
 
 import userRoutes from "./routes/UserRoutes";
@@ -12,7 +12,9 @@ import gameRoutes from "./routes/GameRoutes";
 import groupRoutes from "./routes/GroupRoutes";
 import reportRoutes from "./routes/ReportRoutes";
 import adminRoutes from "./routes/AdminRoutes";
+import matchmakingRoutes from "./routes/MatchmakingRoutes";
 import { connectToRedisClient, redisClient } from "./redis_client";
+import { processMatchmakingQueue } from './services/MatchmakingService';
 
 // Load environment variables
 dotenv.config();
@@ -57,6 +59,12 @@ AppDataSource.initialize()
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
+
+    // Periodically process the matchmaking queue
+    setInterval(async () => {
+      console.log('Processing matchmaking queue...');
+      await processMatchmakingQueue();
+    }, 10000); // Adjust the interval as needed (e.g., every 10 seconds)
   })
   .catch((error) => {
     console.error("Error during Data Source initialization:", error);
@@ -70,3 +78,4 @@ app.use("/games", gameRoutes);
 app.use("/groups", groupRoutes);
 app.use("/reports", reportRoutes);
 app.use("/admins", adminRoutes);
+app.use("/matchmaking", matchmakingRoutes);
