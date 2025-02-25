@@ -8,5 +8,4 @@ interface GamesApi {
 
     @GET("/games")
     suspend fun getGames(): Response<List<Game>>
-
 }

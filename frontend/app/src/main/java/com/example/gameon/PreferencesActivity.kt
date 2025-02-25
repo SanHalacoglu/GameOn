@@ -1,6 +1,7 @@
 package com.example.gameon
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -44,16 +45,31 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import com.example.gameon.PreferenceComposables.Footer
 import com.example.gameon.PreferenceComposables.Header
 import com.example.gameon.PreferenceComposables.Preferences
+import com.example.gameon.api.methods.fetchGames
+import com.example.gameon.classes.Game
 import com.example.gameon.ui.theme.*
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 
 class PreferencesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val gamesListState = mutableStateOf<List<Game>>(emptyList())
+
+        lifecycleScope.launch {
+            val gamesList = fetchGames(this@PreferencesActivity) // Call API
+            gamesListState.value = gamesList // Update state
+            Log.d("PreferencesActivity", "Received games: $gamesList")
+        }
+
         setContent {
             Column (
                 modifier = Modifier
@@ -62,7 +78,7 @@ class PreferencesActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Header()
-                Preferences(Modifier.weight(1F, true))
+                Preferences(Modifier.weight(1F, true), gamesList = gamesListState.value.map { it.game_name })
                 Footer()
             }
         }
@@ -94,7 +110,7 @@ object PreferenceComposables {
     private val canConfirm = mutableStateOf(false)
     
     @Composable
-    fun Preferences(modifier: Modifier) {
+    fun Preferences(modifier: Modifier, gamesList: List<String>) {
         //Enables Footer's confirm button when all preferences selected
         canConfirm.value = (selectedLanguage.value != "") &&
                 (selectedRegion.value != "") &&
@@ -144,7 +160,7 @@ object PreferenceComposables {
                 selectedOption = selectedSkillLevel
             )
             PreferenceInput("Game",
-                options = listOf("League of Legends", "Dota 2", "Minecraft"),
+                options = gamesList,
                 selectedOption = selectedGame
             )
         }
@@ -329,6 +345,7 @@ object PreferenceComposables {
 @Preview(showBackground = true)
 @Composable
 fun PreferencesPreview() {
+    val sampleGames = listOf("League of Legends", "Dota 2", "Minecraft")
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -336,7 +353,7 @@ fun PreferencesPreview() {
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Header()
-        Preferences(Modifier.weight(1F, true))
+        Preferences(Modifier.weight(1F, true), gamesList = sampleGames)
         Footer()
     }
 }
