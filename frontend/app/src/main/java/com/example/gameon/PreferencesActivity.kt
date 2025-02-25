@@ -49,8 +49,10 @@ import androidx.lifecycle.lifecycleScope
 import com.example.gameon.PreferenceComposables.Footer
 import com.example.gameon.PreferenceComposables.Header
 import com.example.gameon.PreferenceComposables.Preferences
+import com.example.gameon.api.methods.createUserPreferences
 import com.example.gameon.api.methods.fetchGames
 import com.example.gameon.classes.Game
+import com.example.gameon.classes.Preferences
 import com.example.gameon.ui.theme.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -63,6 +65,12 @@ class PreferencesActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val gamesListState = mutableStateOf<List<Game>>(emptyList())
+
+        val selectedLanguage = mutableStateOf("")
+        val selectedRegion = mutableStateOf("")
+        val selectedTimezone = mutableStateOf("")
+        val selectedSkillLevel = mutableStateOf("")
+        val selectedGameName = mutableStateOf("")
 
         lifecycleScope.launch {
             val gamesList = fetchGames(this@PreferencesActivity) // Call API
@@ -78,8 +86,31 @@ class PreferencesActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Header()
-                Preferences(Modifier.weight(1F, true), gamesList = gamesListState.value.map { it.game_name })
-                Footer()
+                Preferences(
+                    modifier = Modifier.weight(1F, true),
+                    gamesList = gamesListState.value,
+                    selectedLanguage = selectedLanguage,
+                    selectedRegion = selectedRegion,
+                    selectedTimezone = selectedTimezone,
+                    selectedSkillLevel = selectedSkillLevel,
+                    selectedGameName = selectedGameName
+                )
+                Footer(onConfirm = {
+                    val selectedGameObject = gamesListState.value.find { it.game_name == selectedGameName.value }
+                    val gameId = selectedGameObject?.game_id ?: 0 // Default to 0 if not found
+
+                    val preferences = Preferences(
+                        discord_id = "123456789012345678", // Replace with actual user ID
+                        spoken_language = selectedLanguage.value,
+                        time_zone = selectedTimezone.value,
+                        skill_level = selectedSkillLevel.value,
+                        game_id = gameId
+                    )
+
+                    lifecycleScope.launch {
+                        createUserPreferences(this@PreferencesActivity, preferences)
+                    }
+                })
             }
         }
     }
@@ -101,22 +132,30 @@ object PreferenceComposables {
         "Etc"
     )
 
-    private val selectedLanguage = mutableStateOf("")
-    private val selectedRegion = mutableStateOf("")
-    private val selectedTimezone = mutableStateOf("")
-    private val selectedSkillLevel = mutableStateOf("")
-    private val selectedGame = mutableStateOf("")
+//    private val selectedLanguage = mutableStateOf("")
+//    private val selectedRegion = mutableStateOf("")
+//    private val selectedTimezone = mutableStateOf("")
+//    private val selectedSkillLevel = mutableStateOf("")
+//    private val selectedGame = mutableStateOf("")
 
     private val canConfirm = mutableStateOf(false)
     
     @Composable
-    fun Preferences(modifier: Modifier, gamesList: List<String>) {
+    fun Preferences(
+        modifier: Modifier,
+        gamesList: List<Game>,
+        selectedLanguage: MutableState<String>,
+        selectedRegion: MutableState<String>,
+        selectedTimezone: MutableState<String>,
+        selectedSkillLevel: MutableState<String>,
+        selectedGameName: MutableState<String>
+    ) {
         //Enables Footer's confirm button when all preferences selected
         canConfirm.value = (selectedLanguage.value != "") &&
                 (selectedRegion.value != "") &&
                 (selectedTimezone.value != "") &&
                 (selectedSkillLevel.value != "") &&
-                (selectedGame.value != "")
+                (selectedGameName.value != "")
 
         // Get list of all possible timezones
         // Then sort the list and remove any unnecessary entries
@@ -160,8 +199,8 @@ object PreferenceComposables {
                 selectedOption = selectedSkillLevel
             )
             PreferenceInput("Game",
-                options = gamesList,
-                selectedOption = selectedGame
+                options = gamesList.map { it.game_name },
+                selectedOption = selectedGameName
             )
         }
     }
@@ -313,7 +352,9 @@ object PreferenceComposables {
     }
 
     @Composable
-    fun Footer() {
+    fun Footer(
+        onConfirm: () -> Unit
+    ) {
         Box (
             modifier = Modifier
                 .fillMaxWidth()
@@ -323,7 +364,7 @@ object PreferenceComposables {
         ) {
             Button(
                 enabled = canConfirm.value,
-                onClick = { },
+                onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Blue,
                     disabledContainerColor = Color(0x442C8DFF)
@@ -342,18 +383,18 @@ object PreferenceComposables {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreferencesPreview() {
-    val sampleGames = listOf("League of Legends", "Dota 2", "Minecraft")
-    Column (
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = BlueDarker),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Header()
-        Preferences(Modifier.weight(1F, true), gamesList = sampleGames)
-        Footer()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreferencesPreview() {
+//    val sampleGames = listOf("League of Legends", "Dota 2", "Minecraft")
+//    Column (
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(color = BlueDarker),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ){
+//        Header()
+//        Preferences(Modifier.weight(1F, true), gamesList = sampleGames)
+//        Footer()
+//    }
+//}
