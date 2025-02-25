@@ -10,7 +10,7 @@ interface AuthApi {
     @GET("/auth/login")
     suspend fun login(): Response<User>
 
-    @GET("/auth/discord_callback")
+    @GET("/auth/callback_discord")
     suspend fun discordCallback(@Query("code") code: String): Response<User>
 
 }

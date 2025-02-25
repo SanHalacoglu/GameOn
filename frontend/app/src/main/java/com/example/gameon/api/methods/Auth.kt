@@ -55,10 +55,9 @@ suspend fun finishLogin (
     val authApi = Api.init(context).getInstance(false).create(AuthApi::class.java)
     val result = authApi.discordCallback(code)
 
-    Log.d("Auth", result.code().toString())
-
     // If successful continue
     val intent: Intent = if (result.isSuccessful) {
+        Log.d("Auth", result.body().toString())
         Intent(context, MainActivity::class.java)
     }
     // Upon redirect, redirect to Preferences page

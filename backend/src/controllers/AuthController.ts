@@ -1,6 +1,7 @@
 import e, { Request, Response } from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import { User } from "../entity/User";
 
 
 dotenv.config();
@@ -27,7 +28,17 @@ const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || "";
 
 const DB_SERVICE_URL = process.env.DB_SERVICE_URL || "";
 
-const FRONT_END_URL = process.env.FRONTEND_URL || "";
+
+/** Simply used to tell the frontend to redirect to the Main Activity.\
+ * This link must be intercepted on the frontend.\
+ * This link not currently deep-linked to any app.
+*/
+const FRONTEND_MAIN_URL = "gameoncpen://main"
+/** Simply used to tell the frontend to redirect to the Preferences Activity.\
+ * This link must be intercepted on the frontend.\
+ * This link not currently deep-linked to any app.
+*/
+const FRONTEND_PREFERENCES_URL = "gameoncpen://preferences"
 
 /**
  * Creates URL search parameters for exchanging the auth code.
@@ -54,6 +65,7 @@ export async function exchangeCodeForAccessToken(code: string): Promise<any> {
   const response = await axios.post(DISCORD_TOKEN_URL, params.toString(), {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });
+
   return response.data;
 }
 
@@ -88,21 +100,19 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
   if (req.session.user){
     if(req.session.user.temp_session){
       console.log("User has a temp session. Redirecting to register page.");
-      //TODO FRONT END: CHANGE NAVIGATION LOGIC TO REGISTER PAGE FRONTEND
-      res.redirect(`${FRONT_END_URL}/register.html`);
+      //This link must be intercepted on the frontend
+      //This is not currently deep-linked to any app however
+      res.redirect(FRONTEND_PREFERENCES_URL);
       return
 
     }else{
       console.log("User has a permanent session. Redirecting to home page.");
-      const response = await axios.get(`${DB_SERVICE_URL}/users/${req.session.user.discord_id}`, {
+      const response = await axios.get<User>(`${DB_SERVICE_URL}/users/${req.session.user.discord_id}`, {
         responseType: 'json'
       });
       
       if(response.status == 200){
         const userProfileData = response.data
-        userProfileData.is_registered = true
-      
-        //TODO FRONT END: CHANGE NAVIGATION LOGIC TO LOGIN/USERPAGE
         res.send(userProfileData);
       }else{
         console.log("Something has went horribly wrong.");
@@ -115,7 +125,6 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
   console.log("No Session User");
 
   const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email`;
-  //TODO FRONT END: KEEP OR CHANGE TO COMMUNICATE WITH DISCORD
   res.redirect(authURL);
   return;
 }
@@ -155,7 +164,7 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
       return;
     }
 
-    const dbResponse = await axios.get(`${DB_SERVICE_URL}/users/${discordUserData.id}`, {
+    const dbResponse = await axios.get<User>(`${DB_SERVICE_URL}/users/${discordUserData.id}`, {
       responseType: 'json',
       validateStatus: (status) => status < 500
     });
@@ -171,8 +180,9 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
         temp_session: true
       }
 
-      //TODO FRONT END: CHANGE NAVIGATION LOGIC TO REGISTER PAGE FRONTEND
-      res.redirect(`${FRONT_END_URL}/register.html`);
+      //This link must be intercepted on the frontend
+      //This is not currently deep-linked to any app however
+      res.redirect(FRONTEND_PREFERENCES_URL);
       return;
       
       //User Profile Exists, Create Session Return User Profile
@@ -185,9 +195,6 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
       }
 
       const userProfileData = dbResponse.data
-      userProfileData.is_registered = true
-
-      //TODO FRONT END: CHANGE NAVIGATION LOGIC TO LOGIN/USERPAGE
       res.send(userProfileData);
     }else{
       res.status(dbResponse.status).send(dbResponse.data);
@@ -213,7 +220,7 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
 export async function handleRegister(req: Request, res: Response): Promise<void> {
   console.log("In handle register.");
   if (!req.session.user){
-    res.redirect(`${FRONT_END_URL}/index.html`);
+    res.redirect(FRONTEND_MAIN_URL);
     return;
   }
 
@@ -225,7 +232,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
   userData.discord_username = req.session.user.discord_username;
   console.log(userData);
 
-  const response = await axios.post(`${DB_SERVICE_URL}/users`, userData, {
+  const response = await axios.post<User>(`${DB_SERVICE_URL}/users`, userData, {
     responseType: 'json'
   });
 

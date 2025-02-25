@@ -62,6 +62,12 @@ AppDataSource.initialize()
     console.error("Error during Data Source initialization:", error);
   });
 
+// Uncomment to see which requests are sent
+// app.use('/', (req, res, next) => {
+//   console.log(req.method, req.url)
+//   next()
+// })
+
 // Define routes
 app.use('/auth', authRouter);
 app.use("/users", userRoutes);
