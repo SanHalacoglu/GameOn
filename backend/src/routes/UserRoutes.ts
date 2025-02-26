@@ -5,6 +5,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  getUserGroups
 } from "../controllers/UserController";
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.get("/:id", getUserById);
 router.post("/", createUser);
 router.put("/:id", updateUser);
 router.delete("/:id", deleteUser);
+router.get("/:id/groups", getUserGroups);
 
 export default router;
