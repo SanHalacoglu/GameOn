@@ -10,5 +10,7 @@ val BlueLight = Color(0xFF83BCFF)
 val White = Color.White
 val Black = Color.Black
 
+val Error = Color(0xFFB3261E)
+
 // Source: https://discord.com/branding
 val DiscordBlurple = Color(0xFF5865F2)

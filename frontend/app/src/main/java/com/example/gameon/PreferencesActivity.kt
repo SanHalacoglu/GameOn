@@ -215,7 +215,6 @@ object PreferenceComposables {
     ) {
         var expanded by remember { mutableStateOf(false) }
         val fontFamily = FontFamily(Font(R.font.lato_regular))
-        val blank = Color(0)
 
         Column {
             ExposedDropdownMenuBox(
@@ -280,11 +279,11 @@ object PreferenceComposables {
                             },
                             colors = MenuItemColors(
                                 textColor = textColor,
-                                leadingIconColor = blank,
-                                trailingIconColor = blank,
-                                disabledTextColor = blank,
-                                disabledLeadingIconColor = blank,
-                                disabledTrailingIconColor = blank
+                                leadingIconColor = Color.Transparent,
+                                trailingIconColor = Color.Transparent,
+                                disabledTextColor = Color.Transparent,
+                                disabledLeadingIconColor = Color.Transparent,
+                                disabledTrailingIconColor = Color.Transparent
                             ),
                             modifier = Modifier.background(bgColor)
                         )
