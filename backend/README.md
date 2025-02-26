@@ -8,7 +8,7 @@
     ```
     DISCORD_CLIENT_ID=your_discord_client_id
     DISCORD_CLIENT_SECRET=your_discord_client_secret
-    DISCORD_REDIRECT_URI=http://localhost:3000/auth/callback_discord
+    DISCORD_REDIRECT_URI=http://localhost:3000/auth/redirect
     PORT=3000
     MYSQL_HOST=mysql
     MYSQL_PORT=3306
