@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gameon.R
@@ -25,10 +26,17 @@ import com.example.gameon.ui.theme.Blue
 import com.example.gameon.ui.theme.BlueLight
 
 @Composable
-fun Logo() {
+fun Logo(
+    large: Boolean = false
+) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
+    val fontSize = if (large) 96.sp else 40.sp
+    val blurRadius = if (large) 40F else 18F
+    val iconWidth = if (large) 51.dp else 20.75.dp
+    val offsetX = if (large) 76.dp else 31.5.dp
+    val offsetY = if (large) 20.dp else 8.5.dp
+
     Box (
-        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
         //Text fill and shadow
@@ -37,12 +45,12 @@ fun Logo() {
             color = BlueLight,
             style = TextStyle(
                 fontFamily = fontFamily,
-                fontSize = 96.sp,
+                fontSize = fontSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 shadow = Shadow(
                     color = Blue,
-                    blurRadius = 40F
+                    blurRadius = blurRadius
                 ),
             )
         )
@@ -52,7 +60,7 @@ fun Logo() {
             color = Blue,
             style = TextStyle(
                 fontFamily = fontFamily,
-                fontSize = 96.sp,
+                fontSize = fontSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 drawStyle = Stroke(2F)
@@ -62,9 +70,14 @@ fun Logo() {
             painterResource(R.drawable.gameon_headphones),
             "GameOn Headphones",
             modifier = Modifier
-                .width(51.dp)
-                .height(38.dp)
-                .offset(76.dp, 20.dp),
+                .width(iconWidth)
+                .offset(offsetX, offsetY),
         )
     }
+}
+
+@Preview
+@Composable
+fun LogoPreview() {
+    Logo(false)
 }
