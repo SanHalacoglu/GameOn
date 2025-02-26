@@ -214,23 +214,17 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
  * 5. Otherwise, forwards the error response.
  */
 export async function handleRegister(req: Request, res: Response): Promise<void> {
-  console.log("In handle register.");
-  if (!req.session.user || !req.body){
-    const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email`;
-    res.redirect(authURL);
-    return;
-  }
-
-  if (req.session.user.discord_id != req.body.discord_id as String|null) {
+  const sessionData = req.session.user!;
+  if (sessionData.discord_id != req.body.discord_id as String|null) {
     res.status(403).send("Discord ID does not match session information.")
     return
   }
 
   console.log("User has session and is in register");
   const userData = {
-    discord_id: req.session.user.discord_id,
-    email: req.session.user.discord_email!,
-    username: req.session.user.discord_username!
+    discord_id: sessionData.discord_id,
+    email: sessionData.discord_email!,
+    username: sessionData.discord_username!
   } as User
 
   const userResponse = await axios.post<User>(
@@ -247,7 +241,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
   )
 
   if(preferencesResponse.status == 201) {
-    req.session.user.temp_session = false;
+    sessionData.temp_session = false;
     res.send(userResponse.data);
   } else {
     res.status(preferencesResponse.status).send(preferencesResponse.data);
@@ -260,4 +254,12 @@ export async function handleLogout(req: Request, res: Response): Promise<void> {
     if(err) res.sendStatus(500)
     else res.sendStatus(204)
   })
+}
+
+export async function protectEndpoint(req: Request, res: Response, next: e.NextFunction): Promise<void> {
+  if(req.session.user){
+    next();
+  }else{
+    res.status(401).send("Unauthorized. Requires a session to access this endpoint.");
+  }
 }
