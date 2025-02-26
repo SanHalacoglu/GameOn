@@ -24,7 +24,8 @@ export const getReportById = async (req: Request, res: Response) => {
 };
 
 export const createReport = async (req: Request, res: Response) => {
-  const { reporter_discord_id, reported_discord_id, group_id, reason } = req.body
+  const reporter_discord_id = req.session.user!.discord_id;
+  const {reported_discord_id, group_id, reason } = req.body
 
   if (!reporter_discord_id || !reported_discord_id || !group_id || !reason) {
     res.status(400).json({ message: "All fields are required" });
