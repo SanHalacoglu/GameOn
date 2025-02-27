@@ -29,22 +29,30 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import com.example.gameon.api.methods.submitReport
+import com.example.gameon.classes.Group
+import com.example.gameon.classes.Report
+import com.example.gameon.classes.User
 import com.example.gameon.composables.DropdownInput
 import com.example.gameon.composables.Logo
 import com.example.gameon.composables.ReportTitle
 import com.example.gameon.composables.TextInput
 import com.example.gameon.ui.theme.*
+import kotlinx.coroutines.launch
 
 class ReportsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val groupList = listOf("Sims Swappers", "Dota Base", "Crafty Kings")
-        var userList = listOf("")
+        //TODO: Pull groups and users live from backend
 
-        val selectedGroup = mutableStateOf("")
-        val selectedUser = mutableStateOf("")
+        val groupListState = mutableStateOf<List<Group>>(emptyList())
+        val userListState = mutableStateOf<List<User>>(emptyList())
+
+        val selectedGroupName = mutableStateOf("")
+        val selectedUserName = mutableStateOf("")
         val reason = mutableStateOf("")
 
         val width = 300.dp
@@ -70,19 +78,36 @@ class ReportsActivity : ComponentActivity() {
                         Modifier.width(width)
                     )
                     Reports(
-                        groupList,
-                        selectedGroup,
-                        userList,
-                        selectedUser,
+                        groupListState.value,
+                        selectedGroupName,
+                        userListState.value,
+                        selectedUserName,
                         reason,
                         Modifier.width(width)
                     ) {
-                        userList = listOf("maddy_paulson", "rubination", "caboose4020")
+                        // Set group members to user
                     }
                     ReportButton(
-                        "Report User",
+                        "Submit Report",
                         containerColor = Error,
-                    )
+                    ) {
+                        lifecycleScope.launch {
+                            val selectedGroupObject = groupListState.value.find { it.group_name == selectedGroupName.value }
+                            val groupId = selectedGroupObject?.group_id ?: 0 // Default to 0 if not found
+
+                            val selectedUserObject = userListState.value.find { it.username == selectedUserName.value }
+                            val discordId = selectedUserObject?.discord_id ?: "0" // Default to "0" if not found
+
+                            submitReport(
+                                Report(
+                                    group_id = groupId,
+                                    reported_discord_id = discordId,
+                                    reason = reason.value,
+                                ),
+                                context = this@ReportsActivity,
+                            )
+                        }
+                    }
                     ReportButton(
                         "Cancel",
                         outlined = true
@@ -97,10 +122,10 @@ class ReportsActivity : ComponentActivity() {
 
 @Composable
 fun Reports(
-    groupList: List<String>,
-    selectedGroup: MutableState<String>,
-    userList: List<String>,
-    selectedUser: MutableState<String>,
+    groupListState: List<Group>,
+    selectedGroupName: MutableState<String>,
+    userListState: List<User>,
+    selectedUserName: MutableState<String>,
     reason: MutableState<String>,
     modifier: Modifier,
     onSelectedGroup: () -> Unit = { },
@@ -112,16 +137,16 @@ fun Reports(
     ){
         DropdownInput(
             "Group",
-            groupList,
-            selectedGroup,
+            groupListState.map { it.group_name },
+            selectedGroupName,
             modifier = modifier,
             onSelect = onSelectedGroup
         )
-        if (selectedGroup.value != "")
+        if (selectedGroupName.value != "")
             DropdownInput(
                 "User",
-                userList,
-                selectedUser,
+                userListState.map { it.username },
+                selectedUserName,
                 { Icon() },
                 modifier = modifier
             )
@@ -184,13 +209,13 @@ fun ReportButton(
 @Preview(showBackground = true)
 @Composable
 fun ReportsPreview() {
-    val groupList = listOf("Sims Swappers", "Dota Base", "Crafty Kings")
-    val userList = listOf("maddy_paulson", "rubination", "caboose4020")
+    val groupList = emptyList<Group>()
+    val userList = emptyList<User>()
 
-    val selectedGroup = remember { mutableStateOf("Sims Swappers") }
-    val selectedUser = remember { mutableStateOf("caboose4020") }
+    val selectedGroupName = remember { mutableStateOf("Sims Swappers") }
+    val selectedUserName = remember { mutableStateOf("caboose4020") }
     val reason = remember { mutableStateOf(
-        "This person called me many bad words while playing The Sims. Send her to the gulag."
+        "This person called me many bad words while playing The Sims. Send him to the gulag."
     ) }
 
     val width = 300.dp
@@ -216,9 +241,9 @@ fun ReportsPreview() {
             )
             Reports(
                 groupList,
-                selectedGroup,
+                selectedGroupName,
                 userList,
-                selectedUser,
+                selectedUserName,
                 reason,
                 Modifier.width(width)
             )
