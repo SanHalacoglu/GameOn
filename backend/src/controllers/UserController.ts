@@ -69,7 +69,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 export const getUserGroups = async (req: Request, res: Response) => {
   const groupMemberRepository = AppDataSource.getRepository(GroupMember);
   const userGroups = await groupMemberRepository.find({
-    where: { user: { discord_id: req.params.id } },
+    where: { user: { discord_id: (req.params.id == "session") ? req.session.user!.discord_id : req.params.id} },
     relations: ["group", "group.game"],
   });
 

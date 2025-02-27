@@ -14,28 +14,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.example.gameon.api.methods.getGroupMembers
+import com.example.gameon.api.methods.getUserGroups
 import com.example.gameon.api.methods.submitReport
 import com.example.gameon.classes.Group
 import com.example.gameon.classes.Report
 import com.example.gameon.classes.User
 import com.example.gameon.composables.DropdownInput
+import com.example.gameon.composables.Icon
 import com.example.gameon.composables.Logo
+import com.example.gameon.composables.ReportButton
 import com.example.gameon.composables.ReportTitle
 import com.example.gameon.composables.TextInput
 import com.example.gameon.ui.theme.*
@@ -46,8 +44,6 @@ class ReportsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        //TODO: Pull groups and users live from backend
-
         val groupListState = mutableStateOf<List<Group>>(emptyList())
         val userListState = mutableStateOf<List<User>>(emptyList())
 
@@ -55,7 +51,23 @@ class ReportsActivity : ComponentActivity() {
         val selectedUserName = mutableStateOf("")
         val reason = mutableStateOf("")
 
+        val canSubmit = selectedGroupName.value.isNotEmpty() &&
+                selectedUserName.value.isNotEmpty() &&
+                reason.value.isNotEmpty()
+
         val width = 300.dp
+
+        lifecycleScope.launch{
+
+            val groupList = getUserGroups(
+                context = this@ReportsActivity
+            )
+            if (groupList.isNotEmpty()) {
+                groupListState.value = groupList
+            } else {
+                selectedGroupName.value = "You are not in any groups."
+            }
+        }
 
         setContent {
             Box (
@@ -85,18 +97,38 @@ class ReportsActivity : ComponentActivity() {
                         reason,
                         Modifier.width(width)
                     ) {
-                        // Set group members to user
+                        lifecycleScope.launch {
+                            val selectedGroupObject = groupListState.value
+                                .find { it.group_name == selectedGroupName.value }
+                            // Default to 0 if not found
+                            val groupId = selectedGroupObject?.group_id ?: 0
+
+                            val groupMemberList =
+                                getGroupMembers(groupId, this@ReportsActivity)
+
+                            val userList = groupMemberList.map {
+                                it.user!!
+                            }
+
+                            userListState.value = userList
+                        }
                     }
                     ReportButton(
                         "Submit Report",
                         containerColor = Error,
+                        enabled = canSubmit,
+                        modifier = Modifier.width(width)
                     ) {
                         lifecycleScope.launch {
-                            val selectedGroupObject = groupListState.value.find { it.group_name == selectedGroupName.value }
-                            val groupId = selectedGroupObject?.group_id ?: 0 // Default to 0 if not found
+                            val selectedGroupObject = groupListState.value
+                                .find { it.group_name == selectedGroupName.value }
+                            // Default to 0 if not found
+                            val groupId = selectedGroupObject?.group_id ?: 0
 
-                            val selectedUserObject = userListState.value.find { it.username == selectedUserName.value }
-                            val discordId = selectedUserObject?.discord_id ?: "0" // Default to "0" if not found
+                            val selectedUserObject = userListState.value
+                                .find { it.username == selectedUserName.value }
+                            // Default to "0" if not found
+                            val discordId = selectedUserObject?.discord_id ?: "0"
 
                             submitReport(
                                 Report(
@@ -110,7 +142,8 @@ class ReportsActivity : ComponentActivity() {
                     }
                     ReportButton(
                         "Cancel",
-                        outlined = true
+                        outlined = true,
+                        modifier = Modifier.width(width)
                     ) {
                         finish()
                     }
@@ -142,7 +175,7 @@ fun Reports(
             modifier = modifier,
             onSelect = onSelectedGroup
         )
-        if (selectedGroupName.value != "")
+        if (selectedGroupName.value.isNotEmpty())
             DropdownInput(
                 "User",
                 userListState.map { it.username },
@@ -153,55 +186,6 @@ fun Reports(
         TextInput(
             reason,
             modifier = modifier.height(350.dp)
-        )
-    }
-}
-
-@Composable
-fun Icon() {
-    Box (
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .width(40.dp)
-            .height(40.dp)
-            .background(
-                color = DiscordBlurple,
-                shape = CircleShape
-            )
-    ) {
-        Image(
-            painterResource(R.drawable.discord_icon),
-            "Discord Icon",
-            modifier = Modifier
-                .width(26.dp)
-                .height(20.dp)
-        )
-    }
-}
-
-@Composable
-fun ReportButton(
-    text: String,
-    textColor: Color = White,
-    containerColor: Color = BlueDarker,
-    outlined: Boolean = false,
-    onClick : () -> Unit = { }
-) {
-    OutlinedButton(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor
-        ),
-        border = ButtonDefaults.outlinedButtonBorder(
-            enabled = outlined
-        ),
-        modifier = Modifier
-            .width(300.dp)
-    ) {
-        Text(
-            text,
-            fontFamily = FontFamily(Font(R.font.lato_bold)),
-            color = textColor
         )
     }
 }
@@ -250,10 +234,12 @@ fun ReportsPreview() {
             ReportButton(
                 "Report User",
                 containerColor = Error,
+                modifier = Modifier.width(width)
             )
             ReportButton(
                 "Cancel",
-                outlined = true
+                outlined = true,
+                modifier = Modifier.width(width)
             )
         }
     }

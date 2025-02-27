@@ -24,16 +24,15 @@ suspend fun submitReport(
 
 suspend fun getReports(
     context: Context,
-    onSuccess: (reports: List<Report>) -> Unit,
-    onFailure: () -> Unit
-) {
+): List<Report> {
     val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
 
     val result = reportsApi.getReports()
 
-    if (result.isSuccessful) {
-        onSuccess(result.body()!!)
+    return if (result.isSuccessful) {
+        result.body()!!
     } else {
         Log.d("Reports", "Something went wrong!")
+        emptyList()
     }
 }
