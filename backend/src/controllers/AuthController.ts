@@ -4,21 +4,7 @@ import dotenv from "dotenv";
 import { User } from "../entity/User";
 import { Preferences } from "../entity/Preference";
 
-
 dotenv.config();
-
-declare module 'express-session' {
-  interface SessionData {
-    user?: {
-      discord_id: string;
-      discord_access_token: string;
-      discord_refresh_token: string;
-      discord_username?: string;
-      discord_email?: string;
-      temp_session: boolean;
-    };
-  }
-}
 
 const DISCORD_AUTH_URL = "https://discord.com/api/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";

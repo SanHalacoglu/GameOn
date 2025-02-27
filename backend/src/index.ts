@@ -46,6 +46,20 @@ app.use(
   })
 );
 
+//SessionData User Type Declaration
+declare module 'express-session' {
+  interface SessionData {
+    user?: {
+      discord_id: string;
+      discord_access_token: string;
+      discord_refresh_token: string;
+      discord_username?: string;
+      discord_email?: string;
+      temp_session: boolean;
+    };
+  }
+}
+
 const PORT = process.env.PORT || 3000;
 
 // Initialize the data source and start the server
