@@ -15,6 +15,7 @@
     MYSQL_USER=gameon_user
     MYSQL_PASSWORD=gameon_password
     MYSQL_DB=gameon_db
+    DB_SERVICE_URL=http://localhost:3000
     SESSION_SECRET=yourSessionSecret
     REDIS_URL=redis://redis:6379
     ```
