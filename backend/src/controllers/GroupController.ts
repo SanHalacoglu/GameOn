@@ -168,4 +168,4 @@ const createDiscordGroup = async (discord_auth_tokens: string[]): Promise<String
     console.error("Error creating Discord group" + response_channel_info.data);
     return "";
   }
-}
+};
