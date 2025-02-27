@@ -389,7 +389,7 @@ fun PreferencesPreview() {
     val selectedTimezone = remember {mutableStateOf("Arctic/Longyearbyen")}
     val selectedSkillLevel = remember {mutableStateOf("Competitive")}
     val selectedGameName = remember {mutableStateOf("The Sims")}
-    val sampleGames = listOf<Game>()
+    val sampleGames = emptyList<Game>()
     Column (
         modifier = Modifier
             .fillMaxSize()
