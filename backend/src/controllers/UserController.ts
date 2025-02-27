@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
+import { GroupMember } from "../entity/GroupMember";
 
 export const getUsers = async (req: Request, res: Response) => {
   const userRepository = AppDataSource.getRepository(User);
@@ -62,5 +63,20 @@ export const deleteUser = async (req: Request, res: Response) => {
     res.status(204).send();
   } else {
     res.status(404).json({ message: "User not found" });
+  }
+};
+
+export const getUserGroups = async (req: Request, res: Response) => {
+  const groupMemberRepository = AppDataSource.getRepository(GroupMember);
+  const userGroups = await groupMemberRepository.find({
+    where: { user: { discord_id: req.params.id } },
+    relations: ["group", "group.game"],
+  });
+
+  if (userGroups.length > 0) {
+    const groups = userGroups.map(groupMember => groupMember.group);
+    res.json(groups);
+  } else {
+    res.status(404).json({ message: "No groups found for this user" });
   }
 };
