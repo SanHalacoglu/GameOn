@@ -4,9 +4,17 @@ import { Preferences } from "../entity/Preference";
 import { addMatchmakingRequest } from "../services/MatchmakingService";
 
 export const initiateMatchmaking = async (req: Request, res: Response): Promise<void> => {
+  const { preference_id } = req.body;
+  const discord_access_token = req.session.user?.discord_access_token; // Retrieve discord_access_token from session
+
+  if (!discord_access_token) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
   const preferencesRepository = AppDataSource.getRepository(Preferences);
   const preferences = await preferencesRepository.findOne({
-    where: { preference_id: parseInt(req.body.preference_id) },
+    where: { preference_id: parseInt(preference_id) },
     relations: ["user", "game"],
   });
 
@@ -15,6 +23,6 @@ export const initiateMatchmaking = async (req: Request, res: Response): Promise<
     return;
   }
 
-  await addMatchmakingRequest(preferences);
+  await addMatchmakingRequest(preferences, discord_access_token); 
   res.status(200).json({ message: "Matchmaking request initiated" });
 };
