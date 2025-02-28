@@ -12,7 +12,11 @@ import com.example.gameon.StartupActivity
 import com.example.gameon.api.Api
 import com.example.gameon.api.PersistentCookieJar
 import com.example.gameon.api.interfaces.AuthApi
+import com.example.gameon.classes.DateAdapter
 import com.example.gameon.classes.Preferences
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import java.util.Date
 
 suspend fun checkLoggedIn (context: Context) {
     val authApi = Api.init(context)
@@ -21,9 +25,17 @@ suspend fun checkLoggedIn (context: Context) {
 
     val result = authApi.login()
 
+    val gson: Gson = GsonBuilder()
+        .registerTypeAdapter(Date::class.java, DateAdapter())
+        .create()
+
     //If successful continue
     val intent: Intent = if (result.isSuccessful) {
-        Intent(context, MainActivity::class.java)
+        val userJson = gson.toJson(result.body())
+        Log.d("Auth", "User logged in: $userJson")
+        Intent(context, MainActivity::class.java).apply{
+            putExtra("User", userJson)
+        }
     }
     //Upon redirect, redirect to either Login or Preferences pages
     else if (result.code() in 300..399) {
