@@ -16,20 +16,20 @@ import com.example.gameon.ui.theme.White
 
 @Composable
 fun TextInput(
-    selectedOption: MutableState<String>,
+    input: MutableState<String>,
     modifier: Modifier
 ) {
     val fontFamily = FontFamily(Font(R.font.lato_regular))
 
     TextField(
-        value = selectedOption.value,
-        onValueChange = { selectedOption.value = it },
+        value = input.value,
+        onValueChange = { input.value = it },
         label = { Text(
             "Reason",
             fontFamily=fontFamily
         ) },
         placeholder = { Text(
-            "Why are you reporting this user",
+            "Why are you reporting this user?",
             fontFamily=fontFamily
         ) },
         singleLine = false,
@@ -39,12 +39,12 @@ fun TextInput(
             unfocusedLabelColor = White,
             unfocusedContainerColor = BlueDark,
             unfocusedIndicatorColor = BlueDark,
-            unfocusedPlaceholderColor = Color(0xFFAAAAAA),
+            unfocusedPlaceholderColor = Color(0xAAFFFFFF),
             focusedTextColor = White,
             focusedLabelColor = White,
             focusedContainerColor = BlueDark,
             focusedIndicatorColor = White,
-            focusedPlaceholderColor = Color(0xFFAAAAAA),
+            focusedPlaceholderColor = Color(0xAAFFFFFF),
         ),
         modifier = modifier
     )

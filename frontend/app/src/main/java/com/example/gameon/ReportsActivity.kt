@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,14 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -51,9 +48,7 @@ class ReportsActivity : ComponentActivity() {
         val selectedUserName = mutableStateOf("")
         val reason = mutableStateOf("")
 
-        val canSubmit = selectedGroupName.value.isNotEmpty() &&
-                selectedUserName.value.isNotEmpty() &&
-                reason.value.isNotEmpty()
+        val canSubmit = mutableStateOf(false)
 
         val width = 300.dp
 
@@ -95,6 +90,7 @@ class ReportsActivity : ComponentActivity() {
                         userListState.value,
                         selectedUserName,
                         reason,
+                        canSubmit,
                         Modifier.width(width)
                     ) {
                         lifecycleScope.launch {
@@ -116,7 +112,7 @@ class ReportsActivity : ComponentActivity() {
                     ReportButton(
                         "Submit Report",
                         containerColor = Error,
-                        enabled = canSubmit,
+                        enabled = canSubmit.value,
                         modifier = Modifier.width(width)
                     ) {
                         lifecycleScope.launch {
@@ -155,14 +151,18 @@ class ReportsActivity : ComponentActivity() {
 
 @Composable
 fun Reports(
-    groupListState: List<Group>,
+    groupList: List<Group>,
     selectedGroupName: MutableState<String>,
-    userListState: List<User>,
+    userList: List<User>,
     selectedUserName: MutableState<String>,
     reason: MutableState<String>,
+    canSubmit: MutableState<Boolean>,
     modifier: Modifier,
     onSelectedGroup: () -> Unit = { },
 ) {
+    canSubmit.value = selectedGroupName.value.isNotBlank() &&
+            selectedUserName.value.isNotBlank() &&
+            reason.value.isNotBlank()
 
     Column (
         verticalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterVertically),
@@ -170,15 +170,15 @@ fun Reports(
     ){
         DropdownInput(
             "Group",
-            groupListState.map { it.group_name },
+            groupList.map { it.group_name },
             selectedGroupName,
             modifier = modifier,
             onSelect = onSelectedGroup
         )
-        if (selectedGroupName.value.isNotEmpty())
+        if (groupList.isNotEmpty() && selectedGroupName.value.isNotEmpty())
             DropdownInput(
                 "User",
-                userListState.map { it.username },
+                userList.map { it.username },
                 selectedUserName,
                 { Icon() },
                 modifier = modifier
@@ -229,6 +229,7 @@ fun ReportsPreview() {
                 userList,
                 selectedUserName,
                 reason,
+                remember { mutableStateOf(true) },
                 Modifier.width(width)
             )
             ReportButton(
