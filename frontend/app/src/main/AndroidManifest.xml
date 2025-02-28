@@ -16,6 +16,11 @@
         android:theme="@style/Theme.GameOn"
         tools:targetApi="31">
         <activity
+            android:name=".ViewReportsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_view_reports"
+            android:theme="@style/Theme.GameOn" />
+        <activity
             android:name=".ListReportsActivity"
             android:exported="true"
             android:label="@string/title_activity_list_reports"
@@ -24,7 +29,7 @@
             android:name=".ReportsActivity"
             android:exported="false"
             android:label="@string/title_activity_reports"
-            android:theme="@style/Theme.GameOn"/>
+            android:theme="@style/Theme.GameOn" />
         <activity
             android:name=".StartupActivity"
             android:exported="true"

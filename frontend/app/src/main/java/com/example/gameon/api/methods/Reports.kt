@@ -36,3 +36,19 @@ suspend fun getReports(
         emptyList()
     }
 }
+
+suspend fun getReportById(
+    reportId: Int,
+    context: Context
+): Report? {
+    val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
+
+    val result = reportsApi.getReportById(reportId)
+
+    return if (result.isSuccessful) {
+        result.body()!!
+    } else {
+        Log.d("Reports", "Something went wrong!")
+        null
+    }
+}

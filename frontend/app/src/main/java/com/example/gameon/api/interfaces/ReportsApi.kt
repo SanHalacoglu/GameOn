@@ -5,11 +5,15 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ReportsApi {
 
     @GET("/reports")
     suspend fun getReports(): Response<List<Report>>
+
+    @GET("/reports/{id}")
+    suspend fun getReportById(@Path("id") id: Int): Response<Report>
 
     @POST("/reports")
     suspend fun createReport(@Body report: Report): Response<Any>

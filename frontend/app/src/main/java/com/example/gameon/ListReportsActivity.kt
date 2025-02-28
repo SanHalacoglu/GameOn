@@ -1,5 +1,6 @@
 package com.example.gameon
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -83,7 +84,11 @@ class ListReportsActivity : ComponentActivity() {
                             .height(550.dp)
                     ) {
                             reportId ->
-                        Log.d("ReportList", "Report $reportId clicked.")
+                        startActivity(Intent(
+                            this@ListReportsActivity,
+                            ViewReportsActivity::class.java
+                        ).apply { putExtra("ReportId", reportId) })
+                        finish()
                     }
                     ReportButton(
                         "Back",

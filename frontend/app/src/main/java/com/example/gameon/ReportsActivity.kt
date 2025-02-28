@@ -53,7 +53,6 @@ class ReportsActivity : ComponentActivity() {
         val width = 300.dp
 
         lifecycleScope.launch{
-
             val groupList = getUserGroups(
                 context = this@ReportsActivity
             )
@@ -102,9 +101,7 @@ class ReportsActivity : ComponentActivity() {
                             val groupMemberList =
                                 getGroupMembers(groupId, this@ReportsActivity)
 
-                            val userList = groupMemberList.map {
-                                it.user!!
-                            }
+                            val userList = groupMemberList.map { it.user!! }
 
                             userListState.value = userList
                         }
@@ -199,7 +196,7 @@ fun ReportsPreview() {
     val selectedGroupName = remember { mutableStateOf("Sims Swappers") }
     val selectedUserName = remember { mutableStateOf("caboose4020") }
     val reason = remember { mutableStateOf(
-        "This person called me many bad words while playing The Sims. Send him to the gulag."
+        "This person called me many bad words while playing The Sims."
     ) }
 
     val width = 300.dp
