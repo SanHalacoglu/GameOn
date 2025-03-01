@@ -182,8 +182,10 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
       res.status(dbResponse.status).send(dbResponse.data);
       return;
     }
-
-    res.send(discordUserData);
+    
+    // else if status 200 block sends response twice
+    // which crashes the server
+    // res.send(discordUserData);
   } catch (error) {
     console.error("Error during Discord OAuth process:", error);
     res.status(500).send("Internal Server Error");
@@ -236,9 +238,12 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 
 export async function handleLogout(req: Request, res: Response): Promise<void> {
   // Clear session
-  req.session.destroy((err) => {
+  req.session.regenerate((err) => {
     if(err) res.sendStatus(500)
-    else res.sendStatus(204)
+    else {
+      console.log("User logged out")
+      res.sendStatus(204)
+    }
   })
 }
 
