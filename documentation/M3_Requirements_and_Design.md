@@ -4,6 +4,11 @@
 ### Change History
 
 ### March 1st 2025 Changes
+### 3.3.1 Sign In
+- **Change**: Users must register with our app after successfully signing in with Discord. If they haven't registered yet, they will be taken to the account creation screen, where they must enter their registration preferences, including Spoken Language, Region, Timezone, Skill Level, and Game.
+- **Modified Sections**: Functional Requirements: Sign In.
+- **Rationale**: Added the additional requirement for users to register with our app. The updated preferences better represent what a user should provide.
+  
 #### 4.1 Admin Routes
 - **Change**: Added interfaces for retrieving, creating, updating, and deleting admins.
 - **Modified Sections**: Admin Routes section.
@@ -87,6 +92,11 @@
 - **Change**: Added a new section for External Modules.
 - **Modified Sections**: External Modules section.
 - **Rationale**: Provides clarity on the use of the Discord API for authentication and creating matchmaking groups, ensuring a comprehensive understanding of external dependencies.
+  
+#### 4.6 Functional Requirements Sequence Diagram
+- **Change**: Updated UML diagram for Signin.
+- **Modified Sections**: Functional Requirements Sequence Diagram.
+- **Rationale**: Design was updated.
 
 ## 2. Project Description
 **GameOn** is a social matchmaking platform designed for gamers to find ideal teammates and build lasting connections. By authenticating through Discord, players create personalized profiles, sharing details like preferred games, skill levels, communication styles, and playstyles. The app intelligently matches players based on their preferences, instantly creating a dedicated Discord group for seamless in-game coordination and ongoing communication. With integrated feedback systems, including reviews and ratings, GameOn fosters a supportive and positive gaming community.
@@ -110,7 +120,7 @@
     
     - **Detailed Flow for Each Independent Scenario**: 
         1. **Login**:
-            - **Description**: Users are prompted to sign in with Discord. If they have already signed in with Discord they are taken to the home screen.
+            - **Description**: Users are prompted to sign in with Discord. If they have already signed in with Discord and registered with our app they are taken to the home screen.
             - **Primary actor(s)**: User 
             - **Main success scenario**:
                 1. Successful sign-in via Discord authentication.
@@ -119,7 +129,7 @@
                     - 1a1. Incorrect credentials are provided.
 
         2. **Register**:
-            - **Description**: Users are prompted to sign in with Discord. If they have not they are taken to the account creation screen and are prompted to enter a screen name, upload an avatar, provide spoken language preference(s), time zone, and date of birth.
+            - **Description**: Users are prompted to sign in with Discord. If they haven't registered with our app, they are taken to the account creation screen, where they must enter their registration preferences, including Spoken Language, Region, Timezone, Skill Level, and Game.
             - **Primary actor(s)**: User 
             - **Main success scenario(s)**:
                 1. Successful sign-in via Discord authentication.
@@ -129,13 +139,11 @@
                     - 1a1. Incorrect credentials are provided.
                 - 2a. User fails to provide all required fields.
                     - 2a1. User must be prompted to fill in missing fields.
-                - 2b. User uploads an incorrect image format for their avatar.
-                    - 2b1. User must be prompted to upload an image of all supported filetypes.
-                - 2c: User leaves and closes application before all imformation is filled. Registration does not occur.
+                - 2b: User leaves and closes application before all imformation is filled. Registration does not occur.
 
 <a name="fr2"></a>
 
-2.  **User Settings** 
+1.  **User Settings** 
     - **Overview**:
         1. View and Change Settings
     
@@ -484,16 +492,16 @@
 
 ### **4.6. Functional Requirements Sequence Diagram**
 1. [**Sign In**](#fr1)\
-![Sign In SD](images/SignIn.svg)
-2. [**User Settings**](#fr2)\
+![Sign In SD](images/Signin_Register.svg)
+1. [**User Settings**](#fr2)\
 ![User Settings SD](images/UserSettings.svg)
-3. [**Find Group**](#fr4)\
+1. [**Find Group**](#fr4)\
 ![Find Group SD](images/FindGroup.svg)
-4. [**Navigate to Existing Group**](#fr4)\
+1. [**Navigate to Existing Group**](#fr4)\
 ![Nav to Existing SD](images/NavToExistingGroup.svg)
-5. [**Report User**](#fr5)\
+1. [**Report User**](#fr5)\
 ![Report User](images/ReportUser.svg)
-6. [**View Reports**](#fr6)\
+1. [**View Reports**](#fr6)\
 ![View Reports](images/ViewReports.svg)
 
 
