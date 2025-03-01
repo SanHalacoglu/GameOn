@@ -143,7 +143,7 @@
 
 <a name="fr2"></a>
 
-1.  **User Settings** 
+2.  **User Settings** 
     - **Overview**:
         1. View and Change Settings
     
@@ -493,15 +493,15 @@
 ### **4.6. Functional Requirements Sequence Diagram**
 1. [**Sign In**](#fr1)\
 ![Sign In SD](images/Signin_Register.svg)
-1. [**User Settings**](#fr2)\
+2. [**User Settings**](#fr2)\
 ![User Settings SD](images/UserSettings.svg)
-1. [**Find Group**](#fr4)\
+3. [**Find Group**](#fr4)\
 ![Find Group SD](images/FindGroup.svg)
-1. [**Navigate to Existing Group**](#fr4)\
+4. [**Navigate to Existing Group**](#fr4)\
 ![Nav to Existing SD](images/NavToExistingGroup.svg)
-1. [**Report User**](#fr5)\
+5. [**Report User**](#fr5)\
 ![Report User](images/ReportUser.svg)
-1. [**View Reports**](#fr6)\
+6. [**View Reports**](#fr6)\
 ![View Reports](images/ViewReports.svg)
 
 
