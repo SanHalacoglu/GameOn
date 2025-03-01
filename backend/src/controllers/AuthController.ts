@@ -106,8 +106,8 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
   }
   console.log("No Session User");
 
-  const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=identify%20email`;
-  res.redirect(authURL);
+  const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=identify+email+gdm.join+guilds.join`;
+  res.redirect(authURL);``
   return;
 }
 
