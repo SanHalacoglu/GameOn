@@ -7,7 +7,7 @@ import {
   deleteGroup,
   joinGroup,
   leaveGroup,
-  getGroupMembers
+  getGroupMembers,
   getGroupUrl,
 } from "../controllers/GroupController";
 
