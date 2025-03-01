@@ -16,6 +16,11 @@
         android:theme="@style/Theme.GameOn"
         tools:targetApi="31">
         <activity
+            android:name=".BannedActivity"
+            android:exported="false"
+            android:label="@string/title_activity_banned"
+            android:theme="@style/Theme.GameOn" />
+        <activity
             android:name=".ViewGroupActivity"
             android:exported="false" />
         <activity
@@ -78,4 +83,5 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
     </application>
+
 </manifest>

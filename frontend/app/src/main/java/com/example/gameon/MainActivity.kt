@@ -22,12 +22,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -45,12 +50,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.getUserGroups
 import com.example.gameon.api.methods.initiateMatchmaking
+import com.example.gameon.api.methods.logout
 import com.example.gameon.classes.Group
 import com.example.gameon.ui.theme.*
 import kotlinx.coroutines.launch
@@ -101,16 +108,30 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-                Header(discordUsername)
+                Header(
+                    discordUsername,
+                    {
+                        // TODO: open user settings
+                    },
+                    {
+                        lifecycleScope.launch {
+                            logout(this@MainActivity)
+                        }
+                    }
+                )
                 MainContent(preferenceID, groupListState, discordUsername)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Header(username: String) {
-    val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
+fun Header(username: String, onSettings: () -> Unit, onLogout: () -> Unit) {
+    val fontFamilyBarlow = FontFamily(Font(R.font.barlowcondensed_bold))
+    val fontFamilyLato = FontFamily(Font(R.font.lato_black))
+    var expanded by remember { mutableStateOf(false) }
+
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -124,7 +145,7 @@ fun Header(username: String) {
                 text = "GameOn",
                 color = TestBlue,
                 style = TextStyle(
-                    fontFamily = fontFamily,
+                    fontFamily = fontFamilyBarlow,
                     fontSize = 55.sp,
                     shadow = Shadow(
                         color = TestBlueLight,
@@ -147,19 +168,53 @@ fun Header(username: String) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle, // Default profile icon
-                contentDescription = "Profile Icon",
-                tint = Purple, // Adjust color as needed
-                modifier = Modifier.size(90.dp) // Set icon size
-            )
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle, // Default profile icon
+                    contentDescription = "Profile Icon",
+                    tint = Purple, // Adjust color as needed
+                    modifier = Modifier.size(90.dp)
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)// Set icon size
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    containerColor = Purple,
+                    modifier = Modifier
+                        .width(120.dp)
+                ) {
+                    DropdownMenuItem(
+                        { Text(
+                            "Settings",
+                            fontFamily = fontFamilyLato,
+                            textAlign = TextAlign.Center,
+                            color = BlueDarker,
+                            modifier = Modifier.fillMaxWidth()
+                        ) },
+                        onClick = onSettings,
+                    )
+                    DropdownMenuItem(
+                        { Text(
+                            "Log Out",
+                            fontFamily = fontFamilyLato,
+                            textAlign = TextAlign.Center,
+                            color = BlueDarker,
+                            modifier = Modifier.fillMaxWidth()
+                        ) },
+                        onClick = onLogout,
+                    )
+                }
+            }
 
             // Username with Glow Effect
             Text(
                 text = username,
                 color = Purple, // Pinkish-white glow
                 style = TextStyle(
-                    fontFamily = fontFamily,
+                    fontFamily = fontFamilyBarlow,
                     fontSize = 16.sp, // Adjust size as needed
                     shadow = Shadow(
                         color = PurpleLight, // Glow color
@@ -386,7 +441,9 @@ fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, di
 //@Preview(showBackground = true)
 //@Composable
 //fun MainPreview() {
+//    val groupListState = remember {mutableStateOf<List<Group>>(emptyList())}
 //    val discord = "maddy_paulson"
+//    val discordId = "751124124151185438"
 //    Column (
 //        modifier = Modifier
 //            .fillMaxSize()
@@ -394,7 +451,7 @@ fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, di
 //        verticalArrangement = Arrangement.Top,
 //        horizontalAlignment = Alignment.CenterHorizontally
 //    ){
-//        Header(discord)
-//        MainContent(preferenceID = -1, discordId = "751124124151185438") // Fix: Provide a valid preferenceID
+//        Header(discord, {}, {})
+//        MainContent(preferenceID = -1, groupListState, discord) // Fix: Provide a valid preferenceID
 //    }
 //}

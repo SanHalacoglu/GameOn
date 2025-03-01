@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import com.example.gameon.BannedActivity
 import com.example.gameon.LoginActivity
 import com.example.gameon.MainActivity
 import com.example.gameon.PreferencesActivity
@@ -23,10 +24,14 @@ suspend fun checkLoggedIn (context: Context) {
     val sessionDetails = SessionDetails(context)
     val intent: Intent = if (result.isSuccessful) {
         val user = result.body()
-        if (user != null) {
+        if (user != null && !user.banned) {
             sessionDetails.saveUser(user)
+            Intent(context, MainActivity::class.java)
+        } else if (user != null) {
+            Intent(context, BannedActivity::class.java)
+        } else {
+            Intent(context, MainActivity::class.java)
         }
-        Intent(context, MainActivity::class.java)
     }
 
     //If successful continue
@@ -75,11 +80,14 @@ suspend fun finishLogin (
     // If successful continue
     val intent: Intent = if (result.isSuccessful) {
         val user = result.body()
-        if (user != null) {
+        if (user != null && !user.banned) {
             sessionDetails.saveUser(user)
+            Intent(context, MainActivity::class.java)
+        } else if (user != null) {
+            Intent(context, BannedActivity::class.java)
+        } else {
+            Intent(context, MainActivity::class.java)
         }
-        Log.d("Auth", result.body().toString())
-        Intent(context, MainActivity::class.java)
     }
     // Upon redirect, redirect to Preferences page
     else if (result.code() in 300..399) {

@@ -108,7 +108,7 @@ class ReportsActivity : ComponentActivity() {
                     }
                     ReportButton(
                         "Submit Report",
-                        containerColor = Error,
+                        containerColor = Red,
                         enabled = canSubmit.value,
                         modifier = Modifier.width(width)
                     ) {
@@ -231,7 +231,7 @@ fun ReportsPreview() {
             )
             ReportButton(
                 "Report User",
-                containerColor = Error,
+                containerColor = Red,
                 modifier = Modifier.width(width)
             )
             ReportButton(

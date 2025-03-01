@@ -86,7 +86,7 @@ class ViewReportsActivity : ComponentActivity() {
                     )
                     ReportButton(
                         "Ban User",
-                        containerColor = Error,
+                        containerColor = Red,
                         modifier = Modifier.width(width)
                     ) {
                         lifecycleScope.launch {
@@ -209,7 +209,7 @@ fun ViewReportsPreview() {
             )
             ReportButton(
                 "Ban User",
-                containerColor = Error,
+                containerColor = Red,
                 modifier = Modifier.width(width)
             )
             ReportButton(

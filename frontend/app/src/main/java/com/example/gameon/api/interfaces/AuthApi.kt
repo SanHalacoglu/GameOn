@@ -20,6 +20,6 @@ interface AuthApi {
     suspend fun register(@Body preferences: Preferences): Response<User>
 
     @POST("/auth/logout")
-    suspend fun logout(): Response<Nothing>
+    suspend fun logout(): Response<Any> //returns no content
 
 }
