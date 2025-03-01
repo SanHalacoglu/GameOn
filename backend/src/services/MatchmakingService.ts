@@ -41,6 +41,39 @@ export async function addMatchmakingRequest(preferences: Preferences, discord_ac
   console.log(`Added matchmaking request for user ${preferences.user.discord_id}`);
 }
 
+export async function isUserInMatchmakingQueue(discord_id: string): Promise<{ status: string, timestamp?: number }> {
+  const now = Date.now();
+  const validRequests = await redisClient.zRangeByScore(
+    MATCHMAKING_QUEUE,
+    now - MATCHMAKING_TIMEOUT,
+    now
+  );
+
+  const parsedRequests: MatchmakingRequest[] = validRequests.map((req) => JSON.parse(req));
+  const userRequest = parsedRequests.find((req) => req.discord_id === discord_id);
+
+  if (userRequest) {
+    return { status: "in_progress", timestamp: userRequest.timestamp };
+  }
+
+  // Check if the request has timed out
+  const allRequests = await redisClient.zRangeByScore(
+    MATCHMAKING_QUEUE,
+    0,
+    now - MATCHMAKING_TIMEOUT
+  );
+
+  const timedOutRequests: MatchmakingRequest[] = allRequests.map((req) => JSON.parse(req));
+  const timedOutRequest = timedOutRequests.find((req) => req.discord_id === discord_id);
+
+  if (timedOutRequest) {
+    return { status: "timed_out", timestamp: timedOutRequest.timestamp };
+  }
+
+  return { status: "not_in_progress" };
+}
+
+
 /**
  * Processes the matchmaking queue, forms groups, and removes processed requests.
  */
