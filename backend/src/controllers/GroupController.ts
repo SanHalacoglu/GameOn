@@ -4,6 +4,8 @@ import { Group } from "../entity/Group";
 import { Game } from "../entity/Game";
 import { User } from "../entity/User";
 import { GroupMember } from "../entity/GroupMember";
+import { Not } from "typeorm";
+import { RedisQueryResultCache } from "typeorm/cache/RedisQueryResultCache.js";
 import axios from "axios";
 
 const DISCORD_USERS_CHANNELS_URL = "https://discord.com/api/users/@me/channels";
@@ -142,6 +144,25 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
     res.status(404).json({ message: "Group member not found" });
   }
 };
+
+
+export const getGroupMembers = async (req: Request, res: Response) => {
+  const groupMemberRepository = AppDataSource.getRepository(GroupMember);
+
+  const groupMembers = await groupMemberRepository.find({
+    where: {
+      group: { group_id: parseInt(req.params.id) },
+      user: { discord_id: Not(req.session.user!.discord_id) }
+    },
+    relations: ["user"]
+  })
+
+  if (groupMembers.length) {
+    res.json(groupMembers)
+  } else {
+    res.status(404).json({ message: "No group members found" })
+  }
+}
 
 export const getGroupUrl = async (req: Request, res: Response): Promise<void> => {
   const groupRepository = AppDataSource.getRepository(Group);

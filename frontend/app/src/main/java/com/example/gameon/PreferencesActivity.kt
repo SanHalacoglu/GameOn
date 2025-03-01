@@ -150,16 +150,16 @@ object PreferenceComposables {
         selectedGameName: MutableState<String>
     ) {
         //Enables Footer's confirm button when all preferences selected
-        canConfirm.value = (selectedLanguage.value != "") &&
-                (selectedRegion.value != "") &&
-                (selectedTimezone.value != "") &&
-                (selectedSkillLevel.value != "") &&
-                (selectedGameName.value != "")
+        canConfirm.value = (selectedLanguage.value.isNotEmpty()) &&
+                (selectedRegion.value.isNotEmpty()) &&
+                (selectedTimezone.value.isNotEmpty()) &&
+                (selectedSkillLevel.value.isNotEmpty()) &&
+                (selectedGameName.value.isNotEmpty())
 
         // Get list of all possible timezones
         // Then sort the list and remove any unnecessary entries
         var timezones = listOf("Please select a region.")
-        if (selectedRegion.value != "")
+        if (selectedRegion.value.isNotEmpty())
             timezones = TimeZone.availableZoneIds.filter {
                 timezone -> timezone.startsWith(selectedRegion.value)
             } .sorted()
@@ -185,7 +185,7 @@ object PreferenceComposables {
             }
             // Show Timezone once region inputted
             // For ease of timezone selection
-            if (selectedRegion.value != "")
+            if (selectedRegion.value.isNotEmpty())
                 PreferenceInput(
                     "Timezone",
                     "Pick the most relevant timezone to you.",
@@ -215,7 +215,6 @@ object PreferenceComposables {
     ) {
         var expanded by remember { mutableStateOf(false) }
         val fontFamily = FontFamily(Font(R.font.lato_regular))
-        val blank = Color(0)
 
         Column {
             ExposedDropdownMenuBox(
@@ -280,18 +279,18 @@ object PreferenceComposables {
                             },
                             colors = MenuItemColors(
                                 textColor = textColor,
-                                leadingIconColor = blank,
-                                trailingIconColor = blank,
-                                disabledTextColor = blank,
-                                disabledLeadingIconColor = blank,
-                                disabledTrailingIconColor = blank
+                                leadingIconColor = Color.Transparent,
+                                trailingIconColor = Color.Transparent,
+                                disabledTextColor = Color.Transparent,
+                                disabledLeadingIconColor = Color.Transparent,
+                                disabledTrailingIconColor = Color.Transparent
                             ),
                             modifier = Modifier.background(bgColor)
                         )
                     }
                 }
             }
-            if (supportingText != "")
+            if (supportingText.isNotEmpty())
                 Text(
                     supportingText,
                     fontFamily=fontFamily,
@@ -390,7 +389,7 @@ fun PreferencesPreview() {
     val selectedTimezone = remember {mutableStateOf("Arctic/Longyearbyen")}
     val selectedSkillLevel = remember {mutableStateOf("Competitive")}
     val selectedGameName = remember {mutableStateOf("The Sims")}
-    val sampleGames = listOf<Game>()
+    val sampleGames = emptyList<Game>()
     Column (
         modifier = Modifier
             .fillMaxSize()

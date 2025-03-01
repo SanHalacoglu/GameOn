@@ -35,7 +35,7 @@ class LoginActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-                Logo()
+                Logo(true)
                 LoginButton {
                     startActivity(browserIntent)
                     finish()
@@ -55,7 +55,7 @@ fun LoginPreview() {
         verticalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Logo()
+        Logo(true)
         LoginButton{}
     }
 }
