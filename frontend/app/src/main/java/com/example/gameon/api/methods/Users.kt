@@ -19,4 +19,5 @@ suspend fun getUserGroups(
         result.body()!!
     else
         emptyList()
+
 }

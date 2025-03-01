@@ -9,5 +9,5 @@ interface UsersApi {
 
     @GET("/users/{id}/groups")
     suspend fun getUserGroups(@Path("id") discordId: String = "session"): Response<List<Group>>
-
+  
 }

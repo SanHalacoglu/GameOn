@@ -18,13 +18,25 @@ suspend fun checkLoggedIn (context: Context) {
     val authApi = Api.init(context)
         .getInstance(false)
         .create(AuthApi::class.java)
-
     val result = authApi.login()
 
-    //If successful continue
+    val sessionDetails = SessionDetails(context)
     val intent: Intent = if (result.isSuccessful) {
+        val user = result.body()
+        if (user != null) {
+            sessionDetails.saveUser(user)
+        }
         Intent(context, MainActivity::class.java)
     }
+
+    //If successful continue
+//    val intent: Intent = if (result.isSuccessful) {
+//        val userJson = gson.toJson(result.body())
+//        Log.d("Auth", "User logged in: $userJson")
+//        Intent(context, MainActivity::class.java).apply{
+//            putExtra("User", userJson)
+//        }
+//    }
     //Upon redirect, redirect to either Login or Preferences pages
     else if (result.code() in 300..399) {
         val redirectUrl: String = result.headers().get("Location")!!
@@ -58,9 +70,14 @@ suspend fun finishLogin (
 ) {
     val authApi = Api.init(context).getInstance(false).create(AuthApi::class.java)
     val result = authApi.discordCallback(code)
+    val sessionDetails = SessionDetails(context)
 
     // If successful continue
     val intent: Intent = if (result.isSuccessful) {
+        val user = result.body()
+        if (user != null) {
+            sessionDetails.saveUser(user)
+        }
         Log.d("Auth", result.body().toString())
         Intent(context, MainActivity::class.java)
     }
@@ -93,13 +110,15 @@ suspend fun register(
         .create(AuthApi::class.java)
 
     val result = authApi.register(preferences)
+    val sessionDetails = SessionDetails(context)
 
     val intent: Intent = if (result.isSuccessful) {
         val user = result.body()
-        Log.d("Auth", "Preferences created successfully: $user")
-        Intent(context, MainActivity::class.java).apply {
-            putExtra("User", user)
+        if (user != null) {
+            sessionDetails.saveUser(user)
         }
+        Log.d("Auth", "Preferences created successfully: $user")
+        Intent(context, MainActivity::class.java)
     } else if (result.code() in 300..399) {
         val redirectUrl: String = result.headers().get("Location")!!
         Intent(context, LoginActivity::class.java).apply {
@@ -109,7 +128,6 @@ suspend fun register(
         Log.e("Auth", "Failed to create preferences: ${result.errorBody()?.string()}")
         return
     }
-
     // Start the new activity and end the current one
     intent.let {
         context.startActivity(it)
@@ -124,12 +142,13 @@ suspend fun logout(context: Context) {
 
     val result = authApi.logout()
 
-    if (result.isSuccessful){
+    if (result.isSuccessful) {
+        val sessionDetails = SessionDetails(context)
+        sessionDetails.clearUser()
+
         PersistentCookieJar(context).clear()
 
-        context.startActivity(
-            Intent(context, StartupActivity::class.java)
-        )
+        context.startActivity(Intent(context, StartupActivity::class.java))
         (context as? Activity)?.finish()
     }
 }
