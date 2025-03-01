@@ -1,7 +1,92 @@
 # M3 - Requirements and Design
 
 ## 1. Change History
-<!-- Leave blank for M3 -->
+### Change History
+
+### March 1st 2025 Changes
+#### 4.1 Admin Routes
+- **Change**: Added interfaces for retrieving, creating, updating, and deleting admins.
+- **Modified Sections**: Admin Routes section.
+- **Rationale**: Provides a detailed breakdown of admin-related operations, ensuring clarity and completeness in managing admin users.
+
+#### 4.1 Auth Routes
+- **Change**: Added interfaces for login, callback, registration, logout, and redirect.
+- **Modified Sections**: Auth Routes section.
+- **Rationale**: Ensures secure user authentication and authorization using Discord's OAuth2, providing a clear flow for user login and registration.
+
+#### 4.1 Game Routes
+- **Change**: Added interfaces for retrieving, creating, updating, and deleting games.
+- **Modified Sections**: Game Routes section.
+- **Rationale**: Provides a centralized way to manage games, ensuring consistency and ease of access.
+
+#### 4.1 Group Routes
+- **Change**: Added interfaces for retrieving, creating, updating, and deleting groups, as well as joining and leaving groups.
+- **Modified Sections**: Group Routes section.
+- **Rationale**: Provides a centralized way to manage groups, ensuring consistency and ease of access.
+
+#### 4.1 Matchmaking Routes
+- **Change**: Added interfaces for initiating matchmaking and checking matchmaking status.
+- **Modified Sections**: Matchmaking Routes section.
+- **Rationale**: Provides a centralized way to handle matchmaking requests, ensuring consistency and ease of access.
+
+#### 4.1 Preferences Routes
+- **Change**: Added interfaces for retrieving, creating, updating, and deleting preferences.
+- **Modified Sections**: Preferences Routes section.
+- **Rationale**: Provides a centralized way to manage user preferences, ensuring consistency and ease of access.
+
+#### 4.1 Report Routes
+- **Change**: Added interfaces for retrieving, creating, resolving, and deleting reports.
+- **Modified Sections**: Report Routes section.
+- **Rationale**: Provides a centralized way to handle user reports, ensuring consistency and ease of access.
+
+#### 4.1 User Routes
+- **Change**: Added interfaces for retrieving, creating, updating, and deleting users, as well as managing user groups and banning users.
+- **Modified Sections**: User Routes section.
+- **Rationale**: Provides a centralized way to manage users, ensuring consistency and ease of access.
+#### 4.1 Authentication
+- **Change**: Documentation format change
+- **Modified Sections**: Authentication Routes section.
+- **Rationale**: The original purpose and interfaces for authentication remain relevant and accurate. We lost marks for formatting however.
+
+#### 4.1 Sign In
+- **Change**: Documentation format change
+- **Modified Sections**: Sign In section.
+- **Rationale**: The original purpose and interfaces for sign-in remain relevant and accurate. We lost marks for formatting however.
+
+#### 4.1 User Management
+- **Change**: Documentation format change
+- **Modified Sections**: User Management section.
+- **Rationale**: The original purpose and interfaces for user management remain relevant and accurate. We lost marks for formatting however.
+
+#### 4.1 Matchmaking
+- **Change**: Documentation format change
+- **Modified Sections**: Matchmaking section.
+- **Rationale**: The original purpose and interfaces for matchmaking remain relevant and accurate. We lost marks for formatting however.
+
+#### 4.1 Group Management
+- **Change**: Documentation format change
+- **Modified Sections**: Group Management section.
+- **Rationale**: The original purpose and interfaces for group management remain relevant and accurate. We lost marks for formatting however.
+
+#### 4.1 Report Management
+- **Change**: Documentation format change
+- **Modified Sections**: Report Management section.
+- **Rationale**: The original purpose and interfaces for report management remain relevant and accurate. We lost marks for formatting however.
+
+#### 4.1 Admin Management
+- **Change**: Documentation format change
+- **Modified Sections**: Admin Management section.
+- **Rationale**: The original purpose and interfaces for admin management remain relevant and accurate. We lost marks for formatting however.
+
+#### 4.2 Databases
+- **Change**: Updated the purpose and details of the GameOnDB (MySQL) and Redis databases.
+- **Modified Sections**: Databases section.
+- **Rationale**: Expanded the description to include more specific details about the tables and the use of Redis for session management, caching, and matchmaking queues.
+
+#### 4.3 External Modules
+- **Change**: Added a new section for External Modules.
+- **Modified Sections**: External Modules section.
+- **Rationale**: Provides clarity on the use of the Discord API for authentication and creating matchmaking groups, ensuring a comprehensive understanding of external dependencies.
 
 ## 2. Project Description
 **GameOn** is a social matchmaking platform designed for gamers to find ideal teammates and build lasting connections. By authenticating through Discord, players create personalized profiles, sharing details like preferred games, skill levels, communication styles, and playstyles. The app intelligently matches players based on their preferences, instantly creating a dedicated Discord group for seamless in-game coordination and ongoing communication. With integrated feedback systems, including reviews and ratings, GameOn fosters a supportive and positive gaming community.
@@ -153,73 +238,226 @@
 
 ## 4. Designs Specification
 ### **4.1. Main Components**
-1. **Authentication**
-    - **Purpose**: Provides secure authentication for users accessing the app. Creates a session token and signs in through the discord API. Calls the SignIn interface with this information.
-    - **Interfaces**: 
-        1.  `public String discordAuthenticate(DiscordParams discordParams);`
-            - **Purpose**: Returns discord token if the user has logged in with discord
 
-2. **Sign In**
-    - **Purpose**: Determines whether a user has an existing account in the database, allowing them to log in, or if they need to register a new account.
-    - **Interfaces**: 
-        1. `public signIn(String discordToken, String sessionToken);`
-            - **Purpose**: Uses the UserManagement interface to determine if the user exists in our database or not, and routes to the home page or registration page.
+#### **Admin Routes**
+- **Purpose**: Manages admin-related operations such as retrieving, creating, updating, and deleting admins.
+- **Rationale**: Provides a centralized way to manage admin users, ensuring only authorized users have access to admin functionalities.
+- **Interfaces**:
+    1. **GET /admins**
+        - **Parameters**: None
+        - **Return Value**: JSON array of admin objects
+        - **Description**: Fetches all admin users from the database.
+    2. **GET /admins/:id**
+        - **Parameters**: admin ID (URL parameter)
+        - **Return Value**: JSON object of the admin
+        - **Description**: Fetches a specific admin user based on the provided ID.
+    3. **POST /admins**
+        - **Parameters**: JSON object with discord_id and permissions
+        - **Return Value**: JSON object of the created admin
+        - **Description**: Adds a new admin user to the database.
+    4. **PUT /admins/:id**
+        - **Parameters**: admin ID (URL parameter), JSON object with updated permissions
+        - **Return Value**: JSON object of the updated admin
+        - **Description**: Updates the permissions of an existing admin user.
+    5. **DELETE /admins/:id**
+        - **Parameters**: admin ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Removes an admin user from the database.
 
-3. **User Management**
-    - **Purpose**: Enables users to manage their profiles, update preferences, and modify personal settings.
-    - **Interfaces**: 
-        1. `public boolean createProfile(UserProfile userArgs);`
-            - **Purpose**: Creates a user profile.
-        2. `public boolean updateProfile(String discordToken, UserProfile profile);`
-            - **Purpose**: Updates the user's profile information.
-        3. `public UserProfile getProfile(String discordToken);`
-            - **Purpose**: Retrieves the user's profile details from DB.
-        4. `public boolean deleteProfile(String discordToken);`
-            - **Purpose**: Permanently deletes a user's account.
+#### **Auth Routes**
+- **Purpose**: Handles authentication and authorization processes, including login, registration, and logout.
+- **Rationale**: Ensures secure user authentication and authorization using Discord's OAuth2.
+- **Interfaces**:
+    1. **GET /auth/login**
+        - **Parameters**: None
+        - **Return Value**: Redirect to Discord's OAuth2 login page
+        - **Description**: Starts the OAuth2 login process.
+    2. **GET /auth/callback_discord**
+        - **Parameters**: None
+        - **Return Value**: JSON object with user information
+        - **Description**: Processes the OAuth2 callback and retrieves user information.
+    3. **POST /auth/register**
+        - **Parameters**: JSON object with user details
+        - **Return Value**: JSON object of the registered user
+        - **Description**: Registers a new user in the system.
+    4. **POST /auth/logout**
+        - **Parameters**: None
+        - **Return Value**: JSON object with a success message
+        - **Description**: Logs out the current user and ends their session.
+    5. **GET /auth/redirect**
+        - **Parameters**: None
+        - **Return Value**: Redirect to the frontend with the authorization code
+        - **Description**: Redirects the user to the frontend application with the authorization code.
 
-4. **Matchmaking**
-    - **Purpose**: Connects users with similar preferences to form gaming groups.
-    - **Interfaces**: 
-        1. `public String matchmaking (MatchmakingRequest matchmakingRequest);`
-            - **Purpose**: Based on matchmaking preferences will create a group in discord with other users. Returns group id.
+#### **Game Routes**
+- **Purpose**: Manages game-related operations such as retrieving, creating, updating, and deleting games.
+- **Rationale**: Provides a centralized way to manage games, ensuring consistency and ease of access.
+- **Interfaces**:
+    1. **GET /games**
+        - **Parameters**: None
+        - **Return Value**: JSON array of game objects
+        - **Description**: Fetches all games from the database.
+    2. **GET /games/:id**
+        - **Parameters**: game ID (URL parameter)
+        - **Return Value**: JSON object of the game
+        - **Description**: Fetches a specific game based on the provided ID.
+    3. **POST /games**
+        - **Parameters**: JSON object with game_name and description
+        - **Return Value**: JSON object of the created game
+        - **Description**: Adds a new game to the database.
+    4. **PUT /games/:id**
+        - **Parameters**: game ID (URL parameter), JSON object with updated game_name and description
+        - **Return Value**: JSON object of the updated game
+        - **Description**: Updates the details of an existing game.
+    5. **DELETE /games/:id**
+        - **Parameters**: game ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Removes a game from the database.
 
-5. **Group Management**
-    - **Purpose**: Facilitates the creation and management of groups within the app and on Discord.
-    - **Interfaces**: 
-        1. `public boolean createGroup(GroupArgs groupArgs);`
-            - **Purpose**: Creates a group.
-        2. `public boolean updateGroup(String groupId, Group group);`
-            - **Purpose**: Updates the Group's information. 
-        3. `public Group getGroup(String groupId);`
-            - **Purpose**: Retrieves the group details from DB.
-        4. `public boolean deleteGroup(String groupId);`
-            - **Purpose**: Permanently deletes a group.
+#### **Group Routes**
+- **Purpose**: Manages group-related operations such as retrieving, creating, updating, and deleting groups, as well as joining and leaving groups.
+- **Rationale**: Provides a centralized way to manage groups, ensuring consistency and ease of access.
+- **Interfaces**:
+    1. **GET /groups**
+        - **Parameters**: None
+        - **Return Value**: JSON array of group objects
+        - **Description**: Fetches all groups from the database.
+    2. **GET /groups/:id**
+        - **Parameters**: group ID (URL parameter)
+        - **Return Value**: JSON object of the group
+        - **Description**: Fetches a specific group based on the provided ID.
+    3. **POST /groups**
+        - **Parameters**: JSON object with game_id, group_name, and max_players
+        - **Return Value**: JSON object of the created group
+        - **Description**: Adds a new group to the database.
+    4. **PUT /groups/:id**
+        - **Parameters**: group ID (URL parameter), JSON object with updated group_name and max_players
+        - **Return Value**: JSON object of the updated group
+        - **Description**: Updates the details of an existing group.
+    5. **DELETE /groups/:id**
+        - **Parameters**: group ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Removes a group from the database.
+    6. **POST /groups/:id/join**
+        - **Parameters**: group ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Adds the current user to the specified group.
+    7. **DELETE /groups/:id/leave**
+        - **Parameters**: group ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Removes the current user from the specified group.
+    8. **GET /groups/:id/members**
+        - **Parameters**: group ID (URL parameter)
+        - **Return Value**: JSON array of group member objects
+        - **Description**: Fetches all members of the specified group.
+    9. **GET /groups/:id/url**
+        - **Parameters**: group ID (URL parameter)
+        - **Return Value**: JSON object with the group's URL
+        - **Description**: Fetches the URL of the specified group.
 
-6. **Report Management**
-    - **Purpose**: Allows users to report other users for rule violations.
-    - **Interfaces**: 
-        1. `public boolean submitReport(String discordTokenReporter, String discordTokenReportee, String reason);`
-            - **Purpose**: Submits a report against a user with a given reason.
+#### **Matchmaking Routes**
+- **Purpose**: Manages matchmaking-related operations such as initiating matchmaking and checking matchmaking status.
+- **Rationale**: Provides a centralized way to handle matchmaking requests, ensuring consistency and ease of access.
+- **Interfaces**:
+    1. **POST /matchmaking/initiate**
+        - **Parameters**: JSON object with preference_id
+        - **Return Value**: JSON object with a success message
+        - **Description**: Starts the matchmaking process based on the provided preferences.
+    2. **GET /matchmaking/status/:discord_id**
+        - **Parameters**: discord ID (URL parameter)
+        - **Return Value**: JSON object with the matchmaking status
+        - **Description**: Retrieves the matchmaking status for the specified user.
 
-7. **Admin Management**
-    - **Purpose**: Allows admins to monitor reports, ban rule violators, ensure a safe community, promote other users to admin, and add supported games. 
-    - **Interfaces**: 
-        1. `public boolean banUser(String discordTokenAdmin, String discordTokenReportee);`
-            - **Purpose**: Bans a reported user from our app.
-        2. `public boolean resolveReport(String reportId, String discordTokenAdmin, String discordTokenReportee, String reasoning);`
-            - **Purpose**: Resolves a report by providing a resolution reason.
-        3. `public List<Reports> getReports();`
-            - **Purpose**: Retrieves a list of all submitted reports.
-        4. `public boolean promoteToAdmin(String discordTokenAdmin, String discordTokenAdminToPromote);`
-            - **Purpose**: Promotes a user to admin privileges.
-        5. `public boolean addGame(GameInformation gameInformation);`
-            - **Purpose**: Adds a new game to the system.
+#### **Preferences Routes**
+- **Purpose**: Manages preference-related operations such as retrieving, creating, updating, and deleting preferences.
+- **Rationale**: Provides a centralized way to manage user preferences, ensuring consistency and ease of access.
+- **Interfaces**:
+    1. **GET /preferences**
+        - **Parameters**: None
+        - **Return Value**: JSON array of preference objects
+        - **Description**: Fetches all preferences from the database.
+    2. **GET /preferences/:id**
+        - **Parameters**: preference ID (URL parameter)
+        - **Return Value**: JSON object of the preferences
+        - **Description**: Fetches specific preferences based on the provided ID.
+    3. **POST /preferences**
+        - **Parameters**: JSON object with discord_id, spoken_language, time_zone, skill_level, and game_id
+        - **Return Value**: JSON object of the created preferences
+        - **Description**: Adds new preferences to the database.
+    4. **PUT /preferences/:id**
+        - **Parameters**: preference ID (URL parameter), JSON object with updated spoken_language, time_zone, and skill_level
+        - **Return Value**: JSON object of the updated preferences
+        - **Description**: Updates the details of existing preferences.
+    5. **DELETE /preferences/:id**
+        - **Parameters**: preference ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Removes preferences from the database.
+
+#### **Report Routes**
+- **Purpose**: Manages report-related operations such as retrieving, creating, resolving, and deleting reports.
+- **Rationale**: Provides a centralized way to handle user reports, ensuring consistency and ease of access.
+- **Interfaces**:
+    1. **GET /reports**
+        - **Parameters**: None
+        - **Return Value**: JSON array of report objects
+        - **Description**: Fetches all reports from the database.
+    2. **GET /reports/:id**
+        - **Parameters**: report ID (URL parameter)
+        - **Return Value**: JSON object of the report
+        - **Description**: Fetches a specific report based on the provided ID.
+    3. **POST /reports**
+        - **Parameters**: JSON object with reported_discord_id, group_id, and reason
+        - **Return Value**: JSON object of the created report
+        - **Description**: Adds a new report to the database.
+    4. **PUT /reports/:id/resolve**
+        - **Parameters**: report ID (URL parameter), JSON object with resolved status
+        - **Return Value**: JSON object of the resolved report
+        - **Description**: Updates the status of a report to resolved.
+    5. **DELETE /reports/:id**
+        - **Parameters**: report ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Removes a report from the database.
+
+#### **User Routes**
+- **Purpose**: Manages user-related operations such as retrieving, creating, updating, and deleting users, as well as managing user groups and banning users.
+- **Rationale**: Provides a centralized way to manage users, ensuring consistency and ease of access.
+- **Interfaces**:
+    1. **GET /users**
+        - **Parameters**: None
+        - **Return Value**: JSON array of user objects
+        - **Description**: Fetches all users from the database.
+    2. **GET /users/:id**
+        - **Parameters**: user ID (URL parameter)
+        - **Return Value**: JSON object of the user
+        - **Description**: Fetches a specific user based on the provided ID.
+    3. **POST /users**
+        - **Parameters**: JSON object with discord_id, username, and email
+        - **Return Value**: JSON object of the created user
+        - **Description**: Adds a new user to the database.
+    4. **PUT /users/:id**
+        - **Parameters**: user ID (URL parameter), JSON object with updated username and email
+        - **Return Value**: JSON object of the updated user
+        - **Description**: Updates the details of an existing user.
+    5. **DELETE /users/:id**
+        - **Parameters**: user ID (URL parameter)
+        - **Return Value**: JSON object with a success message
+        - **Description**: Removes a user from the database.
+    6. **GET /users/:id/groups**
+        - **Parameters**: user ID (URL parameter)
+        - **Return Value**: JSON array of group objects
+        - **Description**: Fetches all groups that the specified user is a member of.
+    7. **PUT /users/:id/ban**
+        - **Parameters**: user ID (URL parameter), JSON object with banned status
+        - **Return Value**: JSON object of the banned user
+        - **Description**: Updates the banned status of a user.
 
 
 ### **4.2. Databases**
 1. **GameOnDB (MySQL)**
-    - **Purpose**: It will store four main tables: user profile information, matchmaking/group details, session details and reports on users who have violated application guidelines. We will use SQL since this data is relational and well-suited to our needs.
+    - **Purpose**: It will store several main tables: user profile information, admin details, game details, group details, group member details, matchmaking preferences, and reports on users who have violated application guidelines. We will use SQL since this data is relational and well-suited to our needs.
 
+2. **Redis**
+    - **Purpose**: It will be used for session management, storing session data such as user authentication tokens and temporary session information. Redis is chosen for its speed and efficiency in handling in-memory data storage, which is crucial for managing user sessions effectively. Additionally, Redis will be used for caching frequently accessed data to improve performance and reduce database load. Redis will also be used for storing and managing matchmaking queues and preferences temporarily, ensuring efficient and timely matching of users based on their preferences.
 
 ### **4.3. External Modules**
 1. **Discord API** 
