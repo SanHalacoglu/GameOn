@@ -6,7 +6,7 @@ import com.example.gameon.classes.Preferences
 import com.example.gameon.classes.User
 import com.google.gson.Gson
 
-class UserPreferences(context: Context) {
+class SessionDetails(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 

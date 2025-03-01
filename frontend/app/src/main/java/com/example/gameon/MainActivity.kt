@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,20 +45,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.getUserGroups
 import com.example.gameon.api.methods.initiateMatchmaking
-import com.example.gameon.classes.DateAdapter
 import com.example.gameon.classes.Group
-import com.example.gameon.classes.User
 import com.example.gameon.ui.theme.*
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import kotlinx.coroutines.launch
-import java.util.Date
 
 
 class MainActivity : ComponentActivity() {
@@ -68,19 +62,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val groupListState = mutableStateOf<List<Group>>(emptyList())
-
-        val gson: Gson = GsonBuilder()
-            .registerTypeAdapter(Date::class.java, DateAdapter())
-            .create()
-
-        val userJson = intent.getStringExtra("User")
-        val user: User? = userJson?.let { gson.fromJson(it, User::class.java) }
+        val user = SessionDetails(this).getUser()
 
         val discordUsername = user?.username ?: "Unknown"
         val discordId = user?.discord_id ?: "Unknown"
         val preferenceID = user?.preference_id ?: user?.preferences?.preference_id?.toIntOrNull() ?: -1
 
-        Log.d("Main", "Discord Username: $discordUsername, Preference ID: $preferenceID")
+
+//        val gson: Gson = GsonBuilder()
+//            .registerTypeAdapter(Date::class.java, DateAdapter())
+//            .create()
+//
+//        val userJson = intent.getStringExtra("User")
+//        val user: User? = userJson?.let { gson.fromJson(it, User::class.java) }
+//
+//        val discordUsername = user?.username ?: "Unknown"
+//        val discordId = user?.discord_id ?: "Unknown"
+//        val preferenceID = user?.preference_id ?: user?.preferences?.preference_id?.toIntOrNull() ?: -1
+//
+//        Log.d("Main", "Discord Username: $discordUsername, Preference ID: $preferenceID")
 
         lifecycleScope.launch{
 
