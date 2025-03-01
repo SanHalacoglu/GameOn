@@ -12,6 +12,7 @@ val Pink = Color(0xFFFFB6FF)
 val PinkLight = Color(0xFFFFB6FF)
 val Purple = Color(0xFF9B8FF3)
 val PurpleLight = Color(0xFF9A7BFF)
+val Error = Color(0xFFB3261E)
 
 val White = Color.White
 val Black = Color.Black
