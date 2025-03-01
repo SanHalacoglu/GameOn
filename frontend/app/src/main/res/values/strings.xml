@@ -5,4 +5,7 @@
     <string name="title_activity_auth">AuthActivity</string>
     <string name="title_activity_startup">StartupActivity</string>
     <string name="title_activity_discord_web_view">DiscordWebViewActivity</string>
+    <string name="title_activity_reports">ReportsActivity</string>
+    <string name="title_activity_list_reports">ListReportsActivity</string>
+    <string name="title_activity_view_reports">ViewReportsActivity</string>
 </resources>

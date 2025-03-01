@@ -19,6 +19,22 @@
             android:name=".ViewGroupActivity"
             android:exported="false" />
         <activity
+            android:name=".ViewReportsActivity"
+            android:exported="false" />
+            android:exported="false"
+            android:label="@string/title_activity_view_reports"
+            android:theme="@style/Theme.GameOn" />
+        <activity
+            android:name=".ListReportsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_list_reports"
+            android:theme="@style/Theme.GameOn" />
+        <activity
+            android:name=".ReportsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_reports"
+            android:theme="@style/Theme.GameOn" />
+        <activity
             android:name=".StartupActivity"
             android:exported="true"
             android:theme="@style/Theme.GameOn">
@@ -63,5 +79,4 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
     </application>
-
 </manifest>

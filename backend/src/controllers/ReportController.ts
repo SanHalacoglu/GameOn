@@ -3,10 +3,16 @@ import { AppDataSource } from "../data-source";
 import { Report } from "../entity/Report";
 import { User } from "../entity/User";
 import { Group } from "../entity/Group";
+import axios from "axios";
+
+const DB_SERVICE_URL = process.env.DB_SERVICE_URL || "";
 
 export const getReports = async (req: Request, res: Response) => {
   const reportRepository = AppDataSource.getRepository(Report);
-  const reports = await reportRepository.find({ relations: ["reporter", "reported_user", "group"] });
+  const reports = await reportRepository.find({ 
+    relations: ["reporter", "reported_user", "group"],
+    where: req.query.unresolved == "true" ? { resolved: false } : undefined
+  });
   res.json(reports);
 };
 
@@ -77,16 +83,30 @@ export const createReport = async (req: Request, res: Response) => {
 };
 
 export const resolveReport = async (req: Request, res: Response) => {
-  const reportRepository = AppDataSource.getRepository(Report);
-  const report = await reportRepository.findOne({
-    where: { report_id: parseInt(req.params.id) },
-  });
-  if (report) {
-    report.resolved = true;
-    await reportRepository.save(report);
-    res.json(report);
-  } else {
-    res.status(404).json({ message: "Report not found" });
+  try {
+    const reportRepository = AppDataSource.getRepository(Report);
+    const report = await reportRepository.findOne({
+      where: { report_id: parseInt(req.params.id) },
+      relations: ["reported_user"]
+    });
+    if (report) {
+      report.resolved = true;
+      await reportRepository.save(report);
+
+      if(req.query.ban == "true") {
+        await axios.put(`${DB_SERVICE_URL}/users/${report.reported_user.discord_id}/ban`, {
+          responseType: 'json'
+        });
+      }
+
+      res.json(report);
+    } else {
+      res.status(404).json({ message: "Report not found" });
+    }
+
+  } catch (error) {
+    console.error("Error resolving report:", error);
+    res.status(500).json({ message: "Internal server error" })
   }
 };
 

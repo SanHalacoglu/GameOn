@@ -22,4 +22,7 @@ export class Group {
 
   @OneToMany(() => GroupMember, (groupMember) => groupMember.group)
   members!: GroupMember[];
+
+  @Column({ nullable: true })
+  groupurl!: string;
 }
