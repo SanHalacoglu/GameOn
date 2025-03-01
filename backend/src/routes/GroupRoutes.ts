@@ -8,6 +8,7 @@ import {
   joinGroup,
   leaveGroup,
   getGroupMembers
+  getGroupUrl,
 } from "../controllers/GroupController";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.delete("/:id", deleteGroup);
 router.post("/:id/join", joinGroup);
 router.delete("/:id/leave", leaveGroup);
 router.get("/:id/members", getGroupMembers)
+router.get("/:id/url", getGroupUrl); 
 
 export default router;

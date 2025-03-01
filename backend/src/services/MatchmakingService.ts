@@ -5,6 +5,7 @@ import { Game } from "../entity/Game";
 import { Group } from "../entity/Group";
 import { GroupMember } from "../entity/GroupMember";
 import { Preferences } from "../entity/Preference";
+import { createDiscordGroup } from "../controllers/GroupController";
 
 const MATCHMAKING_QUEUE = "matchmaking_queue";
 const MATCHMAKING_TIMEOUT = 3 * 60 * 1000; // 3 minutes
@@ -12,6 +13,7 @@ const GROUP_SIZE = 3;
 
 interface MatchmakingRequest {
   discord_id: string;
+  discord_access_token: string;
   skill_level: "casual" | "competitive";
   game_id: number;
   timestamp: number;
@@ -21,9 +23,10 @@ interface MatchmakingRequest {
  * Adds a matchmaking request to the Redis sorted set.
  * @param preferences - The user's preferences for matchmaking.
  */
-export async function addMatchmakingRequest(preferences: Preferences) {
+export async function addMatchmakingRequest(preferences: Preferences, discord_access_token: string) {
   const request: MatchmakingRequest = {
     discord_id: preferences.user.discord_id,
+    discord_access_token,
     skill_level: preferences.skill_level,
     game_id: preferences.game.game_id,
     timestamp: Date.now(),
@@ -37,6 +40,39 @@ export async function addMatchmakingRequest(preferences: Preferences) {
 
   console.log(`Added matchmaking request for user ${preferences.user.discord_id}`);
 }
+
+export async function isUserInMatchmakingQueue(discord_id: string): Promise<{ status: string, timestamp?: number }> {
+  const now = Date.now();
+  const validRequests = await redisClient.zRangeByScore(
+    MATCHMAKING_QUEUE,
+    now - MATCHMAKING_TIMEOUT,
+    now
+  );
+
+  const parsedRequests: MatchmakingRequest[] = validRequests.map((req) => JSON.parse(req));
+  const userRequest = parsedRequests.find((req) => req.discord_id === discord_id);
+
+  if (userRequest) {
+    return { status: "in_progress", timestamp: userRequest.timestamp };
+  }
+
+  // Check if the request has timed out
+  const allRequests = await redisClient.zRangeByScore(
+    MATCHMAKING_QUEUE,
+    0,
+    now - MATCHMAKING_TIMEOUT
+  );
+
+  const timedOutRequests: MatchmakingRequest[] = allRequests.map((req) => JSON.parse(req));
+  const timedOutRequest = timedOutRequests.find((req) => req.discord_id === discord_id);
+
+  if (timedOutRequest) {
+    return { status: "timed_out", timestamp: timedOutRequest.timestamp };
+  }
+
+  return { status: "not_in_progress" };
+}
+
 
 /**
  * Processes the matchmaking queue, forms groups, and removes processed requests.
@@ -122,6 +158,10 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
     group_name: `${game.game_name} Matchmaking Group`,
     max_players: GROUP_SIZE,
   });
+
+  const discordAuthTokens = members.map(member => member.discord_access_token);
+  const groupUrl = await createDiscordGroup(discordAuthTokens);
+  group.groupurl = groupUrl;
 
   await groupRepository.save(group);
 

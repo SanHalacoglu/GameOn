@@ -6,6 +6,10 @@ import { User } from "../entity/User";
 import { GroupMember } from "../entity/GroupMember";
 import { Not } from "typeorm";
 import { RedisQueryResultCache } from "typeorm/cache/RedisQueryResultCache.js";
+import axios from "axios";
+
+const DISCORD_USERS_CHANNELS_URL = "https://discord.com/api/users/@me/channels";
+const DISCORD_CUSTOM_CHANNEL_URL = "https://discord.com/channels/@me/";
 
 export const getGroups = async (req: Request, res: Response): Promise<void> => {
   const groupRepository = AppDataSource.getRepository(Group);
@@ -100,7 +104,6 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  //Check if user has already joined the group
   const existingGroupMember = await groupMemberRepository.findOne({
     where: { 
       group: { group_id: group.group_id }, 
@@ -110,7 +113,6 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ message: "User has already joined this group." })
   }
 
-  //Check if group member limit has been reached
   if (group.members && group.members.length >= group.max_players) {
     res.status(400).json({ message: "Group member limit has been reached." })
     return
@@ -143,6 +145,7 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
+
 export const getGroupMembers = async (req: Request, res: Response) => {
   const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
@@ -160,3 +163,39 @@ export const getGroupMembers = async (req: Request, res: Response) => {
     res.status(404).json({ message: "No group members found" })
   }
 }
+
+export const getGroupUrl = async (req: Request, res: Response): Promise<void> => {
+  const groupRepository = AppDataSource.getRepository(Group);
+  const group = await groupRepository.findOne({
+    where: { group_id: parseInt(req.params.id) },
+  });
+  if (group) {
+    res.json({ groupurl: group.groupurl });
+  } else {
+    res.status(404).json({ message: "Group not found" });
+  }
+};
+
+/**
+ * Creates a Group DM in discord with the provided discord auth tokens.
+ * Requires gdm.join scope.
+ * @param discord_auth_tokens 
+ * @returns Channel URL of the created group.
+ */
+export const createDiscordGroup = async (discord_auth_tokens: string[]): Promise<string> => {
+  const payload = {
+    access_tokens: discord_auth_tokens
+  }
+
+  const response_channel_info = await axios.post(DISCORD_USERS_CHANNELS_URL, payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (response_channel_info.status === 200) {
+    console.log("Discord group created successfully");
+    return DISCORD_CUSTOM_CHANNEL_URL + response_channel_info.data.id;
+  } else {
+    console.error("Error creating Discord group" + response_channel_info.data);
+    return "";
+  }
+};
