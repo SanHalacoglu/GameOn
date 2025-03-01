@@ -80,3 +80,17 @@ export const getUserGroups = async (req: Request, res: Response) => {
     res.status(404).json({ message: "No groups found for this user" });
   }
 };
+
+export const banUser = async (req: Request, res: Response) => {
+  const userRepository = AppDataSource.getRepository(User);
+  const user = await userRepository.findOne({
+    where: { discord_id: req.params.id },
+  })
+  if (user) {
+    user.banned = true
+    userRepository.save(user)
+    res.json(user)
+  } else {
+    res.status(404).send({message: "User not found"})
+  }
+}

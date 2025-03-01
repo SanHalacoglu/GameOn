@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.getReportById
+import com.example.gameon.api.methods.resolveReport
 import com.example.gameon.composables.Icon
 import com.example.gameon.composables.Logo
 import com.example.gameon.composables.ReportButton
@@ -87,19 +88,28 @@ class ViewReportsActivity : ComponentActivity() {
                         "Ban User",
                         containerColor = Error,
                         modifier = Modifier.width(width)
-                    )
+                    ) {
+                        lifecycleScope.launch {
+                            resolveReport(reportId, true, this@ViewReportsActivity)
+                        }
+                    }
                     ReportButton(
                         "Acquit User",
                         containerColor = Blue,
                         modifier = Modifier.width(width)
-                    )
+                    ) {
+                        lifecycleScope.launch {
+                            resolveReport(reportId, false, this@ViewReportsActivity)
+                        }
+                    }
                     ReportButton(
                         "Cancel",
                         outlined = true,
                         modifier = Modifier.width(width)
                     ) {
                         startActivity(Intent(
-                            this@ViewReportsActivity, ListReportsActivity::class.java
+                            this@ViewReportsActivity,
+                            ListReportsActivity::class.java
                         ))
                         finish()
                     }

@@ -2,7 +2,6 @@ package com.example.gameon
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -50,6 +49,7 @@ class ListReportsActivity : ComponentActivity() {
         lifecycleScope.launch{
 
             val reportList = getReports(
+                unresolved = true,
                 context = this@ListReportsActivity
             )
             if (reportList.isNotEmpty()) {
@@ -121,6 +121,11 @@ fun ReportList(
                 onClick(report.report_id)
             }
         }
+        if (reportList.isEmpty())
+            Text(
+                "There are no reports to review.",
+                color = White
+            )
     }
 }
 

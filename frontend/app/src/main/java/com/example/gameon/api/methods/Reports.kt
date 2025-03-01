@@ -2,7 +2,9 @@ package com.example.gameon.api.methods
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import com.example.gameon.ListReportsActivity
 import com.example.gameon.api.Api
 import com.example.gameon.api.interfaces.ReportsApi
 import com.example.gameon.classes.Report
@@ -23,11 +25,12 @@ suspend fun submitReport(
 }
 
 suspend fun getReports(
+    unresolved: Boolean = false,
     context: Context,
 ): List<Report> {
     val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
 
-    val result = reportsApi.getReports()
+    val result = reportsApi.getReports(unresolved)
 
     return if (result.isSuccessful) {
         result.body()!!
@@ -50,5 +53,27 @@ suspend fun getReportById(
     } else {
         Log.d("Reports", "Something went wrong!")
         null
+    }
+}
+
+suspend fun resolveReport(
+    reportId: Int,
+    ban: Boolean,
+    context: Context
+) {
+    val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
+
+    val result = reportsApi.resolveReport(reportId, ban)
+
+    val intent = if (result.isSuccessful) {
+        Intent(context, ListReportsActivity::class.java)
+    } else {
+        Log.e("Reports", "Failed to resolve report: ${result.errorBody()?.string()}")
+        return
+    }
+
+    intent.let {
+        context.startActivity(it)
+        (context as? Activity)?.finish()
     }
 }
