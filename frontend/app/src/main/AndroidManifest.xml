@@ -20,7 +20,6 @@
             android:exported="false" />
         <activity
             android:name=".ViewReportsActivity"
-            android:exported="false" />
             android:exported="false"
             android:label="@string/title_activity_view_reports"
             android:theme="@style/Theme.GameOn" />
