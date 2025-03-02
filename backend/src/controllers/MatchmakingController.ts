@@ -23,6 +23,13 @@ export const initiateMatchmaking = async (req: Request, res: Response): Promise<
     return;
   }
 
+  // Check if the user is already in the matchmaking queue
+  const { status } = await isUserInMatchmakingQueue(preferences.user.discord_id);
+  if (status === "in_progress") {
+    res.status(400).json({ message: "User is already in the matchmaking queue" });
+    return;
+  }
+
   await addMatchmakingRequest(preferences, discord_access_token); 
   res.status(200).json({ message: "Matchmaking request initiated" });
 };

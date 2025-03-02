@@ -156,8 +156,13 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
   const groupRepository = AppDataSource.getRepository(Group);
   const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
-  const users = await Promise.all(members.map((req) => userRepository.findOne({ where: { discord_id: req.discord_id } })));
-  const game = await gameRepository.findOne({ where: { game_id: members[0].game_id } });
+  // Ensure unique users
+  const uniqueMembers = members.filter((member, index, self) =>
+    index === self.findIndex((m) => m.discord_id === member.discord_id)
+  );
+
+  const users = await Promise.all(uniqueMembers.map((req) => userRepository.findOne({ where: { discord_id: req.discord_id } })));
+  const game = await gameRepository.findOne({ where: { game_id: uniqueMembers[0].game_id } });
 
   if (users.includes(null) || !game) {
     console.error("Invalid users or game in matchmaking group");
@@ -170,10 +175,10 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
     max_players: GROUP_SIZE,
   });
 
-  console.log(`MATCHMAKING: Request details: ${members.map(m => 
+  console.log(`MATCHMAKING: Request details: ${uniqueMembers.map(m => 
     `discord_id=${m.discord_id}, token=${m.discord_access_token.substring(0, 8)}...`
   ).join(' | ')}`);
-  const discordAuthTokens = members.map(member => member.discord_access_token);
+  const discordAuthTokens = uniqueMembers.map(member => member.discord_access_token);
   const groupUrl = await createDiscordGroup(discordAuthTokens);
   group.groupurl = groupUrl;
 
