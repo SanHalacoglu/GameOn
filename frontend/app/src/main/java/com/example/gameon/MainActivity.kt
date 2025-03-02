@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.checkMatchmakingStatus
+import com.example.gameon.api.methods.getPreferencesByUserId
 import com.example.gameon.api.methods.getUserGroups
 import com.example.gameon.api.methods.initiateMatchmaking
 import com.example.gameon.api.methods.logout
@@ -81,10 +82,23 @@ class MainActivity : ComponentActivity() {
 
 //        val groupListState = mutableStateOf<List<Group>>(emptyList())
         val user = SessionDetails(this).getUser()
+        Log.d("UserSettings", "User: $user")
+        val preferenceIDState = mutableStateOf(-1)
 
         val discordUsername = user?.username ?: "Unknown"
         val discordId = user?.discord_id ?: "Unknown"
         val preferenceID = user?.preference_id ?: user?.preferences?.preference_id?.toIntOrNull() ?: -1
+        Log.d("UserSettings", "Extracted preference ID: $preferenceID")
+
+        lifecycleScope.launch {
+            val preferences = getPreferencesByUserId(this@MainActivity, discordId)
+            if (preferences != null) {
+                Log.d("MainActivity", "User Preferences: $preferences")
+                preferenceIDState.value = preferences.preference_id?.toIntOrNull() ?: -1
+            } else {
+                Log.e("MainActivity", "No preferences found for this user.")
+            }
+        }
 
         lifecycleScope.launch {
             while (true) {

@@ -24,4 +24,9 @@ interface PreferencesApi {
         @Body preferences: Preferences
     ): Response<Preferences>
 
+    @GET("/preferences/user/{userId}")
+    suspend fun getPreferencesByUserId(
+        @Path("userId") userId: String
+    ): Response<Preferences>
+
 }

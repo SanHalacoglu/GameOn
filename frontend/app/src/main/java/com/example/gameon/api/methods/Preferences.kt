@@ -70,3 +70,19 @@ suspend fun updatePreferences(context: Context, preferenceId: Int, preferences: 
         false
     }
 }
+
+suspend fun getPreferencesByUserId(context: Context, userId: String): Preferences? {
+    val apiService = Api.init(context)
+        .getInstance(followRedirects = false)
+        .create(PreferencesApi::class.java)
+
+    val response = apiService.getPreferencesByUserId(userId)
+
+    return if (response.isSuccessful) {
+        Log.d("getPreferencesByUserId", "Fetched preferences: ${response.body()}")
+        response.body()
+    } else {
+        Log.e("getPreferencesByUserId", "Failed to fetch preferences: ${response.errorBody()?.string()}")
+        null
+    }
+}
