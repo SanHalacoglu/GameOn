@@ -18,3 +18,14 @@ suspend fun getGroupMembers(
     else
         emptyList()
 }
+
+suspend fun fetchGroupUrl(groupId: Int, context: Context): String? {
+    val groupsApi = Api.init(context).getInstance().create(GroupsApi::class.java)
+
+    val result = groupsApi.getGroupUrl(groupId)
+
+    return if (result.isSuccessful)
+        result.body()?.groupUrl
+    else
+        null
+}

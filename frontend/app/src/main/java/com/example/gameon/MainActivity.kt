@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,15 +56,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.SessionDetails
+import com.example.gameon.api.methods.checkMatchmakingStatus
 import com.example.gameon.api.methods.getUserGroups
 import com.example.gameon.api.methods.initiateMatchmaking
 import com.example.gameon.api.methods.logout
 import com.example.gameon.classes.Group
 import com.example.gameon.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
+    private val isMatchmakingActive = mutableStateOf(false) // ✅ Tracks if searching
+    private val matchmakingStatus = mutableStateOf<String?>(null)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -75,51 +80,64 @@ class MainActivity : ComponentActivity() {
         val discordId = user?.discord_id ?: "Unknown"
         val preferenceID = user?.preference_id ?: user?.preferences?.preference_id?.toIntOrNull() ?: -1
 
+        lifecycleScope.launch {
+            while (true) { // Keep polling every 10 seconds
+                delay(10_000)
 
-//        val gson: Gson = GsonBuilder()
-//            .registerTypeAdapter(Date::class.java, DateAdapter())
-//            .create()
-//
-//        val userJson = intent.getStringExtra("User")
-//        val user: User? = userJson?.let { gson.fromJson(it, User::class.java) }
-//
-//        val discordUsername = user?.username ?: "Unknown"
-//        val discordId = user?.discord_id ?: "Unknown"
-//        val preferenceID = user?.preference_id ?: user?.preferences?.preference_id?.toIntOrNull() ?: -1
-//
-//        Log.d("Main", "Discord Username: $discordUsername, Preference ID: $preferenceID")
+                if (isMatchmakingActive.value) {
+                    Log.d("MainActivity", "Polling started: isMatchmakingActive = TRUE")
+                    val status = checkMatchmakingStatus(this@MainActivity, discordId)
+                    Log.d("MainActivity", "Matchmaking Status: $status")
 
-        lifecycleScope.launch{
+                    matchmakingStatus.value = status
 
-            val groupList = getUserGroups(
-                discordId = discordId,
-                context = this@MainActivity
-            )
-            Log.d("Main", "Group List: $groupList")
-            if (groupList.isNotEmpty()) {
-                groupListState.value = groupList
+                    when (status) {
+                        "in_progress" -> Log.d("MainActivity", "Matchmaking is still in progress.")
+                        "timed_out" -> {
+                            isMatchmakingActive.value = false
+                            Log.d("MainActivity", "Matchmaking timed out.")
+                        }
+                        "not_in_progress" -> {
+                            isMatchmakingActive.value = false
+                            Log.d("MainActivity", "Matchmaking no longer in progress.")
+                        }
+                        "error" -> Log.e("MainActivity", "Error checking matchmaking status.")
+                    }
+                } else {
+                    Log.d("MainActivity", "Polling skipped: isMatchmakingActive = FALSE")
+                }
             }
         }
+
+        lifecycleScope.launch {
+            val initialGroupList = getUserGroups(discordId, this@MainActivity)
+            Log.d("MainActivity", "Initial Group List: $initialGroupList")
+            if (initialGroupList.isNotEmpty()) {
+                groupListState.value = initialGroupList
+            }
+
+            while (true) {
+                delay(10_000) // Polling every 30 seconds
+                val updatedGroupList = getUserGroups(discordId, this@MainActivity)
+                Log.d("MainActivity", "Updated Group List: $updatedGroupList")
+                if (updatedGroupList.isNotEmpty()) {
+                    groupListState.value = updatedGroupList
+                }
+            }
+        }
+
         setContent {
-            Column (
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = BlueDarker),
+            Column(
+                modifier = Modifier.fillMaxSize().background(color = BlueDarker),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 Header(
                     discordUsername,
-                    {
-                        // TODO: open user settings
-                    },
-                    {
-                        lifecycleScope.launch {
-                            logout(this@MainActivity)
-                        }
-                    }
+                    { /* TODO: Open settings */ },
+                    { lifecycleScope.launch { logout(this@MainActivity) } }
                 )
-                MainContent(preferenceID, groupListState, discordUsername)
+                MainContent(preferenceID, groupListState, discordUsername, discordId, isMatchmakingActive, matchmakingStatus)
             }
         }
     }
@@ -227,38 +245,47 @@ fun Header(username: String, onSettings: () -> Unit, onLogout: () -> Unit) {
 }
 
 @Composable
-fun FindGroup(preferenceID: Int, context: Context) {
+fun FindGroup(
+    preferenceID: Int,
+    context: Context,
+    discordId: String,
+    isMatchmakingActive: MutableState<Boolean>,
+    matchmakingStatus: MutableState<String?>
+) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
     val coroutineScope = rememberCoroutineScope()
-    var isLoading by remember { mutableStateOf(false) }
+
+    fun startMatchmaking() {
+        coroutineScope.launch {
+            isMatchmakingActive.value = true
+            Log.d("FindGroup", "isMatchmakingActive set to TRUE")
+            val success = initiateMatchmaking(context, preferenceID)
+
+            if (success) {
+                Log.d("FindGroup", "Matchmaking started.")
+                matchmakingStatus.value = "in_progress"
+            } else {
+                Log.e("FindGroup", "Failed to initiate matchmaking")
+                isMatchmakingActive.value = false
+                Log.d("FindGroup", "isMatchmakingActive set to FALSE due to failure")
+            }
+        }
+    }
+    val buttonColor = if (isMatchmakingActive.value) Purple.copy(alpha = 0.5f) else Purple
 
     Box(
         modifier = Modifier
             .fillMaxWidth(0.9f)
-            .height(70.dp) // Increased height
+            .height(70.dp)
             .clip(RoundedCornerShape(50.dp))
-            .background(Purple) // Solid background instead of border
-            .clickable {
-                coroutineScope.launch {
-                    isLoading = true
-                    val success = initiateMatchmaking(context, preferenceID)
-                    isLoading = false
-                    if (success) {
-                        Log.d("FindGroup", "Matchmaking initiated successfully")
-                    } else {
-                        Log.e("FindGroup", "Failed to initiate matchmaking")
-                    }
-                }
-            },
+            .background(buttonColor)
+            .clickable( enabled = !isMatchmakingActive.value) { startMatchmaking() },
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Text(
-            text = if (isLoading) "Finding..." else "Find Group",
-            color = BlueDarker,
-            style = TextStyle(
-                fontFamily = fontFamily,
-                fontSize = 25.sp
-            )
+            text = "Find Group",
+            color = if (isMatchmakingActive.value) BlueDarker.copy(alpha = 0.5f) else BlueDarker,
+            style = TextStyle(fontFamily = fontFamily, fontSize = 25.sp)
         )
     }
 }
@@ -323,7 +350,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(50.dp)
-                                    .clip(RoundedCornerShape(15.dp))
+                                    .clip(RoundedCornerShape(50.dp))
                                     .background(Purple.copy(alpha = 0.2f))
                                     .clickable {
                                         // Create Intent and pass Group object
@@ -354,7 +381,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
 }
 
 @Composable
-fun ReportsSection() {
+fun ReportsSection(context: Context) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
 
     Box(
@@ -382,10 +409,14 @@ fun ReportsSection() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .clip(RoundedCornerShape(15.dp))
+                    .clip(RoundedCornerShape(50.dp))
                     .background(Purple)
                     .clickable {
-                        // TODO: Navigate to Submit Report Page
+                        val intent = android.content.Intent(
+                            context,
+                            ReportsActivity::class.java
+                        )
+                        context.startActivity(intent)
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -402,10 +433,14 @@ fun ReportsSection() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .clip(RoundedCornerShape(15.dp))
-                    .background(Purple) // Slightly different opacity
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(Purple)
                     .clickable {
-                        // TODO: Navigate to View Reports Page
+                        val intent = android.content.Intent(
+                            context,
+                            ListReportsActivity::class.java
+                        )
+                        context.startActivity(intent)
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -421,8 +456,10 @@ fun ReportsSection() {
 }
 
 @Composable
-fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, discordUsername : String) {
+fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, discordUsername : String, discordId: String, isMatchmakingActive: MutableState<Boolean>,
+                matchmakingStatus: MutableState<String?>) {
     val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -430,11 +467,11 @@ fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, di
         verticalArrangement = Arrangement.SpaceEvenly, // Ensures even spacing
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FindGroup(preferenceID, context) // Large Button
+        FindGroup(preferenceID, context, discordId, isMatchmakingActive, matchmakingStatus) // Large Button
 
         ViewExistingGroups(context, groupListState, discordUsername) // Expands to fit content
 
-        ReportsSection() // Expands to fit content
+        ReportsSection(context) // Expands to fit content
     }
 }
 

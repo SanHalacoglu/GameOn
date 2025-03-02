@@ -10,4 +10,11 @@ interface GroupsApi {
     @GET("groups/{id}/members")
     suspend fun getGroupMembers(@Path("id") groupId: Int): Response<List<GroupMember>>
 
+    @GET("groups/{id}/url")
+    suspend fun getGroupUrl(@Path("id") groupId: Int): Response<GroupUrlResponse>
+
+    data class GroupUrlResponse(
+        val groupUrl: String
+    )
+
 }
