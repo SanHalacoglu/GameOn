@@ -23,6 +23,31 @@ export const getPreferencesById = async (req: Request, res: Response): Promise<v
   }
 };
 
+export const getPreferencesByUserId = async (req: Request, res: Response): Promise<void> => {
+  const preferencesRepository = AppDataSource.getRepository(Preferences);
+  const userRepository = AppDataSource.getRepository(User);
+
+  const user = await userRepository.findOne({
+    where: { discord_id: req.params.userId },
+  });
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  const preferences = await preferencesRepository.findOne({
+    where: { user: { discord_id: req.params.userId } },
+    relations: ["user", "game"],
+  });
+
+  if (preferences) {
+    res.json(preferences);
+  } else {
+    res.status(404).json({ message: "Preferences not found" });
+  }
+};
+
 export const createPreferences = async (req: Request, res: Response): Promise<void> => {
   const { discord_id, spoken_language, time_zone, skill_level, game_id } = req.body;
 
