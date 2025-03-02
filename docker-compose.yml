@@ -21,6 +21,7 @@ services:
     depends_on:
       - mysql
       - redis
+    restart: always
 
   mysql:
     image: mysql:8
