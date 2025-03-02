@@ -29,6 +29,11 @@
             android:label="@string/title_activity_view_reports"
             android:theme="@style/Theme.GameOn" />
         <activity
+            android:name=".UserSettingsActivity"
+            android:exported="false"
+            android:label="UserSettingsActivity"
+            android:theme="@style/Theme.GameOn" />
+        <activity
             android:name=".ListReportsActivity"
             android:exported="true"
             android:label="@string/title_activity_list_reports"

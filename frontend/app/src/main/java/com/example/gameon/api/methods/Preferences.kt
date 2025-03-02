@@ -37,3 +37,36 @@ suspend fun createUserPreferences(
         (context as? Activity)?.finish()
     }
 }
+
+suspend fun getUserPreferences(preferenceId: Int, context: Context): Preferences? {
+    val apiService = Api.init(context)
+        .getInstance(followRedirects = false)
+        .create(PreferencesApi::class.java)
+
+    val response = apiService.getPreferencesById(preferenceId)
+
+    return if (response.isSuccessful) {
+        response.body()
+    } else {
+        Log.e("UserSettings", "Failed to fetch preferences: ${response.errorBody()?.string()}")
+        null
+    }
+}
+
+suspend fun updatePreferences(context: Context, preferenceId: Int, preferences: Preferences): Boolean {
+    return try {
+        val apiService = Api.init(context).getInstance().create(PreferencesApi::class.java)
+        val response = apiService.updatePreferences(preferenceId, preferences)
+
+        if (response.isSuccessful) {
+            Log.d("updatePreferences", "Preferences updated successfully!")
+            true
+        } else {
+            Log.e("updatePreferences", "Failed to update preferences: ${response.errorBody()?.string()}")
+            false
+        }
+    } catch (e: Exception) {
+        Log.e("updatePreferences", "Error updating preferences", e)
+        false
+    }
+}

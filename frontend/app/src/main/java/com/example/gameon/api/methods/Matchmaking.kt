@@ -41,6 +41,7 @@ suspend fun checkMatchmakingStatus(context: Context, discordId: String): String 
         when (response.body()?.message) {
             "Matchmaking in progress" -> "in_progress"
             "Matchmaking timed out" -> "timed_out"
+            "Group found" -> "group_found"
             else -> "unknown"
         }
     } else {

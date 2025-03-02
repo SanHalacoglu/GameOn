@@ -65,6 +65,7 @@ import com.example.gameon.api.methods.initiateMatchmaking
 import com.example.gameon.api.methods.logout
 import com.example.gameon.classes.DateAdapter
 import com.example.gameon.classes.User
+import com.example.gameon.composables.ReportButton
 import com.example.gameon.composables.ReportTitle
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -109,6 +110,7 @@ class ViewGroupActivity : ComponentActivity() {
                     discordUsername,
                     {
                         // TODO: open user settings
+
                     },
                     {
                         lifecycleScope.launch {
@@ -116,7 +118,20 @@ class ViewGroupActivity : ComponentActivity() {
                         }
                     }
                 )
-                MainContent(groupMembersState, groupName, groupId)
+                Column(modifier = Modifier.weight(1f)) {
+                    MainContent(groupMembersState, groupName, groupId)
+                }
+
+                // Back Button should always be visible at the bottom
+                ReportButton(
+                    "Back",
+                    outlined = true,
+                    modifier = Modifier
+                        .width(300.dp)
+                        .padding(bottom = 80.dp) // Add padding to avoid cutting off
+                ) {
+                    finish()
+                }
             }
         }
     }
@@ -277,8 +292,8 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
-                        items(groupMembers.value) { member -> // Fix: Use groupMembers.value
-                            val username = member.username ?: "Unknown User" // Fix: Access username directly
+                        items(groupMembers.value) { member ->
+                            val username = member.username
 
                             Box(
                                 modifier = Modifier
@@ -349,7 +364,7 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
             .fillMaxSize()
             .padding(20.dp),
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally // 🔹 Ensures all children are centered
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -363,7 +378,7 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
             modifier = Modifier
                 .fillMaxWidth() // 🔹 Make the text take the full width
                 .padding(horizontal = 16.dp), // Optional padding for better spacing
-            textAlign = TextAlign.Center // 🔹 Ensures the text itself is centered
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(20.dp))

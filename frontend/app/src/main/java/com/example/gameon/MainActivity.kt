@@ -28,12 +28,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -67,13 +69,17 @@ import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
-    private val isMatchmakingActive = mutableStateOf(false) // ✅ Tracks if searching
+    private val isMatchmakingActive = mutableStateOf(false)
     private val matchmakingStatus = mutableStateOf<String?>(null)
+    private val groupListState = mutableStateOf<List<Group>>(emptyList())
+    private val showDialog = mutableStateOf(false)
+    private val dialogMessage = mutableStateOf("")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val groupListState = mutableStateOf<List<Group>>(emptyList())
+//        val groupListState = mutableStateOf<List<Group>>(emptyList())
         val user = SessionDetails(this).getUser()
 
         val discordUsername = user?.username ?: "Unknown"
@@ -81,7 +87,7 @@ class MainActivity : ComponentActivity() {
         val preferenceID = user?.preference_id ?: user?.preferences?.preference_id?.toIntOrNull() ?: -1
 
         lifecycleScope.launch {
-            while (true) { // Keep polling every 10 seconds
+            while (true) {
                 delay(10_000)
 
                 if (isMatchmakingActive.value) {
@@ -96,6 +102,14 @@ class MainActivity : ComponentActivity() {
                         "timed_out" -> {
                             isMatchmakingActive.value = false
                             Log.d("MainActivity", "Matchmaking timed out.")
+                            dialogMessage.value = "Matchmaking timed out. Please try again."
+                            showDialog.value = true
+                        }
+                        "group_found" -> {
+                            isMatchmakingActive.value = false
+                            Log.d("MainActivity", "Group found! Navigating to group page.")
+                            dialogMessage.value = "You have been matched with a group!"
+                            showDialog.value = true
                         }
                         "not_in_progress" -> {
                             isMatchmakingActive.value = false
@@ -112,17 +126,15 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val initialGroupList = getUserGroups(discordId, this@MainActivity)
             Log.d("MainActivity", "Initial Group List: $initialGroupList")
-            if (initialGroupList.isNotEmpty()) {
-                groupListState.value = initialGroupList
-            }
+
+            groupListState.value = initialGroupList
 
             while (true) {
-                delay(10_000) // Polling every 30 seconds
+                delay(10_000) // Polling every 10 seconds
                 val updatedGroupList = getUserGroups(discordId, this@MainActivity)
                 Log.d("MainActivity", "Updated Group List: $updatedGroupList")
-                if (updatedGroupList.isNotEmpty()) {
-                    groupListState.value = updatedGroupList
-                }
+
+                groupListState.value = updatedGroupList
             }
         }
 
@@ -134,10 +146,16 @@ class MainActivity : ComponentActivity() {
             ) {
                 Header(
                     discordUsername,
-                    { /* TODO: Open settings */ },
+                    {
+                        val intent = android.content.Intent(
+                            this@MainActivity,
+                            UserSettingsActivity::class.java
+                        )
+                        startActivity(intent)
+                    },
                     { lifecycleScope.launch { logout(this@MainActivity) } }
                 )
-                MainContent(preferenceID, groupListState, discordUsername, discordId, isMatchmakingActive, matchmakingStatus)
+                MainContent(preferenceID, groupListState, discordUsername, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
             }
         }
     }
@@ -250,7 +268,9 @@ fun FindGroup(
     context: Context,
     discordId: String,
     isMatchmakingActive: MutableState<Boolean>,
-    matchmakingStatus: MutableState<String?>
+    matchmakingStatus: MutableState<String?>,
+    showDialog: MutableState<Boolean>,
+    dialogMessage: MutableState<String>
 ) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
     val coroutineScope = rememberCoroutineScope()
@@ -271,7 +291,14 @@ fun FindGroup(
             }
         }
     }
+
+    LaunchedEffect(showDialog.value) {
+        Log.d("FindGroup", "Dialog state changed: ${showDialog.value}")
+    }
+
+
     val buttonColor = if (isMatchmakingActive.value) Purple.copy(alpha = 0.5f) else Purple
+    val buttonText = if (isMatchmakingActive.value) "Finding..." else "Find Group"
 
     Box(
         modifier = Modifier
@@ -283,9 +310,24 @@ fun FindGroup(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Find Group",
+            text = buttonText,
             color = if (isMatchmakingActive.value) BlueDarker.copy(alpha = 0.5f) else BlueDarker,
             style = TextStyle(fontFamily = fontFamily, fontSize = 25.sp)
+        )
+    }
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Matchmaking Status") },
+            text = { Text(dialogMessage.value) },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("OK")
+                }
+            }
         )
     }
 }
@@ -293,10 +335,10 @@ fun FindGroup(
 @Composable
 fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group>>, discordUsername: String) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
+    val groups = groupListState.value
 
-    val groups by remember { groupListState }
-    val isLoading = groups.isEmpty()
-    val errorMessage = if (isLoading) "No groups found" else null
+    val isLoading = groups == null // If `null`, still fetching
+    val hasGroups = groups.isNotEmpty()
 
     Box(
         modifier = Modifier
@@ -321,7 +363,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
 
             Spacer(modifier = Modifier.height(8.dp)) // Add spacing
 
-            // Content (Centered Box for Loading/Error Messages)
+            // ✅ Properly handle the states
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -334,14 +376,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                         fontSize = 16.sp
                     )
 
-                    errorMessage != null -> Text(
-                        text = errorMessage,
-                        color = Purple,
-                        fontFamily = fontFamily,
-                        fontSize = 16.sp
-                    )
-
-                    else -> LazyColumn(
+                    hasGroups -> LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
@@ -374,6 +409,13 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
+
+                    else -> Text(
+                        text = "No groups found",
+                        color = Purple,
+                        fontFamily = fontFamily,
+                        fontSize = 16.sp
+                    )
                 }
             }
         }
@@ -457,7 +499,7 @@ fun ReportsSection(context: Context) {
 
 @Composable
 fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, discordUsername : String, discordId: String, isMatchmakingActive: MutableState<Boolean>,
-                matchmakingStatus: MutableState<String?>) {
+                matchmakingStatus: MutableState<String?>, showDialog: MutableState<Boolean>, dialogMessage: MutableState<String>) {
     val context = LocalContext.current
 
     Column(
@@ -467,7 +509,7 @@ fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, di
         verticalArrangement = Arrangement.SpaceEvenly, // Ensures even spacing
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FindGroup(preferenceID, context, discordId, isMatchmakingActive, matchmakingStatus) // Large Button
+        FindGroup(preferenceID, context, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage) // Large Button
 
         ViewExistingGroups(context, groupListState, discordUsername) // Expands to fit content
 

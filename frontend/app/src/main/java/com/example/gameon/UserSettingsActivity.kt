@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -51,26 +53,37 @@ import androidx.lifecycle.lifecycleScope
 import com.example.gameon.PreferenceComposables.Footer
 import com.example.gameon.PreferenceComposables.Header
 import com.example.gameon.PreferenceComposables.Preferences
+import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.createUserPreferences
 import com.example.gameon.api.methods.fetchGames
+import com.example.gameon.api.methods.getUserPreferences
 import com.example.gameon.api.methods.register
+import com.example.gameon.api.methods.updatePreferences
 import com.example.gameon.classes.Game
 import com.example.gameon.classes.Preferences
 import com.example.gameon.ui.theme.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 
-class PreferencesActivity : ComponentActivity() {
+class UserSettingsActivity : ComponentActivity() {
     companion object {
-        private const val TAG = "PreferencesActivity"
+        private const val TAG = "UserSettingsActivity"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val discordId = intent.getStringExtra("DiscordId")!!
+        val user = SessionDetails(this).getUser()
+        Log.d("UserSettings", "User: $user")
+        val discordId =  user?.discord_id ?: "-1"
         val gamesListState = mutableStateOf<List<Game>>(emptyList())
+//        val preferenceId = user?.preferences?.preference_id ?: -1
+        val preferenceId = user?.preferences?.preference_id?.toIntOrNull() ?: -1
+
+        Log.d("UserSettings", "Extracted preference ID: $preferenceId")
+
+        Log.d("UserSettings", "Preference id: $preferenceId")
 
         val selectedLanguage = mutableStateOf("")
         val selectedRegion = mutableStateOf("")
@@ -79,7 +92,27 @@ class PreferencesActivity : ComponentActivity() {
         val selectedGameName = mutableStateOf("")
 
         lifecycleScope.launch {
-            val gamesList = fetchGames(this@PreferencesActivity) // Call API
+            val preferences = getUserPreferences(preferenceId, this@UserSettingsActivity)
+
+            if (preferences != null) {
+                Log.d("UserSettings", "Fetched Preferences: $preferences")
+
+                // Populate fields with existing preferences
+                selectedLanguage.value = preferences.spoken_language ?: ""
+                selectedTimezone.value = preferences.time_zone ?: ""
+                selectedSkillLevel.value = preferences.skill_level ?: ""
+                selectedGameName.value = preferences.game?.game_name ?: ""
+
+                // Extract the correct region from the timezone (e.g., "America/New_York" -> "America")
+                selectedRegion.value = preferences.time_zone?.split("/")?.firstOrNull() ?: ""
+
+            } else {
+                Log.e("UserSettings", "Failed to fetch preferences")
+            }
+        }
+
+        lifecycleScope.launch {
+            val gamesList = fetchGames(this@UserSettingsActivity) // Call API
             gamesListState.value = gamesList // Update state
             Log.d(TAG, "Received games: $gamesList")
         }
@@ -87,13 +120,13 @@ class PreferencesActivity : ComponentActivity() {
         Log.d(TAG, "Discord ID: $discordId")
 
         setContent {
-            Column (
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = BlueDarker),
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                Header()
+            ) {
+                SettingsHeader()
                 Preferences(
                     modifier = Modifier.weight(1F, true),
                     gamesList = gamesListState.value,
@@ -103,12 +136,13 @@ class PreferencesActivity : ComponentActivity() {
                     selectedSkillLevel = selectedSkillLevel,
                     selectedGameName = selectedGameName
                 )
-                Footer(
+                UserSettingsComposables.Footer(
                     onConfirm = {
                         val selectedGameObject = gamesListState.value.find { it.game_name == selectedGameName.value }
                         val gameId = selectedGameObject?.game_id ?: 0 // Default to 0 if not found
 
                         val preferences = Preferences(
+                            preference_id = preferenceId.toString(), // Ensure this is passed
                             discord_id = discordId,
                             spoken_language = selectedLanguage.value,
                             time_zone = selectedTimezone.value,
@@ -118,8 +152,10 @@ class PreferencesActivity : ComponentActivity() {
 
                         Log.d("PreferencesActivity", "Creating preferences: $preferences")
                     },
-                    context = this@PreferencesActivity,
+                    context = this@UserSettingsActivity,
+                    preferenceId = preferenceId, // Pass it here
                     preferences = Preferences(
+                        preference_id = preferenceId.toString(),
                         discord_id = discordId,
                         spoken_language = selectedLanguage.value,
                         time_zone = selectedTimezone.value,
@@ -132,7 +168,46 @@ class PreferencesActivity : ComponentActivity() {
     }
 }
 
-object PreferenceComposables {
+@Composable
+fun SettingsHeader() {
+    val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = BlueDark)
+            .height(150.dp)
+            .padding(top = 30.dp),
+        verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box {
+            Text(
+                text = "User Settings",
+                color = BlueLight,
+                style = TextStyle(
+                    fontFamily = fontFamily,
+                    fontSize = 36.sp,
+                    shadow = Shadow(
+                        color = Blue,
+                        blurRadius = 10F
+                    ),
+                )
+            )
+            //Text stroke
+            Text(
+                text = "User Settings",
+                color = Blue,
+                style = TextStyle(
+                    fontFamily = fontFamily,
+                    fontSize = 36.sp,
+                    drawStyle = Stroke(0.5F)
+                )
+            )
+        }
+    }
+}
+
+object UserSettingsComposables {
 
     private val REGIONS = listOf(
         "Africa",
@@ -149,7 +224,7 @@ object PreferenceComposables {
     )
 
     private val canConfirm = mutableStateOf(false)
-    
+
     @Composable
     fun Preferences(
         modifier: Modifier,
@@ -160,21 +235,18 @@ object PreferenceComposables {
         selectedSkillLevel: MutableState<String>,
         selectedGameName: MutableState<String>
     ) {
-        //Enables Footer's confirm button when all preferences selected
-        canConfirm.value = (selectedLanguage.value.isNotEmpty()) &&
-                (selectedRegion.value.isNotEmpty()) &&
-                (selectedTimezone.value.isNotEmpty()) &&
-                (selectedSkillLevel.value.isNotEmpty()) &&
-                (selectedGameName.value.isNotEmpty())
 
         // Get list of all possible timezones
         // Then sort the list and remove any unnecessary entries
-        var timezones = listOf("Please select a region.")
-        if (selectedRegion.value.isNotEmpty())
-            timezones = TimeZone.availableZoneIds.filter {
-                timezone -> timezone.startsWith(selectedRegion.value)
-            } .sorted()
+        var timezones by remember { mutableStateOf(listOf("Please select a region.")) }
 
+        LaunchedEffect(selectedRegion.value) {
+            if (selectedRegion.value.isNotEmpty()) {
+                timezones = TimeZone.availableZoneIds
+                    .filter { it.startsWith(selectedRegion.value) }
+                    .sorted()
+            }
+        }
         Column (
             modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically),
@@ -191,8 +263,7 @@ object PreferenceComposables {
                 options = REGIONS,
                 selectedOption = selectedRegion
             ) {
-                if(!selectedTimezone.value.startsWith(selectedRegion.value))
-                    selectedTimezone.value = ""
+                selectedTimezone.value = ""
             }
             // Show Timezone once region inputted
             // For ease of timezone selection
@@ -311,59 +382,11 @@ object PreferenceComposables {
                 )
         }
     }
-
-    @Composable
-    fun Header() {
-        val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = BlueDark)
-                .height(150.dp)
-                .padding(top = 30.dp),
-            verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box {
-                //Text fill and shadow
-                Text(
-                    text = "Welcome to GameOn",
-                    color = BlueLight,
-                    style = TextStyle(
-                        fontFamily = fontFamily,
-                        fontSize = 36.sp,
-                        shadow = Shadow(
-                            color = Blue,
-                            blurRadius = 10F
-                        ),
-                    )
-                )
-                //Text stroke
-                Text(
-                    text = "Welcome to GameOn",
-                    color = Blue,
-                    style = TextStyle(
-                        fontFamily = fontFamily,
-                        fontSize = 36.sp,
-                        drawStyle = Stroke(0.5F)
-                    )
-                )
-            }
-            Text(
-                text = "Select Your Preferences",
-                color = Blue,
-                style = TextStyle(
-                    fontFamily = fontFamily,
-                    fontSize = 24.sp,
-                )
-            )
-        }
-    }
-
     @Composable
     fun Footer(
         onConfirm: () -> Unit,
         context: Context,
+        preferenceId: Int, // Make sure this is passed
         preferences: Preferences
     ) {
         val coroutineScope = rememberCoroutineScope()
@@ -376,18 +399,25 @@ object PreferenceComposables {
                 .padding(top = 30.dp, bottom = 70.dp)
         ) {
             Button(
-                enabled = canConfirm.value,
                 onClick = {
                     onConfirm()
-
-                    // ✅ Launch coroutine when Confirm is clicked
                     coroutineScope.launch {
-                        createUserPreferences(context, preferences)
+                        if (preferenceId > 0) { // Ensure a valid ID is being sent
+                            val success = updatePreferences(context, preferenceId, preferences)
+                            if (success) {
+                                Log.d("Footer", "Preferences updated successfully!")
+                                (context as? ComponentActivity)?.finish()
+                            } else {
+                                Log.e("Footer", "Failed to update preferences")
+                            }
+                        } else {
+                            Log.e("Footer", "Invalid preferenceId: $preferenceId")
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Blue,
-                    disabledContainerColor = Color(0x442C8DFF)
+                    disabledContainerColor = Color(0x442C8DFF) // Keep it enabled
                 ),
                 modifier = Modifier
                     .width(300.dp)
@@ -403,31 +433,50 @@ object PreferenceComposables {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreferencesPreview() {
-//    val selectedLanguage = remember {mutableStateOf("English")}
-//    val selectedRegion = remember {mutableStateOf("Arctic")}
-//    val selectedTimezone = remember {mutableStateOf("Arctic/Longyearbyen")}
-//    val selectedSkillLevel = remember {mutableStateOf("Competitive")}
-//    val selectedGameName = remember {mutableStateOf("The Sims")}
-//    val sampleGames = emptyList<Game>()
-//    Column (
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(color = BlueDarker),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ){
-//        Header()
-//        Preferences(
-//            modifier = Modifier.weight(1F, true),
-//            gamesList = sampleGames,
-//            selectedLanguage = selectedLanguage,
-//            selectedRegion = selectedRegion,
-//            selectedTimezone = selectedTimezone,
-//            selectedSkillLevel = selectedSkillLevel,
-//            selectedGameName = selectedGameName
-//        )
-//        Footer{}
-//    }
-//}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreferencesPreview() {
+    val selectedLanguage = remember { mutableStateOf("English") }
+    val selectedRegion = remember { mutableStateOf("Arctic") }
+    val selectedTimezone = remember { mutableStateOf("Arctic/Longyearbyen") }
+    val selectedSkillLevel = remember { mutableStateOf("Competitive") }
+    val selectedGameName = remember { mutableStateOf("The Sims") }
+    val sampleGames = listOf(
+        Game(game_id = 1, game_name = "The Sims",""),
+        Game(game_id = 2, game_name = "Minecraft",""),
+        Game(game_id = 3, game_name = "Valorant","")
+    ) // Mock list of games for preview
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = BlueDarker),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SettingsHeader() // Include the header in the preview
+
+        Preferences(
+            modifier = Modifier.weight(1F, true),
+            gamesList = sampleGames, // Pass mock data
+            selectedLanguage = selectedLanguage,
+            selectedRegion = selectedRegion,
+            selectedTimezone = selectedTimezone,
+            selectedSkillLevel = selectedSkillLevel,
+            selectedGameName = selectedGameName
+        )
+
+        Footer(
+            onConfirm = {
+                Log.d("Preview", "Confirm button clicked")
+            },
+            context = LocalContext.current, // Pass null for preview
+            preferences = Preferences(
+                discord_id = "1234567890",
+                spoken_language = selectedLanguage.value,
+                time_zone = selectedTimezone.value,
+                skill_level = selectedSkillLevel.value,
+                game_id = sampleGames.find { it.game_name == selectedGameName.value }?.game_id ?: 0
+            )
+        )
+    }
+}

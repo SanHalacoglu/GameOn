@@ -92,7 +92,7 @@ class ListReportsActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top, // Keep everything stacked from the top
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-                ReportHeader(
+                ListReportHeader(
                     discordUsername,
                     {
                         // TODO: open user settings
