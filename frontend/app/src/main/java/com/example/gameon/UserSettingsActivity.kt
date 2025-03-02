@@ -56,6 +56,7 @@ import com.example.gameon.PreferenceComposables.Preferences
 import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.createUserPreferences
 import com.example.gameon.api.methods.fetchGames
+import com.example.gameon.api.methods.getPreferencesByUserId
 import com.example.gameon.api.methods.getUserPreferences
 import com.example.gameon.api.methods.register
 import com.example.gameon.api.methods.updatePreferences
@@ -79,11 +80,8 @@ class UserSettingsActivity : ComponentActivity() {
         val discordId =  user?.discord_id ?: "-1"
         val gamesListState = mutableStateOf<List<Game>>(emptyList())
 //        val preferenceId = user?.preferences?.preference_id ?: -1
-        val preferenceId = user?.preferences?.preference_id?.toIntOrNull() ?: -1
-
-        Log.d("UserSettings", "Extracted preference ID: $preferenceId")
-
-        Log.d("UserSettings", "Preference id: $preferenceId")
+        val preferenceIDState = mutableStateOf(-1)
+//        val preferenceId = user?.preferences?.preference_id?.toIntOrNull() ?: -1
 
         val selectedLanguage = mutableStateOf("")
         val selectedRegion = mutableStateOf("")
@@ -92,7 +90,10 @@ class UserSettingsActivity : ComponentActivity() {
         val selectedGameName = mutableStateOf("")
 
         lifecycleScope.launch {
-            val preferences = getUserPreferences(preferenceId, this@UserSettingsActivity)
+            val preferences = getPreferencesByUserId(this@UserSettingsActivity, discordId)
+            if (preferences != null) {
+                preferenceIDState.value = preferences.preference_id?.toIntOrNull() ?: -1
+            }
 
             if (preferences != null) {
                 Log.d("UserSettings", "Fetched Preferences: $preferences")
@@ -139,10 +140,10 @@ class UserSettingsActivity : ComponentActivity() {
                 UserSettingsComposables.Footer(
                     onConfirm = {
                         val selectedGameObject = gamesListState.value.find { it.game_name == selectedGameName.value }
-                        val gameId = selectedGameObject?.game_id ?: 0 // Default to 0 if not found
+                        val gameId = selectedGameObject?.game_id ?: 0
 
                         val preferences = Preferences(
-                            preference_id = preferenceId.toString(), // Ensure this is passed
+                            preference_id = preferenceIDState.value.toString(),
                             discord_id = discordId,
                             spoken_language = selectedLanguage.value,
                             time_zone = selectedTimezone.value,
@@ -150,12 +151,12 @@ class UserSettingsActivity : ComponentActivity() {
                             game_id = gameId
                         )
 
-                        Log.d("PreferencesActivity", "Creating preferences: $preferences")
+                        Log.d(TAG, "Saving preferences: $preferences")
                     },
                     context = this@UserSettingsActivity,
-                    preferenceId = preferenceId, // Pass it here
+                    preferenceId = preferenceIDState.value, // **Pass the preference ID correctly**
                     preferences = Preferences(
-                        preference_id = preferenceId.toString(),
+                        preference_id = preferenceIDState.value.toString(),
                         discord_id = discordId,
                         spoken_language = selectedLanguage.value,
                         time_zone = selectedTimezone.value,
