@@ -1,6 +1,5 @@
 package com.example.gameon
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -34,7 +33,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +49,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.gameon.PreferenceComposables.Footer
 import com.example.gameon.PreferenceComposables.Header
 import com.example.gameon.PreferenceComposables.Preferences
-import com.example.gameon.api.methods.createUserPreferences
 import com.example.gameon.api.methods.fetchGames
 import com.example.gameon.api.methods.register
 import com.example.gameon.classes.Game
@@ -103,30 +100,22 @@ class PreferencesActivity : ComponentActivity() {
                     selectedSkillLevel = selectedSkillLevel,
                     selectedGameName = selectedGameName
                 )
-                Footer(
-                    onConfirm = {
-                        val selectedGameObject = gamesListState.value.find { it.game_name == selectedGameName.value }
-                        val gameId = selectedGameObject?.game_id ?: 0 // Default to 0 if not found
+                Footer(onConfirm = {
+                    val selectedGameObject = gamesListState.value.find { it.game_name == selectedGameName.value }
+                    val gameId = selectedGameObject?.game_id ?: 0 // Default to 0 if not found
 
-                        val preferences = Preferences(
-                            discord_id = discordId,
-                            spoken_language = selectedLanguage.value,
-                            time_zone = selectedTimezone.value,
-                            skill_level = selectedSkillLevel.value,
-                            game_id = gameId
-                        )
-
-                        Log.d("PreferencesActivity", "Creating preferences: $preferences")
-                    },
-                    context = this@PreferencesActivity,
-                    preferences = Preferences(
+                    val preferences = Preferences(
                         discord_id = discordId,
                         spoken_language = selectedLanguage.value,
                         time_zone = selectedTimezone.value,
                         skill_level = selectedSkillLevel.value,
-                        game_id = gamesListState.value.find { it.game_name == selectedGameName.value }?.game_id ?: 0
+                        game_id = gameId
                     )
-                )
+
+                    lifecycleScope.launch {
+                        register(this@PreferencesActivity, preferences)
+                    }
+                })
             }
         }
     }
@@ -149,7 +138,7 @@ object PreferenceComposables {
     )
 
     private val canConfirm = mutableStateOf(false)
-    
+
     @Composable
     fun Preferences(
         modifier: Modifier,
@@ -172,7 +161,7 @@ object PreferenceComposables {
         var timezones = listOf("Please select a region.")
         if (selectedRegion.value.isNotEmpty())
             timezones = TimeZone.availableZoneIds.filter {
-                timezone -> timezone.startsWith(selectedRegion.value)
+                    timezone -> timezone.startsWith(selectedRegion.value)
             } .sorted()
 
         Column (
@@ -362,13 +351,9 @@ object PreferenceComposables {
 
     @Composable
     fun Footer(
-        onConfirm: () -> Unit,
-        context: Context,
-        preferences: Preferences
+        onConfirm: () -> Unit
     ) {
-        val coroutineScope = rememberCoroutineScope()
-
-        Box(
+        Box (
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = BlueDark)
@@ -377,14 +362,7 @@ object PreferenceComposables {
         ) {
             Button(
                 enabled = canConfirm.value,
-                onClick = {
-                    onConfirm()
-
-                    // ✅ Launch coroutine when Confirm is clicked
-                    coroutineScope.launch {
-                        createUserPreferences(context, preferences)
-                    }
-                },
+                onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Blue,
                     disabledContainerColor = Color(0x442C8DFF)
