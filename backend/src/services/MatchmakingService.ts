@@ -170,6 +170,9 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
     max_players: GROUP_SIZE,
   });
 
+  console.log(`MATCHMAKING: Request details: ${members.map(m => 
+    `discord_id=${m.discord_id}, token=${m.discord_access_token.substring(0, 8)}...`
+  ).join(' | ')}`);
   const discordAuthTokens = members.map(member => member.discord_access_token);
   const groupUrl = await createDiscordGroup(discordAuthTokens);
   group.groupurl = groupUrl;
