@@ -65,7 +65,8 @@ export const updateGroup = async (req: Request, res: Response): Promise<void> =>
     where: { group_id: parseInt(req.params.id) },
   });
   if (group) {
-    groupRepository.merge(group, req.body);
+    const { group_id, ...updateData } = req.body;
+    groupRepository.merge(group, updateData);
     await groupRepository.save(group);
     res.json(group);
   } else {
@@ -87,35 +88,30 @@ export const deleteGroup = async (req: Request, res: Response): Promise<void> =>
 };
 
 export const joinGroup = async (req: Request, res: Response): Promise<void> => {
+  const { group_id } = req.params;
+  const { discord_id } = req.body;
+
   const groupRepository = AppDataSource.getRepository(Group);
   const userRepository = AppDataSource.getRepository(User);
   const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
   const group = await groupRepository.findOne({
-    where: { group_id: parseInt(req.params.id) },
+    where: { group_id: parseInt(group_id) },
+    relations: ["members"],
   });
 
-  const user = await userRepository.findOne({
-    where: { discord_id: req.body.discord_id },
-  });
-
-  if (!group || !user) {
-    res.status(404).json({ message: "Group or user not found" });
+  if (!group) {
+    res.status(404).json({ message: "Group not found" });
     return;
   }
 
-  const existingGroupMember = await groupMemberRepository.findOne({
-    where: { 
-      group: { group_id: group.group_id }, 
-      user: { discord_id: user.discord_id } }
-  })
-  if (existingGroupMember) {
-    res.status(400).json({ message: "User has already joined this group." })
-  }
+  const user = await userRepository.findOne({
+    where: { discord_id },
+  });
 
-  if (group.members && group.members.length >= group.max_players) {
-    res.status(400).json({ message: "Group member limit has been reached." })
-    return
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
   }
 
   const groupMember = groupMemberRepository.create({
@@ -124,10 +120,23 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
   });
 
   await groupMemberRepository.save(groupMember);
-  res.status(201).json(groupMember);
+
+  // Reload the group to ensure it has the members relation populated
+  const updatedGroup = await groupRepository.findOne({
+    where: { group_id: group.group_id },
+    relations: ["members"],
+  });
+
+  if (updatedGroup) {
+    console.log(`Group ${updatedGroup.group_name} has ${updatedGroup.members.length} members`);
+    res.json(updatedGroup);
+  } else {
+    res.status(500).json({ message: "Failed to update group members" });
+  }
 };
 
 export const leaveGroup = async (req: Request, res: Response): Promise<void> => {
+  const groupRepository = AppDataSource.getRepository(Group);
   const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
   const groupMember = await groupMemberRepository.findOne({
@@ -139,7 +148,19 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
 
   if (groupMember) {
     await groupMemberRepository.remove(groupMember);
-    res.status(204).send();
+
+    // Reload the group to ensure it has the members relation populated
+    const updatedGroup = await groupRepository.findOne({
+      where: { group_id: parseInt(req.params.id) },
+      relations: ["members"],
+    });
+
+    if (updatedGroup) {
+      console.log(`Group ${updatedGroup.group_name} has ${updatedGroup.members.length} members after user left`);
+      res.json(updatedGroup);
+    } else {
+      res.status(500).json({ message: "Failed to update group members" });
+    }
   } else {
     res.status(404).json({ message: "Group member not found" });
   }

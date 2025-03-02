@@ -62,7 +62,8 @@ export const updateAdmin = async (req: Request, res: Response): Promise<void> =>
     where: { admin_id: parseInt(req.params.id) },
   });
   if (admin) {
-    adminRepository.merge(admin, req.body);
+    const { admin_id, ...updateData } = req.body; // Exclude admin_id from the request body
+    adminRepository.merge(admin, updateData);
     await adminRepository.save(admin);
     res.json(admin);
   } else {

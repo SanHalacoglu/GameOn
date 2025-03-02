@@ -76,14 +76,14 @@ export const updatePreferences = async (req: Request, res: Response): Promise<vo
     where: { preference_id: parseInt(req.params.id) },
   });
   if (preferences) {
-    preferencesRepository.merge(preferences, req.body);
+    const { preference_id, ...updateData } = req.body;
+    preferencesRepository.merge(preferences, updateData);
     await preferencesRepository.save(preferences);
     res.json(preferences);
   } else {
     res.status(404).json({ message: "Preferences not found" });
   }
 };
-
 export const deletePreferences = async (req: Request, res: Response): Promise<void> => {
   const preferencesRepository = AppDataSource.getRepository(Preferences);
   const preferences = await preferencesRepository.findOne({

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Preferences } from "../entity/Preference";
-import { addMatchmakingRequest, isUserInMatchmakingQueue } from "../services/MatchmakingService";
+import { addMatchmakingRequest, isUserInMatchmakingQueue, getUserMatchmakingStatus } from "../services/MatchmakingService";
 
 export const initiateMatchmaking = async (req: Request, res: Response): Promise<void> => {
   const { preference_id } = req.body;
@@ -30,12 +30,14 @@ export const initiateMatchmaking = async (req: Request, res: Response): Promise<
 export const checkMatchmakingStatus = async (req: Request, res: Response): Promise<void> => {
   const { discord_id } = req.params;
 
-  const { status, timestamp } = await isUserInMatchmakingQueue(discord_id);
+  const { status, timestamp } = await getUserMatchmakingStatus(discord_id);
 
   if (status === "in_progress") {
     res.status(200).json({ message: "Matchmaking in progress", timestamp });
   } else if (status === "timed_out") {
     res.status(200).json({ message: "Matchmaking timed out", timestamp });
+  } else if (status === "group_found") {
+    res.status(200).json({ message: "Group found", timestamp });
   } else {
     res.status(404).json({ message: "Matchmaking not in progress" });
   }

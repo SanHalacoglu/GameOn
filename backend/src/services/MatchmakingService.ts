@@ -41,6 +41,15 @@ export async function addMatchmakingRequest(preferences: Preferences, discord_ac
   console.log(`Added matchmaking request for user ${preferences.user.discord_id}`);
 }
 
+export async function getUserMatchmakingStatus(discord_id: string): Promise<{ status: string, timestamp?: number }> {
+  const status = await redisClient.get(`matchmaking_status:${discord_id}`);
+  if (status) {
+    const [statusValue, timestamp] = status.split(":");
+    return { status: statusValue, timestamp: parseInt(timestamp) };
+  }
+  return isUserInMatchmakingQueue(discord_id);
+}
+
 export async function isUserInMatchmakingQueue(discord_id: string): Promise<{ status: string, timestamp?: number }> {
   const now = Date.now();
   const validRequests = await redisClient.zRangeByScore(
@@ -113,6 +122,7 @@ export async function processMatchmakingQueue() {
       // Track processed requests
       members.forEach((req) => {
         processedRequestKeys.push(`${req.discord_id}-${req.timestamp}`);
+        redisClient.set(`matchmaking_status:${req.discord_id}`, `group_found:${req.timestamp}`, 'EX', STATUS_CACHE_EXPIRATION);
       });
 
       console.log(`Created matchmaking group for game ${group[0].game_id} with skill level ${group[0].skill_level}`);
@@ -130,15 +140,16 @@ export async function processMatchmakingQueue() {
   }
 
   // Remove expired requests
+  const expiredRequests = await redisClient.zRangeByScore(MATCHMAKING_QUEUE, 0, now - MATCHMAKING_TIMEOUT);
+  expiredRequests.forEach(async (req) => {
+    const { discord_id, timestamp } = JSON.parse(req);
+    redisClient.set(`matchmaking_status:${discord_id}`, `timed_out:${timestamp}`, 'EX', STATUS_CACHE_EXPIRATION);
+  });
   await redisClient.zRemRangeByScore(MATCHMAKING_QUEUE, 0, now - MATCHMAKING_TIMEOUT);
 
   console.log(`Processed matchmaking queue. Valid requests: ${validRequests.length}`);
 }
 
-/**
- * Creates a matchmaking group and adds users to it.
- * @param members - The list of matchmaking requests to form a group.
- */
 async function createMatchmakingGroup(members: MatchmakingRequest[]) {
   const userRepository = AppDataSource.getRepository(User);
   const gameRepository = AppDataSource.getRepository(Game);
@@ -174,5 +185,15 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
       await groupMemberRepository.save(groupMember);
       console.log(`Added user ${user.discord_id} to group ${group.group_name}`);
     }
+  }
+
+  // Reload the group to ensure it has the members relation populated
+  const updatedGroup = await groupRepository.findOne({
+    where: { group_id: group.group_id },
+    relations: ["members"],
+  });
+
+  if (updatedGroup) {
+    console.log(`Group ${updatedGroup.group_name} has ${updatedGroup.members.length} members`);
   }
 }
