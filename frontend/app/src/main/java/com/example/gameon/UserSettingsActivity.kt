@@ -433,50 +433,50 @@ object UserSettingsComposables {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreferencesPreview() {
-    val selectedLanguage = remember { mutableStateOf("English") }
-    val selectedRegion = remember { mutableStateOf("Arctic") }
-    val selectedTimezone = remember { mutableStateOf("Arctic/Longyearbyen") }
-    val selectedSkillLevel = remember { mutableStateOf("Competitive") }
-    val selectedGameName = remember { mutableStateOf("The Sims") }
-    val sampleGames = listOf(
-        Game(game_id = 1, game_name = "The Sims",""),
-        Game(game_id = 2, game_name = "Minecraft",""),
-        Game(game_id = 3, game_name = "Valorant","")
-    ) // Mock list of games for preview
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = BlueDarker),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        SettingsHeader() // Include the header in the preview
-
-        Preferences(
-            modifier = Modifier.weight(1F, true),
-            gamesList = sampleGames, // Pass mock data
-            selectedLanguage = selectedLanguage,
-            selectedRegion = selectedRegion,
-            selectedTimezone = selectedTimezone,
-            selectedSkillLevel = selectedSkillLevel,
-            selectedGameName = selectedGameName
-        )
-
-        Footer(
-            onConfirm = {
-                Log.d("Preview", "Confirm button clicked")
-            },
-            context = LocalContext.current, // Pass null for preview
-            preferences = Preferences(
-                discord_id = "1234567890",
-                spoken_language = selectedLanguage.value,
-                time_zone = selectedTimezone.value,
-                skill_level = selectedSkillLevel.value,
-                game_id = sampleGames.find { it.game_name == selectedGameName.value }?.game_id ?: 0
-            )
-        )
-    }
-}
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun PreferencesPreview() {
+//    val selectedLanguage = remember { mutableStateOf("English") }
+//    val selectedRegion = remember { mutableStateOf("Arctic") }
+//    val selectedTimezone = remember { mutableStateOf("Arctic/Longyearbyen") }
+//    val selectedSkillLevel = remember { mutableStateOf("Competitive") }
+//    val selectedGameName = remember { mutableStateOf("The Sims") }
+//    val sampleGames = listOf(
+//        Game(game_id = 1, game_name = "The Sims",""),
+//        Game(game_id = 2, game_name = "Minecraft",""),
+//        Game(game_id = 3, game_name = "Valorant","")
+//    ) // Mock list of games for preview
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(color = BlueDarker),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        SettingsHeader() // Include the header in the preview
+//
+//        Preferences(
+//            modifier = Modifier.weight(1F, true),
+//            gamesList = sampleGames, // Pass mock data
+//            selectedLanguage = selectedLanguage,
+//            selectedRegion = selectedRegion,
+//            selectedTimezone = selectedTimezone,
+//            selectedSkillLevel = selectedSkillLevel,
+//            selectedGameName = selectedGameName
+//        )
+//
+//        Footer(
+//            onConfirm = {
+//                Log.d("Preview", "Confirm button clicked")
+//            },
+//            context = LocalContext.current, // Pass null for preview
+//            preferences = Preferences(
+//                discord_id = "1234567890",
+//                spoken_language = selectedLanguage.value,
+//                time_zone = selectedTimezone.value,
+//                skill_level = selectedSkillLevel.value,
+//                game_id = sampleGames.find { it.game_name == selectedGameName.value }?.game_id ?: 0
+//            )
+//        )
+//    }
+//}
