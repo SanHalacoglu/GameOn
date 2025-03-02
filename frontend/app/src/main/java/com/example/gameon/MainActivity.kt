@@ -87,8 +87,7 @@ class MainActivity : ComponentActivity() {
 
         val discordUsername = user?.username ?: "Unknown"
         val discordId = user?.discord_id ?: "Unknown"
-        val preferenceID = user?.preference_id ?: user?.preferences?.preference_id?.toIntOrNull() ?: -1
-        Log.d("UserSettings", "Extracted preference ID: $preferenceID")
+
 
         lifecycleScope.launch {
             val preferences = getPreferencesByUserId(this@MainActivity, discordId)
@@ -169,7 +168,7 @@ class MainActivity : ComponentActivity() {
                     },
                     { lifecycleScope.launch { logout(this@MainActivity) } }
                 )
-                MainContent(preferenceID, groupListState, discordUsername, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
+                MainContent(preferenceIDState, groupListState, discordUsername, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
             }
         }
     }
@@ -278,7 +277,7 @@ fun Header(username: String, onSettings: () -> Unit, onLogout: () -> Unit) {
 
 @Composable
 fun FindGroup(
-    preferenceID: Int,
+    preferenceIDState: MutableState<Int>,
     context: Context,
     discordId: String,
     isMatchmakingActive: MutableState<Boolean>,
@@ -293,7 +292,7 @@ fun FindGroup(
         coroutineScope.launch {
             isMatchmakingActive.value = true
             Log.d("FindGroup", "isMatchmakingActive set to TRUE")
-            val success = initiateMatchmaking(context, preferenceID)
+            val success = initiateMatchmaking(context, preferenceIDState.value)
 
             if (success) {
                 Log.d("FindGroup", "Matchmaking started.")
@@ -512,7 +511,7 @@ fun ReportsSection(context: Context) {
 }
 
 @Composable
-fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, discordUsername : String, discordId: String, isMatchmakingActive: MutableState<Boolean>,
+fun MainContent(preferenceIDState: MutableState<Int>, groupListState: MutableState<List<Group>>, discordUsername : String, discordId: String, isMatchmakingActive: MutableState<Boolean>,
                 matchmakingStatus: MutableState<String?>, showDialog: MutableState<Boolean>, dialogMessage: MutableState<String>) {
     val context = LocalContext.current
 
@@ -523,7 +522,7 @@ fun MainContent(preferenceID: Int, groupListState: MutableState<List<Group>>, di
         verticalArrangement = Arrangement.SpaceEvenly, // Ensures even spacing
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FindGroup(preferenceID, context, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage) // Large Button
+        FindGroup(preferenceIDState, context, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage) // Large Button
 
         ViewExistingGroups(context, groupListState, discordUsername) // Expands to fit content
 
