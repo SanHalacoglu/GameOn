@@ -179,8 +179,9 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
     `discord_id=${m.discord_id}, token=${m.discord_access_token.substring(0, 8)}...`
   ).join(' | ')}`);
   const discordAuthTokens = uniqueMembers.map(member => member.discord_access_token);
-  const groupUrl = await createDiscordGroup(discordAuthTokens);
-  group.groupurl = groupUrl;
+  // broken for now
+  // const groupUrl = await createDiscordGroup(discordAuthTokens);
+  group.groupurl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 
   await groupRepository.save(group);
 
