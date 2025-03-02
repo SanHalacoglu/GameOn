@@ -10,6 +10,7 @@ import { createDiscordGroup } from "../controllers/GroupController";
 const MATCHMAKING_QUEUE = "matchmaking_queue";
 const MATCHMAKING_TIMEOUT = 3 * 60 * 1000; // 3 minutes
 const GROUP_SIZE = 3;
+const STATUS_CACHE_EXPIRATION = 60; // 1 minute
 
 interface MatchmakingRequest {
   discord_id: string;
@@ -82,7 +83,6 @@ export async function isUserInMatchmakingQueue(discord_id: string): Promise<{ st
   return { status: "not_in_progress" };
 }
 
-
 /**
  * Processes the matchmaking queue, forms groups, and removes processed requests.
  */
@@ -122,7 +122,7 @@ export async function processMatchmakingQueue() {
       // Track processed requests
       members.forEach((req) => {
         processedRequestKeys.push(`${req.discord_id}-${req.timestamp}`);
-        redisClient.set(`matchmaking_status:${req.discord_id}`, `group_found:${req.timestamp}`, 'EX', STATUS_CACHE_EXPIRATION);
+        redisClient.set(`matchmaking_status:${req.discord_id}`, `group_found:${req.timestamp}`, { EX: STATUS_CACHE_EXPIRATION });
       });
 
       console.log(`Created matchmaking group for game ${group[0].game_id} with skill level ${group[0].skill_level}`);
@@ -143,7 +143,7 @@ export async function processMatchmakingQueue() {
   const expiredRequests = await redisClient.zRangeByScore(MATCHMAKING_QUEUE, 0, now - MATCHMAKING_TIMEOUT);
   expiredRequests.forEach(async (req) => {
     const { discord_id, timestamp } = JSON.parse(req);
-    redisClient.set(`matchmaking_status:${discord_id}`, `timed_out:${timestamp}`, 'EX', STATUS_CACHE_EXPIRATION);
+    redisClient.set(`matchmaking_status:${discord_id}`, `timed_out:${timestamp}`, { EX: STATUS_CACHE_EXPIRATION });
   });
   await redisClient.zRemRangeByScore(MATCHMAKING_QUEUE, 0, now - MATCHMAKING_TIMEOUT);
 
