@@ -208,6 +208,7 @@ export const createDiscordGroup = async (discord_auth_tokens: string[]): Promise
     access_tokens: discord_auth_tokens
   }
 
+  console.log("Trying to create group for " + discord_auth_tokens.length + " users");
   const response_channel_info = await axios.post(DISCORD_USERS_CHANNELS_URL, payload, {
     headers: { "Content-Type": "application/json" },
   });
