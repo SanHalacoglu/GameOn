@@ -98,12 +98,38 @@
 - **Modified Sections**: Functional Requirements Sequence Diagram.
 - **Rationale**: Design was updated.
 
+### March 1st 2025 Changes
+#### 3.1 Use Case Diagram
+- **Change**: Updated use case diagram.
+- **Modified Sections**: Use case diagram.
+- **Rationale**: Updated based on M3 TA feedback.
+
+#### 4.4 Frameworks
+- **Change**: Remove android studio.
+- **Modified Sections**: Frameworks.
+- **Rationale**: Updated based on M3 TA feedback.
+
+#### 5. Contributions
+- **Change**: Add contributions.
+- **Modified Sections**: Contributions
+- **Rationale**: Updated based on M3 TA feedback.
+
+#### 3.3 Functional Requirements
+- **Change**: Fix use case scenarios for all functional requirements.
+- **Modified Sections**: Functional Requirements
+- **Rationale**: Updated based on M3 TA feedback.
+
+#### 3.3 Non Functional Requirements
+- **Change**: Fix non functional requirements.
+- **Modified Sections**: Non Functional Requirements
+- **Rationale**: Updated based on M3 TA feedback.
+
 ## 2. Project Description
 **GameOn** is a social matchmaking platform designed for gamers to find ideal teammates and build lasting connections. By authenticating through Discord, players create personalized profiles, sharing details like preferred games, skill levels, communication styles, and playstyles. The app intelligently matches players based on their preferences, instantly creating a dedicated Discord group for seamless in-game coordination and ongoing communication. With integrated feedback systems, including reviews and ratings, GameOn fosters a supportive and positive gaming community.
 
 ## 3. Requirements Specification
 ### **3.1. Use-Case Diagram**
-![Use-Case Diagram](images/M3_User_Diagram_1.png)
+![Use-Case Diagram](images/M3_User_Diagram.png)
 
 ### **3.2. Actors Description**
 1. **User**: A player who uses Discord authentication to access the app. They can set preferences, join groups via group matching, interact with other users, and report users if needed.
@@ -113,7 +139,7 @@
 ### **3.3. Functional Requirements**
 <a name="fr1"></a>
 
-1. **Sign In** 
+1. **Authenticate** 
     - **Overview**:
         1. Login
         2. Register
@@ -123,17 +149,30 @@
             - **Description**: Users are prompted to sign in with Discord. If they have already signed in with Discord and registered with our app they are taken to the home screen.
             - **Primary actor(s)**: User 
             - **Main success scenario**:
-                1. Successful sign-in via Discord authentication.
+                1. User opens the app.
+                2. System displays the login screen with a "Sign in with Discord" button.
+                3. User clicks "Sign in with Discord."
+                4. System redirects the user to Discord’s authentication page.
+                5. User enters Discord credentials and submits the form.
+                6. System validates the credentials with Discord API.
+                7. System checks if the user has a registered profile in the app.
+                8. If registered, system redirects the user to the home screen.
+                9. User successfully accesses the app.
             - **Failure scenario(s)**:
                 - 1a. Unsuccessful sign-in via Discord authentication.
-                    - 1a1. Incorrect credentials are provided.
-
+                    - 1a1. User enters incorrect Discord credentials.
+                    - 1a2. System displays an "Invalid credentials" error message.
+                    - 1a3. User is prompted to re-enter credentials.
         2. **Register**:
             - **Description**: Users are prompted to sign in with Discord. If they haven't registered with our app, they are taken to the account creation screen, where they must enter their registration preferences, including Spoken Language, Region, Timezone, Skill Level, and Game.
             - **Primary actor(s)**: User 
             - **Main success scenario(s)**:
-                1. Successful sign-in via Discord authentication.
-                2. Actor successfully fills out form submission and account is registered.
+                1. User clicks "Sign in with Discord."
+                2. System redirects to Discord authentication.
+                3. User enters credentials, and system verifies them.
+                4. If new user, system prompts for preferences.
+                5. User fills in and submits the form.
+                6. System saves profile and redirects to the home screen.
             - **Failure scenario(s)**:
                 - 1a. Unsuccessful sign-in via Discord authentication.
                     - 1a1. Incorrect credentials are provided.
@@ -143,16 +182,20 @@
 
 <a name="fr2"></a>
 
-2.  **User Settings** 
+2.  **Update User Settings** 
     - **Overview**:
         1. View and Change Settings
     
     - **Detailed Flow for Each Independent Scenario**: 
         1. **View and Change Settings**:
-            - **Description**: When clicking their avatar in the top right of the screen, users are taken to their account settings page, where they can change their avatar, spoken language preferences, and time zone.
+            - **Description**: When clicking their avatar in the top right of the screen, users are taken to their account settings page, where they can change their spoken language preferences, and time zone.
             - **Primary actor(s)**: User
             - **Main success scenario**:
-                1. Actor presses submit on user settings and data is updated in the User database.
+                1. User clicks their avatar to open settings.
+                2. System displays the user’s current settings.
+                3. User modifies settings (e.g., avatar, language, timezone).
+                4. User presses "Confirm," and system updates the database.
+                5. System confirms the update and redirects the user to the previous screen.
             - **Failure scenario(s)**:
                 - 1a. Actor leaves this screen without submitting, no settings are updated.
 
@@ -164,12 +207,16 @@
     
     - **Detailed Flow for Each Independent Scenario**: 
         1. **Looking for Group**:
-            - **Description**: When clicking the “Find Group” button in the app, you will be prompted to select a game you wish to play. Indicate how important matching language preference, chattiness, time zone, and age range is to you. Once you have entered the data, you will click a confirm dialogue and be transferred to a queue/loading screen.
+            - **Description**: When clicking the “Find Group” button in the app, the user is entered into the matchmaking queue, and once a group is found or the timeout is reached a popup appears informing the user of the matchmaking status.
             - **Primary actor(s)**: User 
             - **Main success scenario**:
-                1. Once a group is found, we create a Discord server for the group and it is added to the Group's database. Actor is transferred to the "Existing Group" screen.
+                1. User clicks the “Find Group” button.
+                2. A matchmaking request is submitted, and the user is in the matchmaking queue.
+                3. The app polls for the matchmaking status.
+                4. A group is found and the success popup is displayed.
+                5. The new group appears in the "view existing group" section
             - **Failure scenario(s)**:
-                - 1a. If there are not enough people matching your preferences in the queue, after a defined timeout users will be kicked from the queue and returned to the “Find Group” screen.
+                - 1a. Not enough users in queue, After a timeout, the system removes the user from matchmaking queue and displays a timeout popup.
 
 
 <a name="fr4"></a>
@@ -183,7 +230,9 @@
             - **Description**: When a user clicks on an existing group from the “My Groups” banner, they are taken to the existing group page.
             - **Primary actor(s)**: User 
             - **Main success scenario**:
-                1. Actor presses on an existing group and navigates successfully to "Existing Group" screen.
+                1. User clicks on an existing group from the "My Groups" section.
+                2. System retrieves group details from the database.
+                3. System navigates the user to the "Existing Group" screen.
             - **Failure scenario(s)**:
                 - 1a. Group not found in database, user is not routed to existing group page.
 
@@ -198,14 +247,19 @@
             - **Description**: When a user long-presses a user within the "Existing Group"  screen, an option appears to “Report User”.  Upon clicking “Report User”, a pop-up appears where a user can write a summary on why the user is being reported.  Upon clicking “Submit”, the report is submitted to the administrators.
             - **Primary actor(s)**: User, Admin 
             - **Main success scenario**:
-                1. Actor successfully accesses the option to report the user, clicks the “Report User” button, and fills out a summary of reporting.
-                2. Clicking “Submit” successfully sends the summary.
+                1. User selects the "Submit a report" button
+                2. User selects a group from the dropdown
+                3. User selects a user to report from the dropdown
+                4. User writes a reason for the report
+                5. User selects "Submit report"
+                6. System successfully sends the report to the database
             - **Failure scenario(s)**:
                 - 2a. User does not click “Submit” and the report is not submitted to the admin.
+                - 2b. User presses "Cancel" and report is not submitted.
 
 <a name="fr6"></a>
 
-6.  **View Reports** 
+6.  **Handle Reports** 
     - **Overview**:
         1. Ban User
         2. Acquit User
@@ -215,18 +269,23 @@
             - **Description**: Admins view and action user reports from the view reports screen. Admin has the option to ban a user based on the summary they've been provided.
             - **Primary actor(s)**: Admin 
             - **Main success scenario**:
-                1. Actor reviews the report, and bans the offending user. 
-                2. A user is deleted from the Users database. Their existing groups remain. 
+                1. Admin clicks "View reports"
+                2. Admin selects the desired report from the list
+                3. Admin selects "Ban user"
+                4. Once the user logs out, they will hit the banned user screen when attempting to log back in.
             - **Failure scenario(s)**:
-                - 1a. No action is taken, the report remains in the admin's report queue.
+                - 1a. System error prevents banning the user. Admin selects "Ban User," but a database or server error occurs, preventing the ban.
 
         2. **Acquit User**:
             - **Description**: Admins view and action user reports from the view reports screen. Admin has the option to *not* ban the user based on the summmary they've been provided.
             - **Primary actor(s)**: Admin 
             - **Main success scenario**:
-                1. Actor reviews the report, and does not ban the offending user.  User's access to application and all groups remains the same.
+                1. Admin clicks "View reports"
+                2. Admin selects the desired report from the list
+                3. Admin selects "Acquit User"
+                4. User can continue using the app normally.
             - **Failure scenario(s)**:
-                - 1a. No action is taken, the report remains in the admin's report queue.
+                - 1a. System error prevents acquiting the user. Admin selects "Acquit User," but a database or server error occurs, preventing the ban.
 
 ### **3.4. Screen Mockups**
 
@@ -234,14 +293,14 @@
 <a name="#nfr1"></a>
 
 1. **Matchmaking Time**
-    - **Description**:  Users looking for a group should be matched within 10 minutes of initiating the matchmaking process. 
-    - **Justification**: Reduces user frustration and ensures a smooth experience when matchmaking. Long wait times could make users not want to use our app.
+    - **Description**:   Users should be matched within 5 minutes of initiating the matchmaking process. If a match is not found within this time, the system should notify the user and allow them to reattempt matchmaking.
+    - **Justification**: Studies on online gaming matchmaking show that players expect matchmaking to occur within 2-5 minutes before frustration sets in. According to user engagement studies, wait times exceeding 5 minutes significantly decrease retention rates. This requirement ensures that matchmaking is fast enough to keep users engaged.
 
 <a name="#nfr2"></a>
 
 2. **Arbitrary Group Limit**
-    - **Description**: Users should not be limited to an arbitrary number of groups. They should always have the option to find a new group and the technology should support this.
-    - **Justification**: Many gamers play a variety of games, and arbitrary group limitations could frustrate users.
+    - **Description**: Users should be able to join multiple groups without arbitrary restrictions, limited only by system capacity and the number of available matchmaking groups.
+    - **Justification**: Many gamers participate in multiple communities across different games. Platforms like Discord and Steam allow users to be part of several groups simultaneously without limitations. Restricting users arbitrarily could result in poor user retention.
 
 
 ## 4. Designs Specification
@@ -473,16 +532,13 @@
 
 
 ### **4.4. Frameworks**
-1. **Android Studio**
-    - **Purpose**: Developing the Android front-end UI of the application.
-    - **Reason**: Course requirement.
-2. **Node.js**
+1. **Node.js**
     - **Purpose**: Developing the back-end server of the application.
     - **Reason**: Course requirement.
-3. **Azure Virtual Machine**
+2. **Azure Virtual Machine**
     - **Purpose**: We are using a VM for hosting the back-end server.
     - **Reason**: Azure is the most financially viable option with a student account.
-4. **Azure Database for MySQL**
+3. **Azure Database for MySQL**
     - **Purpose**: We will use a MySQL server to store our data.
     - **Reason**: We will use a SQL database since this data is relational and well-suited to our needs.  It remains in the same cloud service as our VM.
 
@@ -562,4 +618,15 @@
 
 
 ## 5. Contributions
-It should be noted that all work for Milestone 3 was completed synchronously, in person in the lab or library so each member has made a strong and equal contribution. 
+### San Halacoglu
+I worked on the backend authorization, login, and registration flow of the game app. I was also responsible for session management throughout the app. Overall, I spent around 40 hours on the project.
+
+### Jake Rubin
+I worked on the frontend portion of the startup, login, and registration flow of the application (logging in via Discord, redirecting back to the app, and submitting preferences). I also developed the frontend logic for submitting, viewing, and resolving reports, as well as setting up the frontend API configuration which could be extended to all applicable endpoints. Overall, I spent around 60 hours on the project.
+
+### Connor Johst
+I created all the backend endpoints not related to login, docker deployment, database integration, and cloud hosting. Overall I spent close to 40 hours on the project.
+
+### Maddy Paulson
+I developed the application's main page, which included the find-groups functionality to initiate matchmaking. I also implemented the user settings update flow, allowing users to modify their preferences, and the view existing groups feature to display and navigate their current groups. I also created various API functions for each of the features described above to make requests to the backend’s endpoints. Overall, I spent around 50 hours on the project.
+
