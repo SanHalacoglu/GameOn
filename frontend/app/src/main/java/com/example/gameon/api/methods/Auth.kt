@@ -34,14 +34,6 @@ suspend fun checkLoggedIn (context: Context) {
         }
     }
 
-    //If successful continue
-//    val intent: Intent = if (result.isSuccessful) {
-//        val userJson = gson.toJson(result.body())
-//        Log.d("Auth", "User logged in: $userJson")
-//        Intent(context, MainActivity::class.java).apply{
-//            putExtra("User", userJson)
-//        }
-//    }
     //Upon redirect, redirect to either Login or Preferences pages
     else if (result.code() in 300..399) {
         val redirectUrl: String = result.headers().get("Location")!!

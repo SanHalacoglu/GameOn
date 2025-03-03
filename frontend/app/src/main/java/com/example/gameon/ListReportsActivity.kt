@@ -95,7 +95,11 @@ class ListReportsActivity : ComponentActivity() {
                 ListReportHeader(
                     discordUsername,
                     {
-                        // TODO: open user settings
+                        val intent = Intent(
+                            this@ListReportsActivity,
+                            UserSettingsActivity::class.java
+                        )
+                        startActivity(intent)
                     },
                     {
                         lifecycleScope.launch {

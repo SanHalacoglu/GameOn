@@ -1,5 +1,6 @@
 package com.example.gameon
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -101,7 +102,11 @@ class ReportsActivity : ComponentActivity() {
                 ReportHeader(
                     discordUsername,
                     {
-                        // TODO: open user settings
+                        val intent = Intent(
+                            this@ReportsActivity,
+                            UserSettingsActivity::class.java
+                        )
+                        startActivity(intent)
                     },
                     {
                         lifecycleScope.launch {

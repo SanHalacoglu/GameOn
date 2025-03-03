@@ -76,8 +76,8 @@ class PreferencesActivity : ComponentActivity() {
         val selectedGameName = mutableStateOf("")
 
         lifecycleScope.launch {
-            val gamesList = fetchGames(this@PreferencesActivity) // Call API
-            gamesListState.value = gamesList // Update state
+            val gamesList = fetchGames(this@PreferencesActivity)
+            gamesListState.value = gamesList
             Log.d(TAG, "Received games: $gamesList")
         }
 
@@ -102,7 +102,7 @@ class PreferencesActivity : ComponentActivity() {
                 )
                 Footer(onConfirm = {
                     val selectedGameObject = gamesListState.value.find { it.game_name == selectedGameName.value }
-                    val gameId = selectedGameObject?.game_id ?: 0 // Default to 0 if not found
+                    val gameId = selectedGameObject?.game_id ?: 0
 
                     val preferences = Preferences(
                         discord_id = discordId,
@@ -149,7 +149,7 @@ object PreferenceComposables {
         selectedSkillLevel: MutableState<String>,
         selectedGameName: MutableState<String>
     ) {
-        //Enables Footer's confirm button when all preferences selected
+        // Enables Footer's confirm button when all preferences selected
         canConfirm.value = (selectedLanguage.value.isNotEmpty()) &&
                 (selectedRegion.value.isNotEmpty()) &&
                 (selectedTimezone.value.isNotEmpty()) &&
@@ -380,32 +380,3 @@ object PreferenceComposables {
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreferencesPreview() {
-//    val selectedLanguage = remember {mutableStateOf("English")}
-//    val selectedRegion = remember {mutableStateOf("Arctic")}
-//    val selectedTimezone = remember {mutableStateOf("Arctic/Longyearbyen")}
-//    val selectedSkillLevel = remember {mutableStateOf("Competitive")}
-//    val selectedGameName = remember {mutableStateOf("The Sims")}
-//    val sampleGames = emptyList<Game>()
-//    Column (
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(color = BlueDarker),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ){
-//        Header()
-//        Preferences(
-//            modifier = Modifier.weight(1F, true),
-//            gamesList = sampleGames,
-//            selectedLanguage = selectedLanguage,
-//            selectedRegion = selectedRegion,
-//            selectedTimezone = selectedTimezone,
-//            selectedSkillLevel = selectedSkillLevel,
-//            selectedGameName = selectedGameName
-//        )
-//        Footer{}
-//    }
-//}

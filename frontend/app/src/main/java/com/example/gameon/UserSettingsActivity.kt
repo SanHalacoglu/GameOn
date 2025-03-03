@@ -79,9 +79,7 @@ class UserSettingsActivity : ComponentActivity() {
         Log.d("UserSettings", "User: $user")
         val discordId =  user?.discord_id ?: "-1"
         val gamesListState = mutableStateOf<List<Game>>(emptyList())
-//        val preferenceId = user?.preferences?.preference_id ?: -1
         val preferenceIDState = mutableStateOf(-1)
-//        val preferenceId = user?.preferences?.preference_id?.toIntOrNull() ?: -1
 
         val selectedLanguage = mutableStateOf("")
         val selectedRegion = mutableStateOf("")
@@ -98,13 +96,10 @@ class UserSettingsActivity : ComponentActivity() {
             if (preferences != null) {
                 Log.d("UserSettings", "Fetched Preferences: $preferences")
 
-                // Populate fields with existing preferences
                 selectedLanguage.value = preferences.spoken_language ?: ""
                 selectedTimezone.value = preferences.time_zone ?: ""
                 selectedSkillLevel.value = preferences.skill_level ?: ""
                 selectedGameName.value = preferences.game?.game_name ?: ""
-
-                // Extract the correct region from the timezone (e.g., "America/New_York" -> "America")
                 selectedRegion.value = preferences.time_zone?.split("/")?.firstOrNull() ?: ""
 
             } else {
@@ -113,8 +108,8 @@ class UserSettingsActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch {
-            val gamesList = fetchGames(this@UserSettingsActivity) // Call API
-            gamesListState.value = gamesList // Update state
+            val gamesList = fetchGames(this@UserSettingsActivity)
+            gamesListState.value = gamesList
             Log.d(TAG, "Received games: $gamesList")
         }
 
@@ -154,7 +149,7 @@ class UserSettingsActivity : ComponentActivity() {
                         Log.d(TAG, "Saving preferences: $preferences")
                     },
                     context = this@UserSettingsActivity,
-                    preferenceId = preferenceIDState.value, // **Pass the preference ID correctly**
+                    preferenceId = preferenceIDState.value,
                     preferences = Preferences(
                         preference_id = preferenceIDState.value.toString(),
                         discord_id = discordId,
@@ -223,8 +218,6 @@ object UserSettingsComposables {
         "Pacific",
         "Etc"
     )
-
-    private val canConfirm = mutableStateOf(false)
 
     @Composable
     fun Preferences(
@@ -387,7 +380,7 @@ object UserSettingsComposables {
     fun Footer(
         onConfirm: () -> Unit,
         context: Context,
-        preferenceId: Int, // Make sure this is passed
+        preferenceId: Int,
         preferences: Preferences
     ) {
         val coroutineScope = rememberCoroutineScope()
@@ -403,7 +396,7 @@ object UserSettingsComposables {
                 onClick = {
                     onConfirm()
                     coroutineScope.launch {
-                        if (preferenceId > 0) { // Ensure a valid ID is being sent
+                        if (preferenceId > 0) {
                             val success = updatePreferences(context, preferenceId, preferences)
                             if (success) {
                                 Log.d("Footer", "Preferences updated successfully!")
@@ -418,7 +411,7 @@ object UserSettingsComposables {
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Blue,
-                    disabledContainerColor = Color(0x442C8DFF) // Keep it enabled
+                    disabledContainerColor = Color(0x442C8DFF)
                 ),
                 modifier = Modifier
                     .width(300.dp)
@@ -434,50 +427,3 @@ object UserSettingsComposables {
     }
 }
 
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun PreferencesPreview() {
-//    val selectedLanguage = remember { mutableStateOf("English") }
-//    val selectedRegion = remember { mutableStateOf("Arctic") }
-//    val selectedTimezone = remember { mutableStateOf("Arctic/Longyearbyen") }
-//    val selectedSkillLevel = remember { mutableStateOf("Competitive") }
-//    val selectedGameName = remember { mutableStateOf("The Sims") }
-//    val sampleGames = listOf(
-//        Game(game_id = 1, game_name = "The Sims",""),
-//        Game(game_id = 2, game_name = "Minecraft",""),
-//        Game(game_id = 3, game_name = "Valorant","")
-//    ) // Mock list of games for preview
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(color = BlueDarker),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        SettingsHeader() // Include the header in the preview
-//
-//        Preferences(
-//            modifier = Modifier.weight(1F, true),
-//            gamesList = sampleGames, // Pass mock data
-//            selectedLanguage = selectedLanguage,
-//            selectedRegion = selectedRegion,
-//            selectedTimezone = selectedTimezone,
-//            selectedSkillLevel = selectedSkillLevel,
-//            selectedGameName = selectedGameName
-//        )
-//
-//        Footer(
-//            onConfirm = {
-//                Log.d("Preview", "Confirm button clicked")
-//            },
-//            context = LocalContext.current, // Pass null for preview
-//            preferences = Preferences(
-//                discord_id = "1234567890",
-//                spoken_language = selectedLanguage.value,
-//                time_zone = selectedTimezone.value,
-//                skill_level = selectedSkillLevel.value,
-//                game_id = sampleGames.find { it.game_name == selectedGameName.value }?.game_id ?: 0
-//            )
-//        )
-//    }
-//}

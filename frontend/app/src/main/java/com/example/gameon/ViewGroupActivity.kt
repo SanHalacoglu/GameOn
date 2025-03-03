@@ -77,18 +77,14 @@ class ViewGroupActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Retrieve the Group object
         val group: Group? = intent.getParcelableExtra("selected_group")
         val groupId = group?.group_id ?: 0
         val groupName = group?.group_name ?: "Unknown Group"
-//        val discordUsername: String? = intent.getStringExtra("discord_username")
         val groupMembersState = mutableStateOf<List<User>>(emptyList())
         val user = SessionDetails(this).getUser()
         val discordUsername = user?.username ?: "Unknown"
 
-        //val groupMembers = group?.members ?: emptyList()
         Log.d("ViewGroupActivity", "Group: $group")
-//        Log.d("ViewGroupActivity", "Group Members: $groupMembers")
 
         lifecycleScope.launch {
             val groupMemberList = getGroupMembers(groupId, this@ViewGroupActivity)
@@ -109,8 +105,11 @@ class ViewGroupActivity : ComponentActivity() {
                 ViewGroupHeader(
                     discordUsername,
                     {
-                        // TODO: open user settings
-
+                        val intent = Intent(
+                            this@ViewGroupActivity,
+                            UserSettingsActivity::class.java
+                        )
+                        startActivity(intent)
                     },
                     {
                         lifecycleScope.launch {
@@ -121,14 +120,12 @@ class ViewGroupActivity : ComponentActivity() {
                 Column(modifier = Modifier.weight(1f)) {
                     MainContent(groupMembersState, groupName, groupId)
                 }
-
-                // Back Button should always be visible at the bottom
                 ReportButton(
                     "Back",
                     outlined = true,
                     modifier = Modifier
                         .width(300.dp)
-                        .padding(bottom = 80.dp) // Add padding to avoid cutting off
+                        .padding(bottom = 80.dp)
                 ) {
                     finish()
                 }
@@ -185,11 +182,11 @@ fun ViewGroupHeader(username: String, onSettings: () -> Unit, onLogout: () -> Un
                 onExpandedChange = { expanded = !expanded }
             ) {
                 Icon(
-                    imageVector = Icons.Default.AccountCircle, // Default profile icon
+                    imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Profile Icon",
-                    tint = Purple, // Adjust color as needed
+                    tint = Purple,
                     modifier = Modifier.size(90.dp)
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)// Set icon size
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
@@ -221,16 +218,15 @@ fun ViewGroupHeader(username: String, onSettings: () -> Unit, onLogout: () -> Un
                 }
             }
 
-            // Username with Glow Effect
             Text(
                 text = username,
-                color = Purple, // Pinkish-white glow
+                color = Purple,
                 style = TextStyle(
                     fontFamily = fontFamilyBarlow,
-                    fontSize = 16.sp, // Adjust size as needed
+                    fontSize = 16.sp,
                     shadow = Shadow(
-                        color = PurpleLight, // Glow color
-                        blurRadius = 10f // Strong blur for glow effect
+                        color = PurpleLight,
+                        blurRadius = 10f
                     )
                 )
             )
@@ -258,7 +254,6 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header at the top
             Text(
                 text = "Group Members",
                 color = White,
@@ -268,7 +263,6 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Content (Centered Box for Loading/Error Messages)
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -358,7 +352,6 @@ fun GoToDiscord(groupId: Int, context: Context) {
 
 @Composable
 fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, groupId: Int) {
-    val width = 300.dp
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -376,8 +369,8 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
                 fontSize = 30.sp,
             ),
             modifier = Modifier
-                .fillMaxWidth() // 🔹 Make the text take the full width
-                .padding(horizontal = 16.dp), // Optional padding for better spacing
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             textAlign = TextAlign.Center
         )
 

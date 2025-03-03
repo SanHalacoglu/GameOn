@@ -1,6 +1,7 @@
 package com.example.gameon
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -68,7 +69,6 @@ import com.example.gameon.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 class MainActivity : ComponentActivity() {
     private val isMatchmakingActive = mutableStateOf(false)
     private val matchmakingStatus = mutableStateOf<String?>(null)
@@ -80,14 +80,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-//        val groupListState = mutableStateOf<List<Group>>(emptyList())
         val user = SessionDetails(this).getUser()
         Log.d("UserSettings", "User: $user")
         val preferenceIDState = mutableStateOf(-1)
 
         val discordUsername = user?.username ?: "Unknown"
         val discordId = user?.discord_id ?: "Unknown"
-
 
         lifecycleScope.launch {
             val preferences = getPreferencesByUserId(this@MainActivity, discordId)
@@ -143,7 +141,7 @@ class MainActivity : ComponentActivity() {
             groupListState.value = initialGroupList
 
             while (true) {
-                delay(10_000) // Polling every 10 seconds
+                delay(10_000)
                 val updatedGroupList = getUserGroups(discordId, this@MainActivity)
                 Log.d("MainActivity", "Updated Group List: $updatedGroupList")
 
@@ -160,7 +158,7 @@ class MainActivity : ComponentActivity() {
                 Header(
                     discordUsername,
                     {
-                        val intent = android.content.Intent(
+                        val intent = Intent(
                             this@MainActivity,
                             UserSettingsActivity::class.java
                         )
@@ -222,11 +220,11 @@ fun Header(username: String, onSettings: () -> Unit, onLogout: () -> Unit) {
                 onExpandedChange = { expanded = !expanded }
             ) {
                 Icon(
-                    imageVector = Icons.Default.AccountCircle, // Default profile icon
+                    imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Profile Icon",
-                    tint = Purple, // Adjust color as needed
+                    tint = Purple,
                     modifier = Modifier.size(90.dp)
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)// Set icon size
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
@@ -258,16 +256,15 @@ fun Header(username: String, onSettings: () -> Unit, onLogout: () -> Unit) {
                 }
             }
 
-            // Username with Glow Effect
             Text(
                 text = username,
-                color = Purple, // Pinkish-white glow
+                color = Purple,
                 style = TextStyle(
                     fontFamily = fontFamilyBarlow,
-                    fontSize = 16.sp, // Adjust size as needed
+                    fontSize = 16.sp,
                     shadow = Shadow(
-                        color = PurpleLight, // Glow color
-                        blurRadius = 10f // Strong blur for glow effect
+                        color = PurpleLight,
+                        blurRadius = 10f
                     )
                 )
             )
@@ -309,7 +306,6 @@ fun FindGroup(
         Log.d("FindGroup", "Dialog state changed: ${showDialog.value}")
     }
 
-
     val buttonColor = if (isMatchmakingActive.value) Purple.copy(alpha = 0.5f) else Purple
     val buttonText = if (isMatchmakingActive.value) "Finding..." else "Find Group"
 
@@ -350,7 +346,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
     val groups = groupListState.value
 
-    val isLoading = groups == null // If `null`, still fetching
+    val isLoading = groups == null
     val hasGroups = groups.isNotEmpty()
 
     Box(
@@ -359,14 +355,13 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
             .height(200.dp)
             .clip(RoundedCornerShape(20.dp))
             .border(2.dp, Purple, RoundedCornerShape(20.dp))
-            .padding(16.dp) // Add padding to separate text from the edges
+            .padding(16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header at the top
             Text(
                 text = "My Existing Groups",
                 color = White,
@@ -374,9 +369,8 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                 fontSize = 20.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp)) // Add spacing
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // ✅ Properly handle the states
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -401,7 +395,6 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                                     .clip(RoundedCornerShape(50.dp))
                                     .background(Purple.copy(alpha = 0.2f))
                                     .clickable {
-                                        // Create Intent and pass Group object
                                         val intent = android.content.Intent(
                                             context,
                                             ViewGroupActivity::class.java
@@ -450,7 +443,6 @@ fun ReportsSection(context: Context) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Reports Section Title
             Text(
                 text = "Reports",
                 color = White,
@@ -458,8 +450,6 @@ fun ReportsSection(context: Context) {
                 fontSize = 20.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-
-            // Submit a Report Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -482,8 +472,6 @@ fun ReportsSection(context: Context) {
                     fontSize = 18.sp
                 )
             }
-
-            // View Reports Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -519,31 +507,13 @@ fun MainContent(preferenceIDState: MutableState<Int>, groupListState: MutableSta
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceEvenly, // Ensures even spacing
+        verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FindGroup(preferenceIDState, context, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage) // Large Button
+        FindGroup(preferenceIDState, context, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
 
-        ViewExistingGroups(context, groupListState, discordUsername) // Expands to fit content
+        ViewExistingGroups(context, groupListState, discordUsername)
 
-        ReportsSection(context) // Expands to fit content
+        ReportsSection(context)
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun MainPreview() {
-//    val groupListState = remember {mutableStateOf<List<Group>>(emptyList())}
-//    val discord = "maddy_paulson"
-//    val discordId = "751124124151185438"
-//    Column (
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(color = BlueDarker),
-//        verticalArrangement = Arrangement.Top,
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ){
-//        Header(discord, {}, {})
-//        MainContent(preferenceID = -1, groupListState, discord) // Fix: Provide a valid preferenceID
-//    }
-//}
