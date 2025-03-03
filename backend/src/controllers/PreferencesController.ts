@@ -97,11 +97,29 @@ export const createPreferences = async (req: Request, res: Response): Promise<vo
 
 export const updatePreferences = async (req: Request, res: Response): Promise<void> => {
   const preferencesRepository = AppDataSource.getRepository(Preferences);
+  const gameRepository = AppDataSource.getRepository(Game);
+
   const preferences = await preferencesRepository.findOne({
     where: { preference_id: parseInt(req.params.id) },
+    relations: ["game"],
   });
+
   if (preferences) {
-    const { preference_id, ...updateData } = req.body;
+    const { preference_id, game_id, ...updateData } = req.body;
+
+    if (game_id) {
+      const game = await gameRepository.findOne({
+        where: { game_id: parseInt(game_id) },
+      });
+
+      if (!game) {
+        res.status(404).json({ message: "Game not found" });
+        return;
+      }
+
+      preferences.game = game;
+    }
+
     preferencesRepository.merge(preferences, updateData);
     await preferencesRepository.save(preferences);
     res.json(preferences);
@@ -109,6 +127,7 @@ export const updatePreferences = async (req: Request, res: Response): Promise<vo
     res.status(404).json({ message: "Preferences not found" });
   }
 };
+
 export const deletePreferences = async (req: Request, res: Response): Promise<void> => {
   const preferencesRepository = AppDataSource.getRepository(Preferences);
   const preferences = await preferencesRepository.findOne({
