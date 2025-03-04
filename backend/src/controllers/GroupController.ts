@@ -253,19 +253,14 @@ export const getGroupMembers = async (req: Request, res: Response) => {
 };
 
 export const getGroupUrl = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const groupRepository = AppDataSource.getRepository(Group);
-    const group = await groupRepository.findOne({
-      where: { group_id: parseInt(req.params.group_id) },
-    });
-    if (group) {
-      res.json({ groupurl: group.groupurl });
-    } else {
-      res.status(404).json({ message: "Group not found" });
-    }
-  } catch (error) {
-    console.error("Error fetching group URL:", error);
-    res.status(500).json({ message: "Internal server error" });
+  const groupRepository = AppDataSource.getRepository(Group);
+  const group = await groupRepository.findOne({
+    where: { group_id: parseInt(req.params.id) },
+  });
+  if (group) {
+    res.json({ groupurl: group.groupurl });
+  } else {
+    res.status(404).json({ message: "Group not found" });
   }
 };
 
