@@ -9,7 +9,4 @@ export class Admin {
   @ManyToOne(() => User)
   @JoinColumn({ name: "discord_id" })
   user: User;
-
-  @Column()
-  permissions: string;
 }

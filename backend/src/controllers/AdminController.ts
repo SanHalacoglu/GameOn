@@ -33,10 +33,10 @@ export const getAdminById = async (req: Request, res: Response): Promise<void> =
 };
 
 export const createAdmin = async (req: Request, res: Response): Promise<void> => {
-  const { discord_id, permissions } = req.body;
+  const { discord_id } = req.body;
 
-  if (!discord_id || !permissions) {
-    res.status(400).json({ message: "discord_id and permissions are required" });
+  if (!discord_id) {
+    res.status(400).json({ message: "discord_id  are required" });
     return;
   }
 
@@ -54,7 +54,6 @@ export const createAdmin = async (req: Request, res: Response): Promise<void> =>
     }
 
     const admin = adminRepository.create({
-      permissions,
       user,
     });
 
