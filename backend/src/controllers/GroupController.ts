@@ -8,6 +8,8 @@ import { Not } from "typeorm";
 import axios from "axios";
 import { ChannelType, Client, GatewayIntentBits, OverwriteResolvable, OverwriteType } from 'discord.js';
 
+import { ChannelType, Client, GatewayIntentBits, OverwriteResolvable, OverwriteType } from 'discord.js';
+
 
 const DISCORD_CHANNEL_URL = "https://discord.com/channels/";
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || "";

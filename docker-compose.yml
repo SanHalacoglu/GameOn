@@ -26,14 +26,20 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: always
 
   mysql:
+    image: mysql
     image: mysql
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: ${MYSQL_DB}
     ports:
+      - "${MYSQL_PORT:-3306}:${MYSQL_PORT_INTER:-3306}"
       - "${MYSQL_PORT:-3306}:${MYSQL_PORT_INTER:-3306}"
     volumes:
       - mysql-data:/var/lib/mysql
@@ -44,8 +50,15 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   redis:
+    image: redis
     image: redis
     ports:
       - "6379:6379"
@@ -57,7 +70,16 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   mysql-data:
+  redis-data:
   redis-data:
