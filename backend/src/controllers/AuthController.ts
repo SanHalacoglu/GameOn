@@ -89,16 +89,21 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
 
     }else{
       console.log("User has a permanent session. Redirecting to home page.");
-      const response = await axios.get<User>(`${DB_SERVICE_URL}/users/${req.session.user.discord_id}`, {
-        responseType: 'json'
-      });
-      
-      if(response.status == 200){
-        const userProfileData = response.data
-        res.send(userProfileData);
-      }else{
-        console.log("Something has went horribly wrong.");
-        res.status(response.status).send(response.data);
+      try {
+        const response = await axios.get<User>(`${DB_SERVICE_URL}/users/${req.session.user.discord_id}`, {
+          responseType: 'json'
+        });
+        
+        if(response.status == 200){
+          const userProfileData = response.data
+          res.send(userProfileData);
+        }else{
+          console.log("Something has went horribly wrong.");
+          res.status(response.status).send(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ message: "Internal server error" });
       }
 
       return;
@@ -215,24 +220,29 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
     username: sessionData.discord_username!
   } as User
 
-  const userResponse = await axios.post<User>(
-    `${DB_SERVICE_URL}/users`, userData, { responseType: 'json' }
-  );
+  try {
+    const userResponse = await axios.post<User>(
+      `${DB_SERVICE_URL}/users`, userData, { responseType: 'json' }
+    );
 
-  if(userResponse.status != 201) {
-    res.status(userResponse.status).send(userResponse.data);
-    return
-  }
+    if(userResponse.status != 201) {
+      res.status(userResponse.status).send(userResponse.data);
+      return
+    }
 
-  const preferencesResponse = await axios.post<Preferences>(
-    `${DB_SERVICE_URL}/preferences`, req.body as Preferences, { responseType: 'json' }
-  )
+    const preferencesResponse = await axios.post<Preferences>(
+      `${DB_SERVICE_URL}/preferences`, req.body as Preferences, { responseType: 'json' }
+    )
 
-  if(preferencesResponse.status == 201) {
-    sessionData.temp_session = false;
-    res.send(userResponse.data);
-  } else {
-    res.status(preferencesResponse.status).send(preferencesResponse.data);
+    if(preferencesResponse.status == 201) {
+      sessionData.temp_session = false;
+      res.send(userResponse.data);
+    } else {
+      res.status(preferencesResponse.status).send(preferencesResponse.data);
+    }
+  } catch (error) {
+    console.error("Error during registration process:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
