@@ -1,9 +1,9 @@
-import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn, OneToMany } from "typeorm";
 import { Preferences } from "./Preference";
+import { GroupMember } from "./GroupMember";
 
 @Entity()
 export class User {
-
   @PrimaryColumn({ unique: true })
   discord_id!: string;
 
@@ -21,4 +21,7 @@ export class User {
 
   @OneToOne(() => Preferences, (preferences) => preferences.user)
   preferences!: Preferences;
+
+  @OneToMany(() => GroupMember, (groupMember) => groupMember.user)
+  groupMembers!: GroupMember[];
 }

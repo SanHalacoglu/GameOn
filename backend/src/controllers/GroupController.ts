@@ -25,7 +25,7 @@ export const getGroupById = async (req: Request, res: Response): Promise<void> =
   try {
     const groupRepository = AppDataSource.getRepository(Group);
     const group = await groupRepository.findOne({
-      where: { group_id: parseInt(req.params.id) },
+      where: { group_id: parseInt(req.params.group_id) },
       relations: ["game", "members"],
     });
     if (group) {
@@ -77,7 +77,7 @@ export const updateGroup = async (req: Request, res: Response): Promise<void> =>
   try {
     const groupRepository = AppDataSource.getRepository(Group);
     const group = await groupRepository.findOne({
-      where: { group_id: parseInt(req.params.id) },
+      where: { group_id: parseInt(req.params.group_id) },
     });
     if (group) {
       const { group_id, ...updateData } = req.body;
@@ -97,7 +97,7 @@ export const deleteGroup = async (req: Request, res: Response): Promise<void> =>
   try {
     const groupRepository = AppDataSource.getRepository(Group);
     const group = await groupRepository.findOne({
-      where: { group_id: parseInt(req.params.id) },
+      where: { group_id: parseInt(req.params.group_id) },
     });
     if (group) {
       await groupRepository.remove(group);
@@ -116,12 +116,19 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
     const { group_id } = req.params;
     const { discord_id } = req.body;
 
+    const parsedGroupId = parseInt(group_id);
+    if (isNaN(parsedGroupId)) {
+      res.status(400).json({ message: "Invalid group ID" });
+      return;
+    }
+
     const groupRepository = AppDataSource.getRepository(Group);
     const userRepository = AppDataSource.getRepository(User);
     const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
+    // Find the group
     const group = await groupRepository.findOne({
-      where: { group_id: parseInt(group_id) },
+      where: { group_id: parsedGroupId },
       relations: ["members"],
     });
 
@@ -130,6 +137,7 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Find the user
     const user = await userRepository.findOne({
       where: { discord_id },
     });
@@ -139,6 +147,20 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Check if the user is already a member of the group
+    const existingMember = await groupMemberRepository.findOne({
+      where: {
+        group: { group_id: group.group_id },
+        user: { discord_id },
+      },
+    });
+
+    if (existingMember) {
+      res.status(409).json({ message: "User is already a member of the group" });
+      return;
+    }
+
+    // Create a new GroupMember
     const groupMember = groupMemberRepository.create({
       group,
       user,
@@ -153,46 +175,50 @@ export const joinGroup = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (updatedGroup) {
-      console.log(`Group ${updatedGroup.group_name} has ${updatedGroup.members.length} members`);
       res.json(updatedGroup);
     } else {
-      res.status(500).json({ message: "Failed to update group members" });
+      res.status(500).json({ message: "Error reloading group after adding member" });
     }
   } catch (error) {
-    console.error("Error joining group:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const leaveGroup = async (req: Request, res: Response): Promise<void> => {
   try {
+    const { group_id } = req.params;
+    const { discord_id } = req.body;
+
     const groupRepository = AppDataSource.getRepository(Group);
     const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
+    // Find the group member
     const groupMember = await groupMemberRepository.findOne({
       where: {
-        group: { group_id: parseInt(req.params.id) },
-        user: { discord_id: req.body.discord_id },
+        group: { group_id: parseInt(group_id) },
+        user: { discord_id },
       },
     });
 
-    if (groupMember) {
-      await groupMemberRepository.remove(groupMember);
-
-      // Reload the group to ensure it has the members relation populated
-      const updatedGroup = await groupRepository.findOne({
-        where: { group_id: parseInt(req.params.id) },
-        relations: ["members"],
-      });
-
-      if (updatedGroup) {
-        console.log(`Group ${updatedGroup.group_name} has ${updatedGroup.members.length} members after user left`);
-        res.json(updatedGroup);
-      } else {
-        res.status(500).json({ message: "Failed to update group members" });
-      }
-    } else {
+    if (!groupMember) {
       res.status(404).json({ message: "Group member not found" });
+      return;
+    }
+
+    // Remove the group member
+    await groupMemberRepository.remove(groupMember);
+
+    // Reload the group to ensure it has the members relation populated
+    const updatedGroup = await groupRepository.findOne({
+      where: { group_id: parseInt(group_id) },
+      relations: ["members"],
+    });
+
+    if (updatedGroup) {
+      console.log(`Group ${updatedGroup.group_name} has ${updatedGroup.members.length} members after user left`);
+      res.json(updatedGroup);
+    } else {
+      res.status(500).json({ message: "Failed to update group members" });
     }
   } catch (error) {
     console.error("Error leaving group:", error);
@@ -206,7 +232,7 @@ export const getGroupMembers = async (req: Request, res: Response) => {
 
     const groupMembers = await groupMemberRepository.find({
       where: {
-        group: { group_id: parseInt(req.params.id) },
+        group: { group_id: parseInt(req.params.group_id) },
         user: { discord_id: Not(req.session.user!.discord_id) }
       },
       relations: ["user"]
@@ -227,7 +253,7 @@ export const getGroupUrl = async (req: Request, res: Response): Promise<void> =>
   try {
     const groupRepository = AppDataSource.getRepository(Group);
     const group = await groupRepository.findOne({
-      where: { group_id: parseInt(req.params.id) },
+      where: { group_id: parseInt(req.params.group_id) },
     });
     if (group) {
       res.json({ groupurl: group.groupurl });

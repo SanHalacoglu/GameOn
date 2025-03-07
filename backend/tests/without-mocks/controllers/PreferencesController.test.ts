@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-const BASE_URL = 'http://localhost:3000'; // Adjust the port if necessary
+const BASE_URL = 'http://localhost:3000';
 
 // Create test data before each test
 beforeAll(async () => {
@@ -35,7 +35,7 @@ beforeAll(async () => {
 describe('PreferencesRoutes - No Mocks', () => {
   // Input: Valid request to get all preferences
   // Expected status code: 200
-  // Expected behavior: Returns a list of preferences
+  // Expected behavior: Returns all preferences stored in the database
   // Expected output: Array of preferences
   test('Get All Preferences', async () => {
     const res = await request(BASE_URL).get('/preferences');
@@ -45,18 +45,32 @@ describe('PreferencesRoutes - No Mocks', () => {
 
   // Input: Valid request to get preferences by ID
   // Expected status code: 200
-  // Expected behavior: Returns the preferences with the specified ID
-  // Expected output: Preferences object
+  // Expected behavior: Returns the preference with the specified ID
+  // Expected output: Preference object with matching preference_id
   test('Get Preferences by ID', async () => {
-    const res = await request(BASE_URL).get('/preferences/1');
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('preference_id', 1);
+    const gamesResponse = await request(BASE_URL).get('/games');
+    const gameId = gamesResponse.body[0].game_id;
+
+    const createResponse = await request(BASE_URL).post('/preferences').send({
+      spoken_language: 'English',
+      time_zone: 'PST',
+      skill_level: 'casual',
+      discord_id: 'test_user_id',
+      game_id: gameId,
+    });
+
+    expect(createResponse.status).toBe(201);
+    const preferenceId = createResponse.body.preference_id;
+
+    const getResponse = await request(BASE_URL).get(`/preferences/${preferenceId}`);
+    expect(getResponse.status).toBe(200);
+    expect(getResponse.body).toHaveProperty('preference_id', preferenceId);
   });
 
   // Input: Valid request to get preferences by user ID
   // Expected status code: 200
-  // Expected behavior: Returns the preferences for the specified user
-  // Expected output: Preferences object
+  // Expected behavior: Returns the preferences associated with the specified user ID
+  // Expected output: Object containing user details and their preferences
   test('Get Preferences by User ID', async () => {
     const res = await request(BASE_URL).get('/preferences/user/test_user_id');
     expect(res.status).toBe(200);
@@ -66,15 +80,18 @@ describe('PreferencesRoutes - No Mocks', () => {
 
   // Input: Valid request to create preferences
   // Expected status code: 201
-  // Expected behavior: Creates new preferences
-  // Expected output: Preferences object
+  // Expected behavior: Creates a new preference entry in the database
+  // Expected output: Object containing the newly created preference_id
   test('Create Preferences', async () => {
+    const gamesResponse = await request(BASE_URL).get('/games');
+    const gameId = gamesResponse.body[0].game_id;
+
     const res = await request(BASE_URL).post('/preferences').send({
       spoken_language: 'English',
       time_zone: 'PST',
       skill_level: 'casual',
       discord_id: 'test_user_id',
-      game_id: 1,
+      game_id: gameId,
     });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('preference_id');
@@ -82,13 +99,28 @@ describe('PreferencesRoutes - No Mocks', () => {
 
   // Input: Valid request to update preferences
   // Expected status code: 200
-  // Expected behavior: Updates the preferences
-  // Expected output: Updated preferences object
+  // Expected behavior: Updates the specified preference with new data
+  // Expected output: Updated preference object with the new values
   test('Update Preferences', async () => {
-    const res = await request(BASE_URL).put('/preferences/1').send({
+    const gamesResponse = await request(BASE_URL).get('/games');
+    const gameId = gamesResponse.body[0].game_id;
+
+    const createResponse = await request(BASE_URL).post('/preferences').send({
+      spoken_language: 'English',
+      time_zone: 'PST',
+      skill_level: 'casual',
+      discord_id: 'test_user_id',
+      game_id: gameId,
+    });
+
+    expect(createResponse.status).toBe(201);
+    const preferenceId = createResponse.body.preference_id;
+
+    const updateResponse = await request(BASE_URL).put(`/preferences/${preferenceId}`).send({
       spoken_language: 'Spanish',
     });
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('spoken_language', 'Spanish');
+
+    expect(updateResponse.status).toBe(200);
+    expect(updateResponse.body).toHaveProperty('spoken_language', 'Spanish');
   });
 });

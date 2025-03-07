@@ -14,13 +14,13 @@ import {
 const router = express.Router();
 
 router.get("/", getGroups);
-router.get("/:id", getGroupById);
+router.get("/:group_id", getGroupById);
 router.post("/", createGroup);
-router.put("/:id", updateGroup);
-router.delete("/:id", deleteGroup);
-router.post("/:id/join", joinGroup);
-router.delete("/:id/leave", leaveGroup);
-router.get("/:id/members", getGroupMembers)
-router.get("/:id/url", getGroupUrl); 
+router.put("/:group_id", updateGroup);
+router.delete("/:group_id", deleteGroup);
+router.post("/:group_id/join", joinGroup);
+router.delete("/:group_id/leave", leaveGroup);
+router.get("/:group_id/members", getGroupMembers)
+router.get("/:group_id/url", getGroupUrl); 
 
 export default router;
