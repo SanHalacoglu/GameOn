@@ -9,6 +9,8 @@
     DISCORD_CLIENT_ID=your_discord_client_id
     DISCORD_CLIENT_SECRET=your_discord_client_secret
     DISCORD_REDIRECT_URI=http://localhost:3000/auth/redirect
+    DISCORD_BOT_TOKEN=your_discord_bot_token
+    DISCORD_GUILD_ID=your_discord_guild_id
     PORT=3000
     MYSQL_HOST=mysql
     MYSQL_PORT=3306
@@ -19,6 +21,7 @@
     SESSION_SECRET=yourSessionSecret
     REDIS_URL=redis://redis:6379
     ```
+    Note: Discord bot needs to be in the guild with DISCORD_GUILD_ID. 
 3. **Run Docker Compose:**
     In the root directory of the project:
     ```
