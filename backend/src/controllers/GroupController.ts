@@ -7,9 +7,12 @@ import { GroupMember } from "../entity/GroupMember";
 import { Not } from "typeorm";
 import { RedisQueryResultCache } from "typeorm/cache/RedisQueryResultCache.js";
 import axios from "axios";
+import { ChannelType, Client, GatewayIntentBits, OverwriteResolvable, OverwriteType } from 'discord.js';
 
-const DISCORD_USERS_CHANNELS_URL = "https://discord.com/api/users/@me/channels";
-const DISCORD_CUSTOM_CHANNEL_URL = "https://discord.com/channels/@me/";
+
+const DISCORD_CHANNEL_URL = "https://discord.com/channels/";
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || "";
+const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID || "";
 
 export const getGroups = async (req: Request, res: Response): Promise<void> => {
   const groupRepository = AppDataSource.getRepository(Group);
@@ -197,30 +200,84 @@ export const getGroupUrl = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-/**
- * Creates a Group DM in discord with the provided discord auth tokens.
- * Requires gdm.join scope.
- * @param discord_auth_tokens 
- * @returns Channel URL of the created group.
- */
-export const createDiscordGroup = async (discord_auth_tokens: string[]): Promise<string> => {
-  const payload = {
-    access_tokens: discord_auth_tokens
+//TODO: Implement Error Handling
+export const createDiscordGroup = async (discord_auth_tokens: string[], discord_ids: string[]): Promise<string> => {
+  const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates]
+  });
+
+  await client.login(DISCORD_BOT_TOKEN);
+  console.log(`Bot login successful`);
+  const guild = await client.guilds.fetch(DISCORD_GUILD_ID);
+  console.log(`Guild fetched: ${guild}`);
+  
+  if (!guild) {
+    console.error('Guild not found');
+    return "";
   }
 
-  console.log("Trying to create group for " + discord_auth_tokens + " users");
-  const response_channel_info = await axios.post(DISCORD_USERS_CHANNELS_URL, JSON.stringify(payload), {
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${discord_auth_tokens[0]}`
+  for (let i = 0; i < discord_auth_tokens.length; i++) {
+    const discord_id = discord_ids[i];
+    const discord_auth_token = discord_auth_tokens[i];
+    await addDiscordUserToGuild(discord_auth_token, discord_id, guild.id);
+  }
+  console.log(`Added users to guild`);
+
+  const randomNumber = Math.floor(Math.random() * 20001);
+  const group_name = `Matchmaking-${randomNumber}-Text`;
+
+  const permissionOverwrites: OverwriteResolvable[] = [];
+
+  permissionOverwrites.push({
+    id: guild.id,
+    deny: ['ViewChannel']
+  });
+
+  for (const discord_id of discord_ids) {
+    permissionOverwrites.push({
+      id: discord_id,
+      type: OverwriteType.Member,
+      allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory']
+    });
+  }
+
+  console.log(`Trying to create channel: ${group_name}`);
+  try {
+    const channel = await guild.channels.create({
+      name: group_name,
+      type: ChannelType.GuildText,
+      permissionOverwrites: permissionOverwrites
+    });
+    console.log(`Created channel: ${channel.name}`); 
+    
+    client.destroy();
+
+    return `${DISCORD_CHANNEL_URL}${guild.id}/${channel.id}`;
+  }  catch (err) {
+    console.error('Error creating channel:', err);
+    return "";
+  }
+};
+
+export const addDiscordUserToGuild = async (discord_auth_token: string, discord_id: string, guild_id: string): Promise<void> => {
+  console.log(`Adding Discord user to guild: ${discord_id} ${guild_id} with token ${discord_auth_token}`);
+  const response = await axios({
+    method: 'put',
+    url: `https://discord.com/api/v10/guilds/${guild_id}/members/${discord_id}`,
+    data: {
+        "access_token": discord_auth_token,
+    },
+    headers: {
+        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json',
     },
   });
 
-  if (response_channel_info.status === 200) {
-    console.log("Discord group created successfully");
-    return DISCORD_CUSTOM_CHANNEL_URL + response_channel_info.data.id;
+  if (response.status == 201) {
+    console.log("Discord user added to guild successfully.");
+  }else if (response.status == 204) {
+    console.log("Discord user already in guild.");
   } else {
-    console.error("Error creating Discord group" + response_channel_info.data);
-    return "";
+    console.error("Error adding Discord user to guild " + response.status);
   }
 };
