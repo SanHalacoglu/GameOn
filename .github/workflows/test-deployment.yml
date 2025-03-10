@@ -61,7 +61,7 @@ jobs:
       - name: Run tests
         run: |
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
-          docker compose -p test-${{ github.sha }} exec backend sh -c 'npm install && (npm test > test-results.log 2>&1 || true)'"
+          docker compose -p test-${{ github.sha }} exec backend sh -c 'npm install && npm test'"
 
       - name: Cleanup test environment
         if: always()
