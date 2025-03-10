@@ -1,0 +1,73 @@
+name: Deploy Test Environment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup SSH known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create .env.test file
+        run: |
+          cat > .env.test << EOL
+          DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}
+          DISCORD_CLIENT_SECRET=${{ secrets.DISCORD_CLIENT_SECRET }}
+          DISCORD_REDIRECT_URI=${{ secrets.TEST_DISCORD_REDIRECT_URI }}
+          DISCORD_GUILD_ID=${{ secrets.DISCORD_GUILD_ID }}
+          DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}
+          PORT=${{ secrets.TEST_PORT }}
+          DB_SERVICE_URL=${{ secrets.TEST_DB_SERVICE_URL }}
+          MYSQL_HOST=${{ secrets.TEST_MYSQL_HOST }}
+          MYSQL_PORT=${{ secrets.TEST_MYSQL_PORT }}
+          MYSQL_USER=${{ secrets.TEST_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.TEST_MYSQL_PASSWORD }}
+          MYSQL_DB=${{ secrets.TEST_MYSQL_DB }}
+          SESSION_SECRET=${{ secrets.TEST_SESSION_SECRET }}
+          REDIS_URL=${{ secrets.TEST_REDIS_URL }}
+          EOL
+      
+      - name: Debug workspace files
+        run: |
+          ls -la
+          ls -la ./backend
+
+      - name: Deploy to test environment
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "mkdir -p ~/test-deployments/deploy-${{ github.sha }}"
+          scp -r ./backend ./docker-compose.yml ./.env.test ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/test-deployments/deploy-${{ github.sha }}/
+
+      - name: Setup and run test environment
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
+          docker compose -p test-${{ github.sha }} up -d --build && \
+          echo 'Waiting for services to start...' && \
+          sleep 30"
+
+      - name: Run tests
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }}/backend && \
+          npm install && \
+          npm test"
+
+      - name: Cleanup test environment
+        if: always()
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
+          docker compose -p test-${{ github.sha }} down -v && \
+          cd ~ && \
+          rm -rf ~/test-deployments/deploy-${{ github.sha }}"
