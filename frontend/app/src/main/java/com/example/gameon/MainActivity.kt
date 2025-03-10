@@ -68,6 +68,7 @@ import com.example.gameon.classes.Group
 import com.example.gameon.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.testTag
 
 class MainActivity : ComponentActivity() {
     private val isMatchmakingActive = mutableStateOf(false)
@@ -75,6 +76,12 @@ class MainActivity : ComponentActivity() {
     private val groupListState = mutableStateOf<List<Group>>(emptyList())
     private val showDialog = mutableStateOf(false)
     private val dialogMessage = mutableStateOf("")
+
+    fun getMatchmakingStatus() = matchmakingStatus
+    fun getIsMatchmakingActive() = isMatchmakingActive
+    fun getShowDialog() = showDialog
+    fun getDialogMessage() = dialogMessage
+    fun getGroupListState() = groupListState
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -315,7 +322,8 @@ fun FindGroup(
             .height(70.dp)
             .clip(RoundedCornerShape(50.dp))
             .background(buttonColor)
-            .clickable( enabled = !isMatchmakingActive.value) { startMatchmaking() },
+            .clickable( enabled = !isMatchmakingActive.value) { startMatchmaking() }
+            .testTag("FindGroupButton"),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -336,7 +344,8 @@ fun FindGroup(
                 ) {
                     Text("OK")
                 }
-            }
+            },
+            modifier = Modifier.testTag("MatchmakingPopup")
         )
     }
 }
@@ -402,7 +411,8 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                                         intent.putExtra("selected_group", group)
                                         intent.putExtra("discord_username", discordUsername)
                                         context.startActivity(intent)
-                                    },
+                                    }
+                                    .testTag("Group:${group.group_name}"),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
