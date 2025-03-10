@@ -60,7 +60,7 @@ declare module 'express-session' {
   }
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // Initialize the data source and start the server
 AppDataSource.initialize()

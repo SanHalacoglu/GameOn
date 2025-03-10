@@ -4,7 +4,8 @@ import { Group } from '../../../src/entity/Group';
 import { Game } from '../../../src/entity/Game';
 import { User } from '../../../src/entity/User';
 
-const BASE_URL = 'http://localhost:3000';
+const port = process.env.PORT; 
+const BASE_URL = `http://localhost:${port}`;
 
 // Create test data before each test
 beforeAll(async () => {
