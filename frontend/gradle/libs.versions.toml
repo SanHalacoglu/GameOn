@@ -19,6 +19,8 @@ composeBom = "2025.02.00"
 material = "1.12.0"
 retrofitVersion = "2.9.0"
 uiTextGoogleFonts = "1.7.8"
+androidx-test = "1.5.2"
+androidx-test-rules = "1.5.0"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activity" }
@@ -47,7 +49,8 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 retrofit2-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
-x-x-x = { module = "androidx.test.runner:1.5.2" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test" }
+androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-test-rules" }
 
 
 [plugins]
