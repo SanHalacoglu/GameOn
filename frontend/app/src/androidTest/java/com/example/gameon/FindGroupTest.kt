@@ -67,7 +67,7 @@ class FindGroupTest {
 
         composeTestRule.onNodeWithText("OK").performClick()
         composeTestRule.onNodeWithTag("MatchmakingPopup").assertDoesNotExist()
-        composeTestRule.onNodeWithTag("GroupItem_New Matchmaking Group").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("Group:New Matchmaking Group").assertIsDisplayed()
     }
 
     @Test

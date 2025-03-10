@@ -36,6 +36,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -48,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -71,16 +73,22 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.launch
 import java.util.Date
+import androidx.compose.material3.AlertDialog
 
 class ViewGroupActivity : ComponentActivity() {
+    val groupMembersState = mutableStateOf<List<User>>(emptyList())
+    fun getGroupMemberState() = groupMembersState
+    val showDialog = mutableStateOf(false)
+    val dialogMessage = mutableStateOf("")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         val group: Group? = intent.getParcelableExtra("selected_group")
+        Log.d("ViewGroupActivity", "Group: $group")
         val groupId = group?.group_id ?: 0
         val groupName = group?.group_name ?: "Unknown Group"
-        val groupMembersState = mutableStateOf<List<User>>(emptyList())
         val user = SessionDetails(this).getUser()
         val discordUsername = user?.username ?: "Unknown"
 
@@ -89,6 +97,11 @@ class ViewGroupActivity : ComponentActivity() {
         lifecycleScope.launch {
             val groupMemberList = getGroupMembers(groupId, this@ViewGroupActivity)
             val userList = groupMemberList.mapNotNull { it.user }
+
+            if (userList.isEmpty()) {
+                dialogMessage.value = "Failed to load group members. Please try again later."
+                showDialog.value = true
+            }
             groupMembersState.value = userList
         }
 
@@ -120,6 +133,23 @@ class ViewGroupActivity : ComponentActivity() {
                 Column(modifier = Modifier.weight(1f)) {
                     MainContent(groupMembersState, groupName, groupId)
                 }
+
+                if (showDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = { showDialog.value = false },
+                        title = { Text("Error") },
+                        text = { Text(dialogMessage.value) },
+                        confirmButton = {
+                            TextButton(
+                                onClick = { showDialog.value = false }
+                            ) {
+                                Text("OK")
+                            }
+                        },
+                        modifier = Modifier.testTag("GroupMembersErrorPopup")
+                    )
+                }
+
                 ReportButton(
                     "Back",
                     outlined = true,
@@ -294,7 +324,8 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
                                     .fillMaxWidth()
                                     .height(50.dp)
                                     .clip(RoundedCornerShape(15.dp))
-                                    .background(Purple.copy(alpha = 0.2f)),
+                                    .background(Purple.copy(alpha = 0.2f))
+                                    .testTag("GroupMember:$username"),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -370,7 +401,8 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .testTag("GroupName:$groupName"),
             textAlign = TextAlign.Center
         )
 
