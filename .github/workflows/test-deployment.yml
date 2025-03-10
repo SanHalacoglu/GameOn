@@ -15,12 +15,12 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
-          ssh-private-key: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Setup SSH known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.TEST_VM_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
       - name: Create .env.test file
         run: |
@@ -43,26 +43,26 @@ jobs:
 
       - name: Deploy to test environment
         run: |
-          ssh ${{ secrets.TEST_VM_USERNAME }}@${{ secrets.TEST_VM_HOST }} "mkdir -p ~/test-deployments/deploy-${{ github.sha }}"
-          scp -r ./backend ./docker-compose.yml ./.env.test ${{ secrets.TEST_VM_USERNAME }}@${{ secrets.TEST_VM_HOST }}:~/test-deployments/deploy-${{ github.sha }}/
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "mkdir -p ~/test-deployments/deploy-${{ github.sha }}"
+          scp -r ./backend ./docker-compose.yml ./.env.test ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/test-deployments/deploy-${{ github.sha }}/
 
       - name: Setup and run test environment
         run: |
-          ssh ${{ secrets.TEST_VM_USERNAME }}@${{ secrets.TEST_VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
           docker compose -p test-${{ github.sha }} up -d --build && \
           echo 'Waiting for services to start...' && \
           sleep 30"
 
       - name: Run tests
         run: |
-          ssh ${{ secrets.TEST_VM_USERNAME }}@${{ secrets.TEST_VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }}/backend && \
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }}/backend && \
           npm install && \
           npm test"
 
       - name: Cleanup test environment
         if: always()
         run: |
-          ssh ${{ secrets.TEST_VM_USERNAME }}@${{ secrets.TEST_VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
           docker compose -p test-${{ github.sha }} down -v && \
           cd ~ && \
           rm -rf ~/test-deployments/deploy-${{ github.sha }}"
