@@ -3,7 +3,8 @@ import { AppDataSource } from '../../../src/data-source';
 import { User } from '../../../src/entity/User';
 import { Admin } from '../../../src/entity/Admin';
 
-const BASE_URL = 'http://localhost:3000';
+const port = process.env.PORT; 
+const BASE_URL = `http://localhost:${port}`;
 
 // Group: AdminRoutes - No Mocks
 describe('AdminRoutes - No Mocks', () => {

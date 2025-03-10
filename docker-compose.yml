@@ -3,9 +3,11 @@ services:
     build:
       context: ./backend
       args:
-        - PORT=${PORT:-3000}
+        - PORT=${PORT}
     ports:
-      - "${PORT:-3000}:${PORT:-3000}"
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env.test
     environment:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
@@ -14,8 +16,7 @@ services:
       - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
       - PORT=${PORT}
       - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PORT=${MYSQL_PORT:-3306}
-      - MYSQL_PORT_INTER=${MYSQL_PORT_INTER:-3306}
+      - MYSQL_PORT=${MYSQL_PORT}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DB=${MYSQL_DB}
@@ -34,7 +35,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: ${MYSQL_DB}
     ports:
-      - "${MYSQL_PORT:-3306}:${MYSQL_PORT_INTER:-3306}"
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init-scripts:/docker-entrypoint-initdb.d
