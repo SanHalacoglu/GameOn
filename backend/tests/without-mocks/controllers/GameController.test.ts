@@ -1,6 +1,7 @@
 import request from 'supertest';
 
-const BASE_URL = 'http://localhost:3000';
+const port = process.env.PORT; 
+const BASE_URL = `http://localhost:${port}`;
 
 // Create test data before all tests
 beforeAll(async () => {
