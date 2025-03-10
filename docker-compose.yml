@@ -9,7 +9,7 @@ services:
     ports:
       - "${PORT}:${PORT}"
     env_file:
-      - .env.test
+      - .env
     environment:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
