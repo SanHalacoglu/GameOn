@@ -58,18 +58,20 @@
 
 #### 2.1.3. Explanation on How to Run the Tests
 
-1. **Clone the Repository**:
+1. Navigate to 
+[GitHub Actions](https://github.com/cjohst/GameOn/actions)
 
-   - Open your terminal and run:
-     ```
-     git clone https://github.com/example/your-project.git
-     ```
+2. Click **"Deploy Test Environment"**
 
-2. **...**
+3. Click **"Run Workflow"**
+
+4. Click the launched workflow
+
+5. Await test results
 
 ### 2.2. GitHub Actions Configuration Location
 
-`~/.github/workflows/backend-tests.yml`
+`~/.github/workflows/test-deployment.yml`
 
 ### 2.3. Jest Coverage Report Screenshots With Mocks
 
