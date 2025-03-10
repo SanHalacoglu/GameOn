@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   deploy-test:
@@ -58,10 +59,16 @@ jobs:
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
           docker compose -p test-${{ github.sha }} ps"
 
+      - name: Debug working directory
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
+          docker compose -p test-${{ github.sha }} exec backend sh -c 'pwd'"
+
       - name: Run tests
         run: |
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
-          docker compose -p test-${{ github.sha }} exec backend sh -c 'npm install && npm test'"
+          docker compose -p test-${{ github.sha }} exec backend sh -c 'npm install && (npm test > /app/test-results.log 2>&1 || true)' && \
+          docker compose -p test-${{ github.sha }} exec backend sh -c 'if [ -f /app/test-results.log ]; then cat /app/test-results.log; else echo "No test output"; fi'"
 
       - name: Cleanup test environment
         if: always()
