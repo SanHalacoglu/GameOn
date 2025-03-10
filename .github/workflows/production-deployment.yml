@@ -40,7 +40,7 @@ jobs:
           cat > .env.prod << EOL
           DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}
           DISCORD_CLIENT_SECRET=${{ secrets.DISCORD_CLIENT_SECRET }}
-          DISCORD_REDIRECT_URI=${{ secrets.DISCORD_REDIRECT_URI }}
+          DISCORD_REDIRECT_URI=http://52.160.40.146:3000/auth/redirect
           DISCORD_GUILD_ID=${{ secrets.DISCORD_GUILD_ID }}
           DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}
           PORT=3000  # Fixed port for production
@@ -50,7 +50,7 @@ jobs:
           MYSQL_USER=root
           MYSQL_PASSWORD=
           MYSQL_DB=gameon_db
-          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          SESSION_SECRET=yourSessionSecret
           REDIS_URL=redis://redis:6379
           EOL
       - name: Create backup
