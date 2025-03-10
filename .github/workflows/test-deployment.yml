@@ -61,12 +61,20 @@ jobs:
       - name: Setup and run test environment
         run: |
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
-          docker compose -p test-${{ github.sha }} up -d --build && \
+          docker compose --env-file .env.test -p test-${{ github.sha }} up -d --build && \
           echo 'Waiting for services to start...' && \
           sleep 30"
-
+          
       - name: Run tests
         run: |
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }}/backend && \
           npm install && \
           npm test"
+
+      - name: Cleanup test environment
+        if: always()
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
+          docker compose -p test-${{ github.sha }} down -v && \
+          cd ~ && \
+          rm -rf ~/test-deployments/deploy-${{ github.sha }}"
