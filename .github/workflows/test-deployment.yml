@@ -56,8 +56,8 @@ jobs:
 
       - name: Verify remote directory
         run: |
-        ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "ls -la ~/test-deployments/deploy-${{ github.sha }}"
-        
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "ls -la ~/test-deployments/deploy-${{ github.sha }}"
+
       - name: Setup and run test environment
         run: |
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/test-deployments/deploy-${{ github.sha }} && \
