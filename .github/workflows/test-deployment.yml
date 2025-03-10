@@ -41,15 +41,11 @@ jobs:
           REDIS_URL=${{ secrets.TEST_REDIS_URL }}
           EOL
       
-      - name: Debug workspace files
-        run: |
-          ls -la
-          ls -la ./backend
-
       - name: Deploy to test environment
         run: |
+          set -e  # Fail the step if any command fails
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "mkdir -p ~/test-deployments/deploy-${{ github.sha }}"
-          scp -r ./backend ./docker-compose.yml ./.env.test ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/test-deployments/deploy-${{ github.sha }}/
+          scp -v -r ./backend ./docker-compose.yml ./.env.test ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/test-deployments/deploy-${{ github.sha }}/d ./docker-compose.yml ./.env.test ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/test-deployments/deploy-${{ github.sha }}/
 
       - name: Setup and run test environment
         run: |
