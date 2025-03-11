@@ -96,10 +96,10 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
         
         if(response.status == 200){
           const userProfileData = response.data
-          res.send(userProfileData);
+          res.json(userProfileData);
         }else{
           console.log("Something has went horribly wrong.");
-          res.status(response.status).send(response.data);
+          res.status(response.status).json(response.data);
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -130,7 +130,7 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
   const code = req.query.code as string;
   if (!code) {
     console.log("Something has went wrong with the discord auth code.");
-    res.status(400).send("Error fetching auth code");
+    res.status(400).json({message: "Error fetching auth code"});
     return;
   }
 
@@ -140,17 +140,15 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
 
     if (tokenData.error) {
       console.log("Something has went wrong with the Discord token exchange code.");
-      res.status(400).send(tokenData.error);
+      res.status(400).json(tokenData.error);
       return;
     }
-
     const discordUserData = await fetchDiscordUser(tokenData.access_token);
     console.log("User Data:", discordUserData);
     if (!discordUserData.id) {
-      res.status(400).send("Error fetching user data");
+      res.status(400).json({message: "Error fetching user data"});
       return;
     }
-
     const dbResponse = await axios.get<User>(`${DB_SERVICE_URL}/users/${discordUserData.id}`, {
       responseType: 'json',
       validateStatus: (status) => status < 500
@@ -182,18 +180,18 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
       }
 
       const userProfileData = dbResponse.data
-      res.send(userProfileData);
+      res.json(userProfileData);
     }else{
-      res.status(dbResponse.status).send(dbResponse.data);
+      res.status(dbResponse.status).json(dbResponse.data);
       return;
     }
     
     // else if status 200 block sends response twice
     // which crashes the server
-    // res.send(discordUserData);
+    // res.json(discordUserData);
   } catch (error) {
     console.error("Error during Discord OAuth process:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({message:"Internal Server Error"});
   }
 }
 
@@ -209,7 +207,7 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
 export async function handleRegister(req: Request, res: Response): Promise<void> {
   const sessionData = req.session.user!;
   if (sessionData.discord_id != req.body.discord_id as String|null) {
-    res.status(403).send("Discord ID does not match session information.")
+    res.status(403).json({message: "Discord ID does not match session information."})
     return
   }
 
@@ -226,7 +224,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
     );
 
     if(userResponse.status != 201) {
-      res.status(userResponse.status).send(userResponse.data);
+      res.status(userResponse.status).json(userResponse.data);
       return
     }
 
@@ -236,9 +234,9 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 
     if(preferencesResponse.status == 201) {
       sessionData.temp_session = false;
-      res.send(userResponse.data);
+      res.json(userResponse.data);
     } else {
-      res.status(preferencesResponse.status).send(preferencesResponse.data);
+      res.status(preferencesResponse.status).json(preferencesResponse.data);
     }
   } catch (error) {
     console.error("Error during registration process:", error);
@@ -261,6 +259,6 @@ export async function protectEndpoint(req: Request, res: Response, next: e.NextF
   if(req.session.user){
     next();
   }else{
-    res.status(401).send("Unauthorized. Requires a session to access this endpoint.");
+    res.status(401).json({ message: "Unauthorized. Requires a session to access this endpoint." });
   }
 }
