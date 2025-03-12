@@ -132,7 +132,7 @@ export async function processMatchmakingQueue() {
   if (processedRequestKeys.length > 0) {
     const pipeline = redisClient.multi();
     processedRequestKeys.forEach((key) => {
-      const [_, timestamp] = key.split("-");
+      const [, timestamp] = key.split("-");
       pipeline.zRemRangeByScore(MATCHMAKING_QUEUE, parseInt(timestamp), parseInt(timestamp));
     });
     await pipeline.exec();
