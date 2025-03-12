@@ -30,27 +30,27 @@ class FindGroupTest {
     @Before
     fun setup() {
         device = UiDevice.getInstance(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation())
-
-        Thread.sleep(3000)
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val intent = Intent(context, LoginActivity::class.java).apply {
             putExtra("DiscordLoginUrl", "https://discord.com/oauth2/authorize?client_id=1342993900419420181&redirect_uri=http://52.160.40.146:3000/auth/redirect&response_type=code&scope=identify+email+gdm.join+guilds.join")
         }
 
         val loginScenario = ActivityScenario.launch<LoginActivity>(intent)
-
         loginScenario.use {
             composeTestRule.waitForIdle()
-
             composeTestRule.onNodeWithTag("login_button").assertIsDisplayed()
-            Thread.sleep(3000)
             composeTestRule.onNodeWithTag("login_button").assertIsDisplayed().performClick()
-            Thread.sleep(20000)
+
+            composeTestRule.waitUntil(timeoutMillis = 15_000) {
+                device.findObject(UiSelector().text("Authorize")).exists()
+            }
 
             val authorizeButton = device.findObject(UiSelector().text("Authorize"))
             if (authorizeButton.exists() && authorizeButton.isEnabled) {
                 authorizeButton.click()
-                Thread.sleep(20000)
+                composeTestRule.waitUntil(timeoutMillis = 10_000) {
+                    device.currentPackageName == "com.example.gameon"
+                }
             } else {
                 throw AssertionError("Authorize button not found!")
             }
