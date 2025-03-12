@@ -1,4 +1,4 @@
-import { createClient, RedisClientType } from "redis";
+import { createClient } from "redis";
 
 const redisUrl: string = process.env.REDIS_URL || "";
 
