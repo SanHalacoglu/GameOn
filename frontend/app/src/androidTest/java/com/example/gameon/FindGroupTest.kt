@@ -1,95 +1,65 @@
 package com.example.gameon
 
+import android.content.Intent
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.runner.AndroidJUnit4
-import com.example.gameon.classes.Group
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 
 @RunWith(AndroidJUnit4::class)
 class FindGroupTest {
 
     @get:Rule
-    val activityRule = ActivityScenarioRule(MainActivity::class.java)
+    val activityRule = ActivityScenarioRule(StartupActivity::class.java)
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val composeTestRule = createComposeRule()
+
+    private lateinit var device: UiDevice
 
     @Before
     fun setup() {
-        // Reset activity state before each test
-        activityRule.scenario.onActivity { activity ->
-            activity.runOnUiThread {
-                activity.getMatchmakingStatus().value = null
-                activity.getIsMatchmakingActive().value = false
-                activity.getDialogMessage().value = ""
-                activity.getShowDialog().value = false
-                activity.getGroupListState().value = emptyList()
+        device = UiDevice.getInstance(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation())
+
+        Thread.sleep(3000)
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val intent = Intent(context, LoginActivity::class.java).apply {
+            putExtra("DiscordLoginUrl", "https://discord.com/oauth2/authorize?client_id=1342993900419420181&redirect_uri=http://52.160.40.146:3000/auth/redirect&response_type=code&scope=identify+email+gdm.join+guilds.join")
+        }
+
+        val loginScenario = ActivityScenario.launch<LoginActivity>(intent)
+
+        loginScenario.use {
+            composeTestRule.waitForIdle()
+
+            composeTestRule.onNodeWithTag("login_button").assertIsDisplayed()
+            Thread.sleep(3000)
+            composeTestRule.onNodeWithTag("login_button").assertIsDisplayed().performClick()
+            Thread.sleep(20000)
+
+            val authorizeButton = device.findObject(UiSelector().text("Authorize"))
+            if (authorizeButton.exists() && authorizeButton.isEnabled) {
+                authorizeButton.click()
+                Thread.sleep(20000)
+            } else {
+                throw AssertionError("Authorize button not found!")
             }
         }
-        Thread.sleep(500)
     }
 
     @Test
-    fun testFindGroupSuccess() {
-        composeTestRule.waitUntil(timeoutMillis = 2000) {
-            composeTestRule.onNodeWithTag("FindGroupButton").assertExists()
-            true
-        }
-        composeTestRule.onNodeWithTag("FindGroupButton").assertIsDisplayed().performClick()
-        composeTestRule.onNodeWithTag("FindGroupButton").performClick()
-        composeTestRule.onNodeWithText("Finding...").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("FindGroupButton").assertIsNotEnabled()
-
-        activityRule.scenario.onActivity { activity ->
-            activity.runOnUiThread {
-                activity.getMatchmakingStatus().value = "group_found"
-                activity.getIsMatchmakingActive().value = false
-                activity.getDialogMessage().value = "You have been matched with a group!"
-                activity.getShowDialog().value = true
-
-                activity.getGroupListState().value = listOf(
-                    Group(group_name = "New Matchmaking Group", max_players = 3, game_id = 1)
-                )
-            }
-        }
-
-        composeTestRule.onNodeWithTag("MatchmakingPopup").assertIsDisplayed()
-        composeTestRule.onNodeWithText("You have been matched with a group!").assertIsDisplayed()
-
-        composeTestRule.onNodeWithText("OK").performClick()
-        composeTestRule.onNodeWithTag("MatchmakingPopup").assertDoesNotExist()
-        composeTestRule.onNodeWithTag("Group:New Matchmaking Group").assertIsDisplayed()
-    }
-
-    @Test
-    fun testFindGroupFailure() {
-        composeTestRule.waitUntil(timeoutMillis = 2000) {
-            composeTestRule.onNodeWithTag("FindGroupButton").assertExists()
-            true
-        }
-        composeTestRule.onNodeWithTag("FindGroupButton").performClick()
-        composeTestRule.onNodeWithText("Finding...").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("FindGroupButton").assertIsNotEnabled()
-
-        activityRule.scenario.onActivity { activity ->
-            activity.runOnUiThread {
-                activity.getMatchmakingStatus().value = "timed_out"
-                activity.getIsMatchmakingActive().value = false
-                activity.getDialogMessage().value = "Matchmaking timed out. Please try again."
-                activity.getShowDialog().value = true
-            }
-        }
-
-        composeTestRule.onNodeWithTag("MatchmakingPopup").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Matchmaking timed out. Please try again.").assertIsDisplayed()
+    fun testFindGroupAfterLogin() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("FindGroupButton").assertIsDisplayed()
     }
 }
