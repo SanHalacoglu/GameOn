@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(
   session({
     store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || 'your-secret-key', 
+    secret: process.env.SESSION_SECRET ?? 'your-secret-key', 
     name: 'discord_app.sid',                                 
     resave: false,                                            
     saveUninitialized: false,                                 

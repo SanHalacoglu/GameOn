@@ -121,7 +121,7 @@ export const updatePreferences = async (req: Request, res: Response): Promise<vo
     });
 
     if (preferences) {
-      const { preference_id, game_id, ...updateData } = req.body;
+      const { game_id, ...updateData } = req.body;
 
       if (game_id) {
         const game = await gameRepository.findOne({
