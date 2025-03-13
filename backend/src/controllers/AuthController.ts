@@ -42,7 +42,7 @@ function createSearchParamsAuthToken(code: string): URLSearchParams {
  * @param code - The authorization code.
  * @returns A promise with token data.
  */
-export async function exchangeCodeForAccessToken(code: string): Promise<any> {
+export async function exchangeCodeForAccessToken(code: string): Promise<Record<string, any>> {
   const params = createSearchParamsAuthToken(code);
   const response = await axios.post(DISCORD_TOKEN_URL, params.toString(), {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -56,7 +56,7 @@ export async function exchangeCodeForAccessToken(code: string): Promise<any> {
  * @param accessToken - The access token.
  * @returns A promise with user data.
  */
-export async function fetchDiscordUser(accessToken: string): Promise<any> {
+export async function fetchDiscordUser(accessToken: string): Promise<Record<string, any>> {
   const response = await axios.get(DISCORD_USER_URL, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -78,26 +78,26 @@ export async function fetchDiscordUser(accessToken: string): Promise<any> {
  *        - If the user exists, create a session for them and log them in.
  *        - If the user does not exist, create a temporary session indicating registration is needed and redirect them to the frontend registration page.
  */
-export async function handleLoginOrRedirect(req: Request, res: Response): Promise<void> {
-  if (req.session.user){
-    if(req.session.user.temp_session){
+export async function handleLoginOrRedirect(req: Request, res: Response) {
+  if (req.session.user) {
+    if (req.session.user.temp_session) {
       console.log("User has a temp session. Redirecting to register page.");
       //This link must be intercepted on the frontend
       //This is not currently deep-linked to any app however
-      res.redirect(FRONTEND_PREFERENCES_URL+`?discord_id=${req.session.user.discord_id}`);
+      res.redirect(FRONTEND_PREFERENCES_URL + `?discord_id=${req.session.user.discord_id}`);
       return
 
-    }else{
+    } else {
       console.log("User has a permanent session. Redirecting to home page.");
       try {
         const response = await axios.get<User>(`${DB_SERVICE_URL}/users/${req.session.user.discord_id}`, {
           responseType: 'json'
         });
-        
-        if(response.status == 200){
+
+        if (response.status == 200) {
           const userProfileData = response.data
           res.json(userProfileData);
-        }else{
+        } else {
           console.log("Something has went horribly wrong.");
           res.status(response.status).json(response.data);
         }
@@ -126,11 +126,11 @@ export async function handleLoginOrRedirect(req: Request, res: Response): Promis
  *    - If no, creates a temporary session for registration.
  * 4. Sends the user data or redirects as needed.
  */
-export async function handleDiscordCallback(req: Request, res: Response): Promise<void> {
+export async function handleDiscordCallback(req: Request, res: Response) {
   const code = req.query.code as string;
   if (!code) {
     console.log("Something has went wrong with the discord auth code.");
-    res.status(400).json({message: "Error fetching auth code"});
+    res.status(400).json({ message: "Error fetching auth code" });
     return;
   }
 
@@ -146,18 +146,18 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
     const discordUserData = await fetchDiscordUser(tokenData.access_token);
     console.log("User Data:", discordUserData);
     if (!discordUserData.id) {
-      res.status(400).json({message: "Error fetching user data"});
+      res.status(400).json({ message: "Error fetching user data" });
       return;
     }
     const dbResponse = await axios.get<User>(`${DB_SERVICE_URL}/users/${discordUserData.id}`, {
       responseType: 'json',
       validateStatus: (status) => status < 500
     });
-    
+
     //User Profile Does Not Exist, Create Temp Session Return User To Registration
-    if(dbResponse.status == 404){
+    if (dbResponse.status == 404) {
       req.session.user = {
-        discord_id: discordUserData.id,
+        discord_id: String(discordUserData.id),
         discord_access_token: tokenData.access_token,
         discord_refresh_token: tokenData.refresh_token,
         discord_email: discordUserData.email,
@@ -167,11 +167,11 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
 
       //This link must be intercepted on the frontend
       //This is not currently deep-linked to any app however
-      res.redirect(FRONTEND_PREFERENCES_URL+`?discord_id=${discordUserData.id}`);
+      res.redirect(FRONTEND_PREFERENCES_URL + `?discord_id=${discordUserData.id}`);
       return;
-      
+
       //User Profile Exists, Create Session Return User Profile
-    }else if(dbResponse.status == 200){
+    } else if (dbResponse.status == 200) {
       req.session.user = {
         discord_id: discordUserData.id,
         discord_access_token: tokenData.access_token,
@@ -181,17 +181,17 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
 
       const userProfileData = dbResponse.data
       res.json(userProfileData);
-    }else{
+    } else {
       res.status(dbResponse.status).json(dbResponse.data);
       return;
     }
-    
+
     // else if status 200 block sends response twice
     // which crashes the server
     // res.json(discordUserData);
   } catch (error) {
     console.error("Error during Discord OAuth process:", error);
-    res.status(500).json({message:"Internal Server Error"});
+    res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
@@ -204,10 +204,10 @@ export async function handleDiscordCallback(req: Request, res: Response): Promis
  * 4. If successful, updates the session and responds with the user data.
  * 5. Otherwise, forwards the error response.
  */
-export async function handleRegister(req: Request, res: Response): Promise<void> {
+export async function handleRegister(req: Request, res: Response) {
   const sessionData = req.session.user!;
-  if (sessionData.discord_id != req.body.discord_id as String|null) {
-    res.status(403).json({message: "Discord ID does not match session information."})
+  if (sessionData.discord_id != req.body.discord_id as String | null) {
+    res.status(403).json({ message: "Discord ID does not match session information." })
     return
   }
 
@@ -223,7 +223,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
       `${DB_SERVICE_URL}/users`, userData, { responseType: 'json' }
     );
 
-    if(userResponse.status != 201) {
+    if (userResponse.status != 201) {
       res.status(userResponse.status).json(userResponse.data);
       return
     }
@@ -232,7 +232,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
       `${DB_SERVICE_URL}/preferences`, req.body as Preferences, { responseType: 'json' }
     )
 
-    if(preferencesResponse.status == 201) {
+    if (preferencesResponse.status == 201) {
       sessionData.temp_session = false;
       res.json(userResponse.data);
     } else {
@@ -244,10 +244,10 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
   }
 }
 
-export async function handleLogout(req: Request, res: Response): Promise<void> {
+export function handleLogout(req: Request, res: Response) {
   // Clear session
   req.session.regenerate((err) => {
-    if(err) res.sendStatus(500)
+    if (err) res.sendStatus(500)
     else {
       console.log("User logged out")
       res.sendStatus(204)
@@ -255,10 +255,10 @@ export async function handleLogout(req: Request, res: Response): Promise<void> {
   })
 }
 
-export async function protectEndpoint(req: Request, res: Response, next: e.NextFunction): Promise<void> {
-  if(req.session.user){
+export function protectEndpoint(req: Request, res: Response, next: e.NextFunction) {
+  if (req.session.user) {
     next();
-  }else{
+  } else {
     res.status(401).json({ message: "Unauthorized. Requires a session to access this endpoint." });
   }
 }
