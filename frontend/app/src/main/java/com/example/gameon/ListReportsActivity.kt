@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -142,7 +143,7 @@ class ListReportsActivity : ComponentActivity() {
                         ReportButton(
                             "Back",
                             outlined = true,
-                            modifier = Modifier.width(width)
+                            modifier = Modifier.width(width).testTag("ListReportsBackButton")
                         ) {
                             finish()
                         }
@@ -261,7 +262,7 @@ fun ReportList(
     onClick: (reportId: Int) -> Unit
 ) {
     Column(
-        modifier,
+        modifier.testTag("ReportList"),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         reportList.forEach { report ->
