@@ -48,6 +48,11 @@ export const createReport = async (req: Request, res: Response) => {
     return;
   }
 
+  if (reason.length > 500) {
+    res.status(400).json({ message: "Report reason must be less than 500 characters" });
+    return;
+  }
+
   const reportRepository = AppDataSource.getRepository(Report);
   const userRepository = AppDataSource.getRepository(User);
   const groupRepository = AppDataSource.getRepository(Group);
