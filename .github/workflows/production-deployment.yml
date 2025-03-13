@@ -65,7 +65,7 @@ jobs:
       - name: Deploy to production environment
         run: |
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "mkdir -p ~/production"
-          scp -r ./backend ./docker-compose.yml ./.env.prod ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/production/
+          scp -r ./backend ./docker-compose.yml ./.env ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/production/
 
       - name: Stop current services and start new ones
         run: |
