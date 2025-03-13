@@ -94,18 +94,19 @@ _(Placeholder for Jest coverage screenshot without mocks)_
 
 | **Non-Functional Requirement**  | **Location in Git**                              |
 | ------------------------------- | ------------------------------------------------ |
-| **Some Auth Endpoints Need To Be Secured By Sessions** | [EndpointSecurity.test.ts#L49](https://github.com/SanHalacoglu/GameOn/blob/main/backend/tests/non-functional/EndpointSecurity.test.ts#L49) |
-| **Reports Cannot Exceed 500 Chars For Performance** | [EndpointSecurity.test.ts#L49](https://github.com/SanHalacoglu/GameOn/blob/main/backend/tests/non-functional/ReportReasonLength.test.ts#L49) |
+| **Endpoints Need To Be Secured By Sessions** | [EndpointSecurity.test.ts#L49](https://github.com/SanHalacoglu/GameOn/blob/main/backend/tests/non-functional/EndpointSecurity.test.ts#L49) |
+| **Report Reasoning Can Not Exceed 500 Characters** | [EndpointSecurity.test.ts#L49](https://github.com/SanHalacoglu/GameOn/blob/main/backend/tests/non-functional/ReportReasonLength.test.ts#L49) |
 
 ### 3.2. Test Verification and Logs
 
 - **Performance (Response Time)**
 
-  - **Verification:** This test suite simulates multiple concurrent API calls using Jest along with a load-testing utility to mimic real-world user behavior. The focus is on key endpoints such as user login and study group search to ensure that each call completes within the target response time of 2 seconds under normal load. The test logs capture metrics such as average response time, maximum response time, and error rates. These logs are then analyzed to identify any performance bottlenecks, ensuring the system can handle expected traffic without degradation in user experience.
+  - **Verification:** 
+  - Endpoints Need To Be Secured By Sessisons: We have a system that verifies users through sessions to ensure they are authenticated via Discord OAuth, which is critical for the security and viability of our platform. To enforce this, we protect key endpoints by validating sessions on incoming HTTPS requests. In our test suite, we simulate unauthorized access by making HTTPS requests without cookies, where the session data would normally be stored, and expect protected endpoints like /auth/register and /auth/logout to return a 401 Unauthorized status. While there are additional protected endpoints, these two are the most important for demonstration purposes.
+  - Report Reasoning Can Not Exceed 500 Characters: Users can report other users they have formed groups with, allowing admins to review reports and help maintain a safer environment on our platform. To prevent database bloat and potential security issues, such as memory exhaustion, we enforce a 500-character limit on the report reason in the backend. To ensure this validation works as expected, we’ve added a test that submits a report with more than 500 characters and checks that a 400 Bad Request response is returned.
+  
   - **Log Output**
-    ```
-    [Placeholder for response time test logs]
-    ```
+  ![Non-Functional Log Outputs](images/NonFunctionaTests.png)
 
 - **Chat Data Security**
   - **Verification:** ...
