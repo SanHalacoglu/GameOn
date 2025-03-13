@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, OneToOne, OneToMany } from "typeorm";
+import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn, OneToMany } from "typeorm";
 import { Preferences } from "./Preference";
 import { GroupMember } from "./GroupMember";
 

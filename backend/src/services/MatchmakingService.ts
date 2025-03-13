@@ -5,6 +5,7 @@ import { Game } from "../entity/Game";
 import { Group } from "../entity/Group";
 import { GroupMember } from "../entity/GroupMember";
 import { Preferences } from "../entity/Preference";
+import { createDiscordGroup } from "../controllers/GroupController";
 
 const MATCHMAKING_QUEUE = "matchmaking_queue";
 const MATCHMAKING_TIMEOUT = 1 * 60 * 1000; // 3 minutes
@@ -32,7 +33,7 @@ export async function addMatchmakingRequest(preferences: Preferences, discord_ac
     timestamp: Date.now(),
   };
 
-  // const requestKey = `${request.discord_id}-${request.timestamp}`;
+  const requestKey = `${request.discord_id}-${request.timestamp}`;
   await redisClient.zAdd(MATCHMAKING_QUEUE, {
     score: request.timestamp,
     value: JSON.stringify(request),
@@ -132,7 +133,7 @@ export async function processMatchmakingQueue() {
   if (processedRequestKeys.length > 0) {
     const pipeline = redisClient.multi();
     processedRequestKeys.forEach((key) => {
-      const [, timestamp] = key.split("-");
+      const [discord_id, timestamp] = key.split("-");
       pipeline.zRemRangeByScore(MATCHMAKING_QUEUE, parseInt(timestamp), parseInt(timestamp));
     });
     await pipeline.exec();

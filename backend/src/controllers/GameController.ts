@@ -56,7 +56,7 @@ export const updateGame = async (req: Request, res: Response) => {
       where: { game_id: parseInt(req.params.id) },
     });
     if (game) {
-      const { ...updateData } = req.body;
+      const { game_id, ...updateData } = req.body;
       gameRepository.merge(game, updateData);
       await gameRepository.save(game);
       res.json(game);

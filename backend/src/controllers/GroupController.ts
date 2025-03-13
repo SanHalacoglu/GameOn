@@ -80,7 +80,7 @@ export const updateGroup = async (req: Request, res: Response): Promise<void> =>
       where: { group_id: parseInt(req.params.group_id) },
     });
     if (group) {
-      const { _, ...updateData } = req.body;
+      const { group_id, ...updateData } = req.body;
       groupRepository.merge(group, updateData);
       await groupRepository.save(group);
       res.json(group);

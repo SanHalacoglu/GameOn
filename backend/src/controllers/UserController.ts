@@ -61,7 +61,7 @@ export const updateUser = async (req: Request, res: Response) => {
       where: { discord_id: req.params.id },
     });
     if (user) {
-      const { ...updateData } = req.body; 
+      const { discord_id, ...updateData } = req.body; 
       userRepository.merge(user, updateData);
       await userRepository.save(user);
       res.json(user);

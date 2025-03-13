@@ -1,4 +1,4 @@
-import { createClient } from "redis";
+import { createClient, RedisClientType } from "redis";
 
 const redisUrl = process.env.REDIS_URL ?? "redis://redis:6379";
 
