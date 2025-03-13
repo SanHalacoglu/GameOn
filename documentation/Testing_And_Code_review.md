@@ -94,8 +94,8 @@ _(Placeholder for Jest coverage screenshot without mocks)_
 
 | **Non-Functional Requirement**  | **Location in Git**                              |
 | ------------------------------- | ------------------------------------------------ |
-| **Performance (Response Time)** | [`tests/nonfunctional/response_time.test.js`](#) |
-| **Chat Data Security**          | [`tests/nonfunctional/chat_security.test.js`](#) |
+| **Some Auth Endpoints Need To Be Secured By Sessions** | [EndpointSecurity.test.ts#L49](https://github.com/SanHalacoglu/GameOn/blob/main/backend/tests/non-functional/EndpointSecurity.test.ts#L49) |
+| **Reports Cannot Exceed 500 Chars For Performance** | [EndpointSecurity.test.ts#L49](https://github.com/SanHalacoglu/GameOn/blob/main/backend/tests/non-functional/ReportReasonLength.test.ts#L49) |
 
 ### 3.2. Test Verification and Logs
 
