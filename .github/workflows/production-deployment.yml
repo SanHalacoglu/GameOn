@@ -35,7 +35,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create .env.prod file
+      - name: Create .env file
         run: |
           cat > .env.prod << EOL
           DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}
@@ -56,22 +56,20 @@ jobs:
 
       - name: Create backup
         run: |
-          ssh ${{ secrets.PROD_VM_USERNAME }}@${{ secrets.PROD_VM_HOST }} "if [ -d ~/production ]; then \
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "if [ -d ~/production ]; then \
             mkdir -p ~/backups && \
             cp -r ~/production ~/backups/production-backup-\$(date +%Y%m%d%H%M%S) && \
-            echo 'Backup created' \
+            echo 'Backup created'; \
           fi"
-
     
       - name: Deploy to production environment
         run: |
           ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "mkdir -p ~/production"
           scp -r ./backend ./docker-compose.yml ./.env.prod ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/production/
 
-
       - name: Stop current services and start new ones
         run: |
-          ssh ${{ secrets.PROD_VM_USERNAME }}@${{ secrets.PROD_VM_HOST }} "cd ~/production && \
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/production && \
           docker compose -p production down || true && \
           docker compose -p production up -d --build && \
           echo 'Production deployment completed successfully'"

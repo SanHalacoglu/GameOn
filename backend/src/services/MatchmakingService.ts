@@ -8,8 +8,8 @@ import { Preferences } from "../entity/Preference";
 import { createDiscordGroup } from "../controllers/GroupController";
 
 const MATCHMAKING_QUEUE = "matchmaking_queue";
-const MATCHMAKING_TIMEOUT = 3 * 60 * 1000; // 3 minutes
-const GROUP_SIZE = 3;
+const MATCHMAKING_TIMEOUT = 1 * 60 * 1000; // 3 minutes
+const GROUP_SIZE = 2;
 const STATUS_CACHE_EXPIRATION = 60; // 1 minute
 
 interface MatchmakingRequest {
