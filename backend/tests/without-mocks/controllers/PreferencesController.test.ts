@@ -118,10 +118,91 @@ describe('PreferencesRoutes - No Mocks', () => {
     const preferenceId = createResponse.body.preference_id;
 
     const updateResponse = await request(BASE_URL).put(`/preferences/${preferenceId}`).send({
+      preference_id:  preferenceId, 
       spoken_language: 'Spanish',
+      time_zone: 'EST',
+      skill_level: 'competitive',
+      discord_id: 'test_user_id',
+      game_id: gameId,
     });
 
     expect(updateResponse.status).toBe(200);
     expect(updateResponse.body).toHaveProperty('spoken_language', 'Spanish');
+    expect(updateResponse.body).toHaveProperty('time_zone', 'EST');
+    expect(updateResponse.body).toHaveProperty('skill_level', 'competitive');
   });
+
+  // Input: Valid request to delete preferences
+// Expected status code: 204
+// Expected behavior: Deletes the specified preference from the database
+// Expected output: No content
+test('Delete Preferences', async () => {
+  const gamesResponse = await request(BASE_URL).get('/games');
+  const gameId = gamesResponse.body[0].game_id;
+
+  const createResponse = await request(BASE_URL).post('/preferences').send({
+    spoken_language: 'English',
+    time_zone: 'PST',
+    skill_level: 'casual',
+    discord_id: 'test_user_id',
+    game_id: gameId,
+  });
+
+  expect(createResponse.status).toBe(201);
+  const preferenceId = createResponse.body.preference_id;
+
+  const deleteResponse = await request(BASE_URL).delete(`/preferences/${preferenceId}`);
+  expect(deleteResponse.status).toBe(204);
+});
+
+// Input: Invalid request to create preferences (missing fields)
+// Expected status code: 400
+// Expected behavior: Returns an error message indicating missing fields
+// Expected output: Error message
+test('Create Preferences with Missing Fields', async () => {
+  const res = await request(BASE_URL).post('/preferences').send({
+    spoken_language: 'English',
+    time_zone: 'PST',
+    skill_level: 'casual',
+  });
+  expect(res.status).toBe(400);
+  expect(res.body).toHaveProperty('message', 'All fields are required');
+});
+
+// Input: Invalid request to get preferences by non-existent ID
+// Expected status code: 404
+// Expected behavior: Returns an error message indicating preferences not found
+// Expected output: Error message
+test('Get Preferences by Non-Existent ID', async () => {
+  const res = await request(BASE_URL).get('/preferences/999999');
+  expect(res.status).toBe(404);
+  expect(res.body).toHaveProperty('message', 'Preferences not found');
+});
+
+// Input: Invalid request to update preferences (non-existent ID)
+// Expected status code: 404
+// Expected behavior: Returns an error message indicating preferences not found
+// Expected output: Error message
+test('Update Preferences with Non-Existent ID', async () => {
+  const res = await request(BASE_URL).put('/preferences/999999').send({
+    spoken_language: 'Spanish',
+    time_zone: 'EST',
+    skill_level: 'competitive',
+    discord_id: 'test_user_id',
+    game_id: 1,
+  });
+  expect(res.status).toBe(404);
+  expect(res.body).toHaveProperty('message', 'Preferences not found');
+});
+
+// Input: Invalid request to get preferences by non-existent user ID
+// Expected status code: 404
+// Expected behavior: Returns an error message indicating user not found
+// Expected output: Error message
+test('Get Preferences by Non-Existent User ID', async () => {
+  const res = await request(BASE_URL).get('/preferences/user/non_existent_user_id');
+  expect(res.status).toBe(404);
+  expect(res.body).toHaveProperty('message', 'User not found');
+});
+
 });

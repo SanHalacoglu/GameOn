@@ -82,13 +82,17 @@ describe('GroupRoutes - No Mocks', () => {
   // Expected output: Updated group object
   test('Update Group', async () => {
     const groupsResponse = await request(BASE_URL).get('/groups');
-    const groupId = groupsResponse.body[0].group_id;
+    const group = groupsResponse.body[0];
+    const groupId = group.group_id;
 
-    const res = await request(BASE_URL).put(`/groups/${groupId}`).send({
+    const updatedGroup = {
+      ...group,
       group_name: `updated_group_${Date.now()}`,
-    });
+    };
+
+    const res = await request(BASE_URL).put(`/groups/${groupId}`).send(updatedGroup);
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('group_name');
+    expect(res.body).toHaveProperty('group_name', updatedGroup.group_name);
   });
 
   // Input: Valid request to delete a group

@@ -82,13 +82,18 @@ describe('GamesRoutes - No Mocks', () => {
   // Expected behavior: Updates the game with the specified ID
   // Expected output: Updated game object
   test('Update Game', async () => {
-    // Fetch the created game to get its ID
+    // Fetch the created game to get its ID and current data
     const gamesResponse = await request(BASE_URL).get('/games');
-    const gameId = gamesResponse.body[0].game_id;
+    const game = gamesResponse.body[0];
+    const gameId = game.game_id;
 
-    const res = await request(BASE_URL).put(`/games/${gameId}`).send({
+    // Update the game data
+    const updatedGameData = {
+      ...game,
       description: 'Updated description',
-    });
+    };
+
+    const res = await request(BASE_URL).put(`/games/${gameId}`).send(updatedGameData);
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('description', 'Updated description');
   });

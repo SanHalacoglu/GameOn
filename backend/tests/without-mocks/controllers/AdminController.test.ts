@@ -84,11 +84,10 @@ describe('AdminRoutes - No Mocks', () => {
   });
   const adminId = adminResponse.body.admin_id;
 
-  // Step 3: Update the admin (no permissions field)
-  const res = await request(BASE_URL).put(`/admins/${adminId}`).send({
-    // Add other fields if needed
-  });
+  // Step 3: Update the admin with the entire adminResponse body
+  const res = await request(BASE_URL).put(`/admins/${adminId}`).send(adminResponse.body);
   expect(res.status).toBe(200);
+  expect(res.body).toHaveProperty('admin_id', adminId);
 });
 
   // Input: Valid request to delete an admin

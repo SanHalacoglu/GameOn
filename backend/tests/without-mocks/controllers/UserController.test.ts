@@ -60,13 +60,17 @@ describe('UserRoutes - No Mocks', () => {
   // Expected output: Updated user object
   test('Update User', async () => {
     const usersResponse = await request(BASE_URL).get('/users');
-    const userId = usersResponse.body[0].discord_id;
+    const user = usersResponse.body[0];
+    const userId = user.discord_id;
 
-    const res = await request(BASE_URL).put(`/users/${userId}`).send({
+    const updatedUser = {
+      ...user,
       username: `updated_user_${Date.now()}`,
-    });
+    };
+
+    const res = await request(BASE_URL).put(`/users/${userId}`).send(updatedUser);
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('username');
+    expect(res.body).toHaveProperty('username', updatedUser.username);
   });
 
   // Input: Valid request to delete a user
