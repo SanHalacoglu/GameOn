@@ -77,12 +77,6 @@ class MainActivity : ComponentActivity() {
     private val showDialog = mutableStateOf(false)
     private val dialogMessage = mutableStateOf("")
 
-    fun getMatchmakingStatus() = matchmakingStatus
-    fun getIsMatchmakingActive() = isMatchmakingActive
-    fun getShowDialog() = showDialog
-    fun getDialogMessage() = dialogMessage
-    fun getGroupListState() = groupListState
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -294,6 +288,7 @@ fun FindGroup(
 
     fun startMatchmaking() {
         coroutineScope.launch {
+            Log.d("FindGroup", "Find Group button clicked!")
             isMatchmakingActive.value = true
             Log.d("FindGroup", "isMatchmakingActive set to TRUE")
             val success = initiateMatchmaking(context, preferenceIDState.value)
@@ -316,6 +311,8 @@ fun FindGroup(
     val buttonColor = if (isMatchmakingActive.value) Purple.copy(alpha = 0.5f) else Purple
     val buttonText = if (isMatchmakingActive.value) "Finding..." else "Find Group"
 
+    Log.d("FindGroup", "Recomposition triggered: Button Text = $buttonText")
+
     Box(
         modifier = Modifier
             .fillMaxWidth(0.9f)
@@ -334,6 +331,7 @@ fun FindGroup(
     }
 
     if (showDialog.value) {
+        Log.d("FindGroup", "Showing dialog: ${dialogMessage.value}")
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text("Matchmaking Status") },

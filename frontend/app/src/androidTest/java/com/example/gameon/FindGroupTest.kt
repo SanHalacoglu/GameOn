@@ -1,9 +1,14 @@
 package com.example.gameon
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -41,7 +46,7 @@ class FindGroupTest {
             composeTestRule.onNodeWithTag("login_button").assertIsDisplayed()
             composeTestRule.onNodeWithTag("login_button").assertIsDisplayed().performClick()
 
-            composeTestRule.waitUntil(timeoutMillis = 15_000) {
+            composeTestRule.waitUntil(timeoutMillis = 30_000) {
                 device.findObject(UiSelector().text("Authorize")).exists()
             }
 
@@ -58,8 +63,46 @@ class FindGroupTest {
     }
 
     @Test
-    fun testFindGroupAfterLogin() {
+    fun testFindGroupSuccess() {
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("FindGroupButton").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("FindGroupButton").assertIsDisplayed().performClick()
+        composeTestRule.runOnIdle {
+            Log.d("FindGroupTest", "Waiting for UI to recompose.")
+        }
+        composeTestRule.onNodeWithTag("FindGroupButton").assertTextContains("Finding...")
+
+        composeTestRule.waitUntil(timeoutMillis = 120000) {
+            composeTestRule.onAllNodesWithText("Group found! Navigating to group page.").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("MatchmakingPopup").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("OK").assertIsDisplayed().performClick()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("MatchmakingPopup").fetchSemanticsNodes().isEmpty()
+        }
+    }
+
+    @Test
+    fun testFindGroupFailure() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("FindGroupButton").assertIsDisplayed().performClick()
+        composeTestRule.runOnIdle {
+            Log.d("FindGroupTest", "Waiting for UI to recompose.")
+        }
+        composeTestRule.onNodeWithTag("FindGroupButton").assertTextContains("Finding...")
+
+        composeTestRule.waitUntil(timeoutMillis = 120000) {
+            composeTestRule.onAllNodesWithText("Matchmaking timed out. Please try again.").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("MatchmakingPopup").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("OK").assertIsDisplayed().performClick()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("MatchmakingPopup").fetchSemanticsNodes().isEmpty()
+        }
     }
 }
