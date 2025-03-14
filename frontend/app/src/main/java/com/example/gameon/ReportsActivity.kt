@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -76,6 +77,7 @@ class ReportsActivity : ComponentActivity() {
         val user = SessionDetails(this).getUser()
         val discordUsername = user?.username ?: "Unknown"
 
+        val reasonError = mutableStateOf(false)
         val canSubmit = mutableStateOf(false)
 
         val width = 300.dp
@@ -139,6 +141,7 @@ class ReportsActivity : ComponentActivity() {
                             userListState.value,
                             selectedUserName,
                             reason,
+                            reasonError,
                             canSubmit,
                             Modifier.width(width)
                         ) {
@@ -160,7 +163,7 @@ class ReportsActivity : ComponentActivity() {
                             "Submit Report",
                             containerColor = Red,
                             enabled = canSubmit.value,
-                            modifier = Modifier.width(width)
+                            modifier = Modifier.width(width).testTag("SubmitReportButton")
                         ) {
                             lifecycleScope.launch {
                                 val selectedGroupObject = groupListState.value
@@ -180,13 +183,15 @@ class ReportsActivity : ComponentActivity() {
                                         reason = reason.value,
                                     ),
                                     context = this@ReportsActivity,
-                                )
+                                ) {
+                                    reasonError.value = true
+                                }
                             }
                         }
                         ReportButton(
                             "Cancel",
                             outlined = true,
-                            modifier = Modifier.width(width)
+                            modifier = Modifier.width(width).testTag("CancelReportButton")
                         ) {
                             finish()
                         }
@@ -305,6 +310,7 @@ fun Reports(
     userList: List<User>,
     selectedUserName: MutableState<String>,
     reason: MutableState<String>,
+    reasonError: MutableState<Boolean>,
     canSubmit: MutableState<Boolean>,
     modifier: Modifier,
     onSelectedGroup: () -> Unit = { },
@@ -321,7 +327,7 @@ fun Reports(
             "Group",
             groupList.map { it.group_name },
             selectedGroupName,
-            modifier = modifier,
+            modifier = modifier.testTag("GroupDropdown"),
             onSelect = onSelectedGroup
         )
         if (groupList.isNotEmpty() && selectedGroupName.value.isNotEmpty())
@@ -330,11 +336,13 @@ fun Reports(
                 userList.map { it.username },
                 selectedUserName,
                 { Icon() },
-                modifier = modifier
+                modifier = modifier.testTag("UserDropdown")
             )
         TextInput(
             reason,
-            modifier = modifier.height(350.dp)
+            modifier = modifier.height(350.dp).testTag("ReasonInput"),
+            "Error: Please limit your input to 500 characters",
+            reasonError.value
         )
     }
 }
@@ -378,6 +386,7 @@ fun ReportsPreview() {
                 userList,
                 selectedUserName,
                 reason,
+                remember { mutableStateOf(false) },
                 remember { mutableStateOf(true) },
                 Modifier.width(width)
             )

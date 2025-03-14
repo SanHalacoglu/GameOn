@@ -325,7 +325,7 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
                                     .height(50.dp)
                                     .clip(RoundedCornerShape(15.dp))
                                     .background(Purple.copy(alpha = 0.2f))
-                                    .testTag("GroupMember:$username"),
+                                    .testTag("$username"),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -367,7 +367,8 @@ fun GoToDiscord(groupId: Int, context: Context) {
                         context.startActivity(intent)
                     }
                 }
-            },
+            }
+            .testTag("DiscordButton"),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -402,7 +403,7 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .testTag("GroupName:$groupName"),
+                .testTag("$groupName"),
             textAlign = TextAlign.Center
         )
 
