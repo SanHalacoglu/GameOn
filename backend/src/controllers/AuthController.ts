@@ -111,7 +111,7 @@ export async function handleLoginOrRedirect(req: Request, res: Response) {
   }
   console.log("No Session User");
 
-  const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=identify+email+gdm.join+guilds.join`;
+  const authURL = `${DISCORD_AUTH_URL}?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${DISCORD_REDIRECT_URI}&response_type=code&scope=guilds.join+identify+email+guilds`;
   res.redirect(authURL);
   return;
 }

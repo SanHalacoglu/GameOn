@@ -154,6 +154,19 @@
 1. **User**: A player who uses Discord authentication to access the app. They can set preferences, join groups via group matching, interact with other users, and report users if needed.
 2. **Admin**: A system administrator who monitors user reports and has the authority to ban users if necessary, ensuring a safe and fair community environment.
 
+### March 12th 2025 Changes
+
+#### 3.3 Non Functional Requirements
+- **Change**: Change non functional requirements.
+- **Modified Sections**: Non Functional Requirements
+- **Rationale**: Based on the feedback received from Milestone 3, we revised and updated our non-functional requirements. The previous requirements were untestable and lacked measurable criteria. We have now replaced them with two new non-functional requirements that are clear, measurable, and testable.
+  
+#### 4.7 Non Functional Requirements Design
+- **Change**: Updated validation.
+- **Modified Sections**: Non Functional Requirements Design
+- **Rationale**: As mentioned above we have changed our non-functional requirements. Hence, we have also changed the validation required.
+
+
 ### **3.3. Functional Requirements**
 <a name="fr1"></a>
 
@@ -314,15 +327,15 @@
 ### **3.5. Non-Functional Requirements**
 <a name="#nfr1"></a>
 
-1. **Matchmaking Time**
-    - **Description**:   Users should be matched within 5 minutes of initiating the matchmaking process. If a match is not found within this time, the system should notify the user and allow them to reattempt matchmaking.
-    - **Justification**: Studies on online gaming matchmaking show that players expect matchmaking to occur within 2-5 minutes before frustration sets in. According to user engagement studies, wait times exceeding 5 minutes significantly decrease retention rates. This requirement ensures that matchmaking is fast enough to keep users engaged.
+1. **Session-Based Endpoint Security**
+    - **Description**:   All critical API endpoints must be secured through session validation. Only users authenticated via Discord OAuth should have access to these endpoints.
+    - **Justification**: Ensures platform security by restricting access to authenticated users. This prevents unauthorized access and protects user data.
 
 <a name="#nfr2"></a>
 
-2. **Arbitrary Group Limit**
-    - **Description**: Users should be able to join multiple groups without arbitrary restrictions, limited only by system capacity and the number of available matchmaking groups.
-    - **Justification**: Many gamers participate in multiple communities across different games. Platforms like Discord and Steam allow users to be part of several groups simultaneously without limitations. Restricting users arbitrarily could result in poor user retention.
+2. **Report Reason Character Limit**
+    - **Description**: User-submitted report reasons are limited to 500 characters.
+    - **Justification**: Prevents database bloat and mitigates potential security risks such as memory exhaustion or abuse through overly large inputs. This ensures system stability and efficient storage usage.
 
 
 ## 4. Designs Specification
@@ -584,10 +597,10 @@
 
 
 ### **4.7. Non-Functional Requirements Design**
-1. [**Endpoints Must Be Secured by Sessions**](#nfr1)
-    - **Validation**: To ensure platform security and user authentication, all critical endpoints must be protected by session validation. Only users authenticated via Discord OAuth will be allowed to access these endpoints.
-2. [**Report Reason Length Limit**](#nfr2)
-    - **Validation**: Users can report other users they have formed groups with, helping admins maintain a safe environment on the platform. To prevent database bloat and avoid potential security vulnerabilities (e.g., memory exhaustion), report reasons are limited to 500 characters.
+1. [**Session-Based Endpoint Security**](#nfr1)
+    - **Validation**: Critical endpoints will use session validation middleware to restrict access to authenticated users. Manual and automated tests will verify that unauthenticated requests are rejected with a 401 Unauthorized response.
+2. [**Report Reason Character Limit**](#nfr2)
+    - **Validation**: A 500-character limit will be enforced through input validation. Manual and automated tests will confirm that inputs exceeding the limit are rejected with appropriate error messages.
 
 
 ### **4.8. Main Project Complexity Design**
