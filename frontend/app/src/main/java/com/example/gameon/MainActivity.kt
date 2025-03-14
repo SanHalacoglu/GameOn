@@ -410,7 +410,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                                         intent.putExtra("discord_username", discordUsername)
                                         context.startActivity(intent)
                                     }
-                                    .testTag("Group:${group.group_name}"),
+                                    .testTag("${group.group_name}"),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
