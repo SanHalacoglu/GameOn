@@ -328,7 +328,7 @@ export const createDiscordGroup = async (discord_auth_tokens: string[], discord_
   }
 };
 
-export const addDiscordUserToGuild = async (discord_auth_token: string, discord_id: string, guild_id: string): Promise<void> => {
+const addDiscordUserToGuild = async (discord_auth_token: string, discord_id: string, guild_id: string): Promise<void> => {
   console.log(`Adding Discord user to guild: ${discord_id} ${guild_id} with token ${discord_auth_token}`);
   const response = await axios({
     method: 'put',
