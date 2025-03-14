@@ -122,7 +122,7 @@ class ReportTest {
         }
 
         // Select the Reason input, input some text, check that submit button is now enabled
-        val reasonInput = composeTestRule.onNodeWithTag("ReasonInput")
+        val reasonInput = composeTestRule.onNodeWithTag("ReasonInput").onChildAt(0)
         reasonInput.assertIsDisplayed().performClick()
         composeTestRule.waitUntil {
             reasonInput.fetchSemanticsNode().config[SemanticsProperties.Focused]
@@ -184,6 +184,107 @@ class ReportTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("SubmitReportButton")
             .assertIsDisplayed().assertIsNotEnabled()
+
+        // Click the "Cancel" button
+        composeTestRule.onNodeWithTag("CancelReportButton")
+            .assertIsDisplayed().performClick()
+
+        // Confirm test is back on the main page
+        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil {
+            reportButton.isDisplayed()
+        }
+    }
+
+    @Test
+    fun testReportReasonTooLargeFailure() {
+        // Load into Main Activity, click into Reports Activity via button
+        composeTestRule.waitForIdle()
+        val reportButton = composeTestRule.onNodeWithTag("ReportButton")
+        composeTestRule.waitUntil {
+            reportButton.isDisplayed()
+        }
+        reportButton.performClick()
+
+        // Load into Reports Activity, check that submission is not yet possible
+        composeTestRule.waitForIdle()
+        val submitButton = composeTestRule.onNodeWithTag("SubmitReportButton")
+        submitButton.assertIsDisplayed().assertIsNotEnabled()
+
+        // Open Group dropdown, determine if dropdown values exist
+        composeTestRule.onNodeWithTag("GroupDropdown").assertIsDisplayed().performClick()
+        val firstGroup = composeTestRule.onNodeWithTag("Group_option_0")
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            firstGroup.isDisplayed()
+        }
+
+        // Select first dropdown value, ensure selection successful
+        val firstGroupText = firstGroup.fetchSemanticsNode().config[SemanticsProperties.Text][0]
+        firstGroup.performClick()
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            firstGroup.isNotDisplayed()
+        }
+        submitButton.assertIsNotEnabled()
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            firstGroupText.text == composeTestRule.onNodeWithTag("GroupTextField")
+                .fetchSemanticsNode().config[SemanticsProperties.EditableText].text
+        }
+
+
+        // Open User dropdown, determine if dropdown values exist
+        composeTestRule.onNodeWithTag("UserDropdown").assertIsDisplayed().performClick()
+        val firstUser = composeTestRule.onNodeWithTag("User_option_0")
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            firstUser.isDisplayed()
+        }
+
+        // Select first user value, ensure selection successful
+        val firstUserText = firstUser.fetchSemanticsNode().config[SemanticsProperties.Text][0]
+        firstUser.performClick()
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            firstUser.isNotDisplayed()
+        }
+        submitButton.assertIsNotEnabled()
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            firstUserText.text == composeTestRule.onNodeWithTag("UserTextField")
+                .fetchSemanticsNode().config[SemanticsProperties.EditableText].text
+        }
+
+        // Select the Reason input, input some text with length > 500
+        val reasonInput = composeTestRule.onNodeWithTag("ReasonInput").onChildAt(0)
+        reasonInput.assertIsDisplayed().performClick()
+        composeTestRule.waitUntil {
+            reasonInput.fetchSemanticsNode().config[SemanticsProperties.Focused]
+        }
+        reasonInput.performTextInput("A".repeat(525))
+
+        // Check that submit button is now enabled
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            // Catching an assertion isn't normal
+            // However there is no "SemanticsNodeInteraction.isEnabled()" function
+            try {
+                submitButton.assertIsEnabled()
+                true
+            } catch (_: AssertionError) {
+                false
+            }
+        }
+
+        // Submit and assert that error message has appeared
+        submitButton.performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil (timeoutMillis = 5000) {
+            composeTestRule.onNodeWithTag("ReasonInput")
+                .fetchSemanticsNode().children.size > 1
+        }
+        assert(
+            composeTestRule.onNodeWithTag("ReasonInput")
+                .onChildAt(1)
+                .fetchSemanticsNode()
+                .config[SemanticsProperties.Text].any {
+                    it.startsWith("Error:")
+                }
+        )
 
         // Click the "Cancel" button
         composeTestRule.onNodeWithTag("CancelReportButton")

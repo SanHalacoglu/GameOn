@@ -77,6 +77,7 @@ class ReportsActivity : ComponentActivity() {
         val user = SessionDetails(this).getUser()
         val discordUsername = user?.username ?: "Unknown"
 
+        val reasonError = mutableStateOf(false)
         val canSubmit = mutableStateOf(false)
 
         val width = 300.dp
@@ -140,6 +141,7 @@ class ReportsActivity : ComponentActivity() {
                             userListState.value,
                             selectedUserName,
                             reason,
+                            reasonError,
                             canSubmit,
                             Modifier.width(width)
                         ) {
@@ -181,7 +183,9 @@ class ReportsActivity : ComponentActivity() {
                                         reason = reason.value,
                                     ),
                                     context = this@ReportsActivity,
-                                )
+                                ) {
+                                    reasonError.value = true
+                                }
                             }
                         }
                         ReportButton(
@@ -306,6 +310,7 @@ fun Reports(
     userList: List<User>,
     selectedUserName: MutableState<String>,
     reason: MutableState<String>,
+    reasonError: MutableState<Boolean>,
     canSubmit: MutableState<Boolean>,
     modifier: Modifier,
     onSelectedGroup: () -> Unit = { },
@@ -335,7 +340,9 @@ fun Reports(
             )
         TextInput(
             reason,
-            modifier = modifier.height(350.dp).testTag("ReasonInput")
+            modifier = modifier.height(350.dp).testTag("ReasonInput"),
+            "Error: Please limit your input to 500 characters",
+            reasonError.value
         )
     }
 }
@@ -379,6 +386,7 @@ fun ReportsPreview() {
                 userList,
                 selectedUserName,
                 reason,
+                remember { mutableStateOf(false) },
                 remember { mutableStateOf(true) },
                 Modifier.width(width)
             )
