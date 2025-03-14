@@ -93,6 +93,10 @@ class FindGroupTest {
     @Test
     fun testFindGroupSuccess() {
         composeTestRule.waitForIdle()
+        val findGroupButton = composeTestRule.onNodeWithTag("FindGroupButton")
+        composeTestRule.waitUntil {
+            findGroupButton.isDisplayed()
+        }
         composeTestRule.onNodeWithTag("FindGroupButton").assertIsDisplayed().performClick()
         composeTestRule.runOnIdle {
             Log.d("FindGroupTest", "Waiting for UI to recompose.")
@@ -115,9 +119,12 @@ class FindGroupTest {
     @Test
     fun testFindGroupFailure() {
         composeTestRule.waitForIdle()
-        composeTestRule.waitUntil(timeoutMillis = 20_000) {
-            composeTestRule.onNodeWithTag("FindGroupButton").assertExists().isDisplayed()
+
+        val findGroupButton = composeTestRule.onNodeWithTag("FindGroupButton")
+        composeTestRule.waitUntil {
+            findGroupButton.isDisplayed()
         }
+
         composeTestRule.onNodeWithTag("FindGroupButton").assertIsDisplayed().performClick()
 
         composeTestRule.runOnIdle {

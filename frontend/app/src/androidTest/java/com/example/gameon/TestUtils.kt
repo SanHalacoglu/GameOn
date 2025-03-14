@@ -37,10 +37,16 @@ fun loginToDiscord(device: UiDevice) {
 
     try {
         device.waitForIdle()
-        Thread.sleep(15000)
+        Thread.sleep(30000)
 
-        val usernameField = device.findObject(UiSelector().className("android.widget.EditText").instance(0))
-        usernameField.setText(username)
+        val usernameField = device.wait(Until.findObject(By.clazz("android.widget.EditText")), 10_000)
+        if (usernameField == null || !usernameField.isEnabled) {
+            throw AssertionError("Username field not found or not interactable!")
+        }
+
+        usernameField.click()
+        Thread.sleep(500)
+        usernameField.text = username
 
         Thread.sleep(1000)
 
