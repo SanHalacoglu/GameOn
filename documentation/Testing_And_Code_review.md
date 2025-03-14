@@ -80,13 +80,16 @@
 
 ### 2.3. Jest Coverage Report Screenshots With Mocks
 
-_(Placeholder for Jest coverage screenshot with mocks enabled)_
+![Jest Coverage Report With Mocks](images/M5_Jest_Coverage_With_Mocks.png)
 
 ### 2.4. Jest Coverage Report Screenshots Without Mocks
 
-_(Placeholder for Jest coverage screenshot without mocks)_
-
+![Jest Coverage Report With Mocks](images/M5_Jest_Coverage_Without_Mocks.png)
 ---
+
+### 2.5 Justification for Low Test Coverage
+
+As you can see, our tests are configured to run against a dockerized backend so Jest cannot properly instrument the code. Thus, we only collect code coverage in mocked tests and do not collect any coverage data from unmocked tests
 
 ## 3. Back-end Test Specification: Tests of Non-Functional Requirements
 
