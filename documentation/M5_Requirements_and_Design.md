@@ -124,6 +124,25 @@
 - **Modified Sections**: Non Functional Requirements
 - **Rationale**: Updated based on M3 TA feedback.
 
+### March 12th 2025 Changes
+
+#### 3.5 Non Functional Requirements
+- **Change**: Change non functional requirements.
+- **Modified Sections**: Non Functional Requirements
+- **Rationale**: Based on the feedback received from Milestone 3, we revised and updated our non-functional requirements. The previous requirements were untestable and lacked measurable criteria. We have now replaced them with two new non-functional requirements that are clear, measurable, and testable.
+
+### March 14th 2025 Changes
+
+#### 3.3 Functional Requirements - Find Group
+- **Change**: Update use case.
+- **Modified Sections**: Functional Requirements
+- **Rationale**: Updated Find Group use case based on actual implementation.
+
+#### 3.3 Functional Requirements - View Existing Group
+- **Change**: Update use case.
+- **Modified Sections**: Functional Requirements
+- **Rationale**: Updated View Existing Group use case based on actual implementation.
+
 ## 2. Project Description
 **GameOn** is a social matchmaking platform designed for gamers to find ideal teammates and build lasting connections. By authenticating through Discord, players create personalized profiles, sharing details like preferred games, skill levels, communication styles, and playstyles. The app intelligently matches players based on their preferences, instantly creating a dedicated Discord group for seamless in-game coordination and ongoing communication. With integrated feedback systems, including reviews and ratings, GameOn fosters a supportive and positive gaming community.
 
@@ -134,14 +153,6 @@
 ### **3.2. Actors Description**
 1. **User**: A player who uses Discord authentication to access the app. They can set preferences, join groups via group matching, interact with other users, and report users if needed.
 2. **Admin**: A system administrator who monitors user reports and has the authority to ban users if necessary, ensuring a safe and fair community environment.
-
-### March 12th 2025 Changes
-
-#### 3.3 Non Functional Requirements
-- **Change**: Cahnge non functional requirements.
-- **Modified Sections**: Non Functional Requirements
-- **Rationale**: Based on the feedback received from Milestone 3, we revised and updated our non-functional requirements. The previous requirements were untestable and lacked measurable criteria. We have now replaced them with two new non-functional requirements that are clear, measurable, and testable.
-
 
 ### **3.3. Functional Requirements**
 <a name="fr1"></a>
@@ -214,17 +225,19 @@
     
     - **Detailed Flow for Each Independent Scenario**: 
         1. **Looking for Group**:
-            - **Description**: When clicking the “Find Group” button in the app, the user is entered into the matchmaking queue, and once a group is found or the timeout is reached a popup appears informing the user of the matchmaking status.
+            - **Description**: When a user clicks the “Find Group” button on the main page of the app, they are entered into the matchmaking queue. The Find Group button is then disabled and the user can continue to use other features in the app. When a group is found, or the timeout of 1 minute is reached, the user receives a live update in the form of a popup notification, informing them whether matchmaking was successful or not.
+        
             - **Primary actor(s)**: User 
             - **Main success scenario**:
-                1. User clicks the “Find Group” button.
-                2. A matchmaking request is submitted, and the user is in the matchmaking queue.
-                3. The app polls for the matchmaking status.
-                4. A group is found and the success popup is displayed.
-                5. The new group appears in the "view existing group" section
+                1. User is on the main page of GameOn.
+                2. User clicks the “Find Group” button.
+                3. The "Find Group" button becomes disabled and says "Finding".
+                4. A matchamking request is submitted, and the user is added to the matchmaking queue.
+                5. A group is found based on the user's preferences.
+                6. A popup appears stating "You have been matched with a group!" 
+                7. The new group appears in the "view existing group" section of the main page.
             - **Failure scenario(s)**:
-                - 1a. Not enough users in queue, After a timeout, the system removes the user from matchmaking queue and displays a timeout popup.
-
+                - 1a. Not enough users in the matchmaking queue, After a timeout, the system removes the user from matchmaking queue and displays a timeout popup.
 
 <a name="fr4"></a>
 
@@ -237,11 +250,13 @@
             - **Description**: When a user clicks on an existing group from the “My Groups” banner, they are taken to the existing group page.
             - **Primary actor(s)**: User 
             - **Main success scenario**:
-                1. User clicks on an existing group from the "My Groups" section.
-                2. System retrieves group details from the database.
-                3. System navigates the user to the "Existing Group" screen.
+                1. User is on the main page of GameOn.
+                2. User clicks on an existing group from the "My Groups" section.
+                3. The View Existing Groups page opens, displaying the group name, group members, and a "Go to Discord Group" button.
+                4. User clicks the "Go to Discord Group"
+                5. Discord opens to the newly created group with members added.
             - **Failure scenario(s)**:
-                - 1a. Group not found in database, user is not routed to existing group page.
+                - 1a. The group has been deleted or is no longer available when the user tries to click it. The groups list is update and displays "No groups found".
 
 <a name="fr5"></a>
 
