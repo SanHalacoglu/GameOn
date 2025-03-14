@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -160,7 +161,7 @@ class ReportsActivity : ComponentActivity() {
                             "Submit Report",
                             containerColor = Red,
                             enabled = canSubmit.value,
-                            modifier = Modifier.width(width)
+                            modifier = Modifier.width(width).testTag("SubmitReportButton")
                         ) {
                             lifecycleScope.launch {
                                 val selectedGroupObject = groupListState.value
@@ -186,7 +187,7 @@ class ReportsActivity : ComponentActivity() {
                         ReportButton(
                             "Cancel",
                             outlined = true,
-                            modifier = Modifier.width(width)
+                            modifier = Modifier.width(width).testTag("CancelReportButton")
                         ) {
                             finish()
                         }
@@ -321,7 +322,7 @@ fun Reports(
             "Group",
             groupList.map { it.group_name },
             selectedGroupName,
-            modifier = modifier,
+            modifier = modifier.testTag("GroupDropdown"),
             onSelect = onSelectedGroup
         )
         if (groupList.isNotEmpty() && selectedGroupName.value.isNotEmpty())
@@ -330,11 +331,11 @@ fun Reports(
                 userList.map { it.username },
                 selectedUserName,
                 { Icon() },
-                modifier = modifier
+                modifier = modifier.testTag("UserDropdown")
             )
         TextInput(
             reason,
-            modifier = modifier.height(350.dp)
+            modifier = modifier.height(350.dp).testTag("ReasonInput")
         )
     }
 }

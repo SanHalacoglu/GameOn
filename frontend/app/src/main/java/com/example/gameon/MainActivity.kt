@@ -402,7 +402,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                                     .clip(RoundedCornerShape(50.dp))
                                     .background(Purple.copy(alpha = 0.2f))
                                     .clickable {
-                                        val intent = android.content.Intent(
+                                        val intent = Intent(
                                             context,
                                             ViewGroupActivity::class.java
                                         )
@@ -465,12 +465,13 @@ fun ReportsSection(context: Context) {
                     .clip(RoundedCornerShape(50.dp))
                     .background(Purple)
                     .clickable {
-                        val intent = android.content.Intent(
+                        val intent = Intent(
                             context,
                             ReportsActivity::class.java
                         )
                         context.startActivity(intent)
-                    },
+                    }
+                    .testTag("ReportButton"),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -487,12 +488,13 @@ fun ReportsSection(context: Context) {
                     .clip(RoundedCornerShape(50.dp))
                     .background(Purple)
                     .clickable {
-                        val intent = android.content.Intent(
+                        val intent = Intent(
                             context,
                             ListReportsActivity::class.java
                         )
                         context.startActivity(intent)
-                    },
+                    }
+                    .testTag("ViewReportsButton"),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
