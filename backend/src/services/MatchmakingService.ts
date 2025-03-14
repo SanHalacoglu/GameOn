@@ -178,10 +178,11 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
   console.log(`MATCHMAKING: Request details: ${uniqueMembers.map(m => 
     `discord_id=${m.discord_id}, token=${m.discord_access_token.substring(0, 8)}...`
   ).join(' | ')}`);
-  const discordAuthTokens = uniqueMembers.map(member => member.discord_access_token);
-  // broken for now
-  // const groupUrl = await createDiscordGroup(discordAuthTokens);
-  group.groupurl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  const discordAuthTokens = members.map(member => member.discord_access_token);
+  const discordIds = members.map(member => member.discord_id);
+
+  const groupUrl = await createDiscordGroup(discordAuthTokens, discordIds);
+  group.groupurl = groupUrl;
 
   await groupRepository.save(group);
 
