@@ -12,6 +12,7 @@ import com.example.gameon.classes.Report
 suspend fun submitReport(
     report: Report,
     context: Context,
+    onBadRequest: () -> Unit = {}
 ) {
     val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
 
@@ -19,6 +20,8 @@ suspend fun submitReport(
 
     if (result.isSuccessful) {
         (context as? Activity)?.finish()
+    } else if (result.code() == 400) {
+        onBadRequest()
     } else {
         Log.d("Reports", "Something went wrong!")
     }
