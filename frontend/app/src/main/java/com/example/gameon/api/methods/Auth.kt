@@ -37,7 +37,7 @@ suspend fun checkLoggedIn (context: Context) {
     //Upon redirect, redirect to either Login or Preferences pages
     else if (result.code() in 300..399) {
         val redirectUrl: String = result.headers().get("Location")!!
-
+        Log.d("Auth", "Redirect URL: $redirectUrl")
         if (redirectUrl.startsWith("https://discord.com")) {
             Intent(context, LoginActivity::class.java).apply {
                 putExtra("DiscordLoginUrl", redirectUrl)
@@ -121,6 +121,7 @@ suspend fun register(
         Intent(context, MainActivity::class.java)
     } else if (result.code() in 300..399) {
         val redirectUrl: String = result.headers().get("Location")!!
+        Log.d("Auth", "Redirect URL: $redirectUrl")
         Intent(context, LoginActivity::class.java).apply {
             putExtra("DiscordLoginUrl", redirectUrl)
         }

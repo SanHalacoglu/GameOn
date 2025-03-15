@@ -21,6 +21,8 @@ retrofitVersion = "2.9.0"
 uiTextGoogleFonts = "1.7.8"
 androidx-test = "1.5.2"
 androidx-test-rules = "1.5.0"
+espressoIntents = "3.6.1"
+uiautomator = "2.3.0"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activity" }
@@ -50,6 +52,8 @@ material = { module = "com.google.android.material:material", version.ref = "mat
 retrofit2-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test" }
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-test-rules" }
+androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoIntents" }
+androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

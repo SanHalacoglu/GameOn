@@ -74,14 +74,9 @@ class MainActivity : ComponentActivity() {
     private val isMatchmakingActive = mutableStateOf(false)
     private val matchmakingStatus = mutableStateOf<String?>(null)
     private val groupListState = mutableStateOf<List<Group>>(emptyList())
+    fun getGroupListState(): MutableState<List<Group>> = groupListState
     private val showDialog = mutableStateOf(false)
     private val dialogMessage = mutableStateOf("")
-
-    fun getMatchmakingStatus() = matchmakingStatus
-    fun getIsMatchmakingActive() = isMatchmakingActive
-    fun getShowDialog() = showDialog
-    fun getDialogMessage() = dialogMessage
-    fun getGroupListState() = groupListState
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -294,6 +289,7 @@ fun FindGroup(
 
     fun startMatchmaking() {
         coroutineScope.launch {
+            Log.d("FindGroup", "Find Group button clicked!")
             isMatchmakingActive.value = true
             Log.d("FindGroup", "isMatchmakingActive set to TRUE")
             val success = initiateMatchmaking(context, preferenceIDState.value)
@@ -316,6 +312,8 @@ fun FindGroup(
     val buttonColor = if (isMatchmakingActive.value) Purple.copy(alpha = 0.5f) else Purple
     val buttonText = if (isMatchmakingActive.value) "Finding..." else "Find Group"
 
+    Log.d("FindGroup", "Recomposition triggered: Button Text = $buttonText")
+
     Box(
         modifier = Modifier
             .fillMaxWidth(0.9f)
@@ -334,6 +332,7 @@ fun FindGroup(
     }
 
     if (showDialog.value) {
+        Log.d("FindGroup", "Showing dialog: ${dialogMessage.value}")
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text("Matchmaking Status") },
@@ -351,9 +350,12 @@ fun FindGroup(
 }
 
 @Composable
-fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group>>, discordUsername: String) {
+fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group>>, discordUsername: String, discordId: String) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
     val groups = groupListState.value
+
+    val showErrorDialog = remember { mutableStateOf(false) }
+    val errorMessage = remember { mutableStateOf("") }
 
     val isLoading = groups == null
     val hasGroups = groups.isNotEmpty()
@@ -372,7 +374,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "My Existing Groups",
+                text = "My Groups",
                 color = White,
                 fontFamily = fontFamily,
                 fontSize = 20.sp
@@ -404,15 +406,25 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                                     .clip(RoundedCornerShape(50.dp))
                                     .background(Purple.copy(alpha = 0.2f))
                                     .clickable {
-                                        val intent = android.content.Intent(
-                                            context,
-                                            ViewGroupActivity::class.java
-                                        )
-                                        intent.putExtra("selected_group", group)
-                                        intent.putExtra("discord_username", discordUsername)
-                                        context.startActivity(intent)
+                                        val currentGroups = groupListState.value
+                                        if (currentGroups.any { it.group_id == group.group_id }) {
+                                            // Group exists, navigate to it
+                                            val intent = Intent(
+                                                context,
+                                                ViewGroupActivity::class.java
+                                            )
+                                            intent.putExtra("selected_group", group)
+                                            intent.putExtra("discord_username", discordUsername)
+                                            context.startActivity(intent)
+                                        } else {
+                                            // Group was deleted, show error
+                                            showErrorDialog.value = true
+                                            errorMessage.value = "This group no longer exists."
+                                            refreshGroupList(context, groupListState, discordId)
+
+                                        }
                                     }
-                                    .testTag("Group:${group.group_name}"),
+                                    .testTag("${group.group_name}"),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -435,6 +447,20 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                 }
             }
         }
+    }
+    if (showErrorDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog.value = false },
+            title = { Text("Group Not Found") },
+            text = { Text(errorMessage.value) },
+            confirmButton = {
+                TextButton(
+                    onClick = { showErrorDialog.value = false }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
@@ -467,12 +493,13 @@ fun ReportsSection(context: Context) {
                     .clip(RoundedCornerShape(50.dp))
                     .background(Purple)
                     .clickable {
-                        val intent = android.content.Intent(
+                        val intent = Intent(
                             context,
                             ReportsActivity::class.java
                         )
                         context.startActivity(intent)
-                    },
+                    }
+                    .testTag("ReportButton"),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -489,12 +516,13 @@ fun ReportsSection(context: Context) {
                     .clip(RoundedCornerShape(50.dp))
                     .background(Purple)
                     .clickable {
-                        val intent = android.content.Intent(
+                        val intent = Intent(
                             context,
                             ListReportsActivity::class.java
                         )
                         context.startActivity(intent)
-                    },
+                    }
+                    .testTag("ViewReportsButton"),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -522,8 +550,21 @@ fun MainContent(preferenceIDState: MutableState<Int>, groupListState: MutableSta
     ) {
         FindGroup(preferenceIDState, context, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
 
-        ViewExistingGroups(context, groupListState, discordUsername)
+        ViewExistingGroups(context, groupListState, discordUsername, discordId)
 
         ReportsSection(context)
+    }
+}
+
+fun refreshGroupList(context: Context, groupListState: MutableState<List<Group>>, discordId: String) {
+    val lifecycleScope = (context as? MainActivity)?.lifecycleScope
+    if (lifecycleScope != null) {
+        lifecycleScope.launch {
+            val updatedGroupList = getUserGroups(discordId, context)
+            Log.d("MainActivity", "Refreshed Group List: $updatedGroupList")
+            groupListState.value = updatedGroupList
+        }
+    } else {
+        Log.e("refreshGroupList", "Failed to refresh group list: lifecycleScope is null")
     }
 }
