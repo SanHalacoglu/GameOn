@@ -293,25 +293,18 @@ As you can see, our tests are configured to run against a dockerized backend so 
 
 ### 5.1. Commit Hash Where Codacy Ran
 
-`[Insert Commit SHA here]`
+`35b0261`
 
 ### 5.2. Unfixed Issues per Codacy Category
 
-_(Placeholder for screenshots of Codacyâ€™s Category Breakdown table in Overview)_
+![Unfixed Issues per Codacy Category](images/codacy/IssuesBreakdown.png)
 
 ### 5.3. Unfixed Issues per Codacy Code Pattern
 
-_(Placeholder for screenshots of Codacyâ€™s Issues page)_
+![Unfixed Issues per Codacy Code Pattern](images/codacy/Issues.png)
 
 ### 5.4. Justifications for Unfixed Issues
 
-- **Code Pattern: [Usage of Deprecated Modules](#)**
-
-  1. **Issue**
-
-     - **Location in Git:** [`src/services/chatService.js#L31`](#)
-     - **Justification:** ...
-
-  2. ...
+Upon integrating Codacy, over 600 issues were flagged. Due to limited time and the need to prioritize critical tasks, we focused on developing and stabilizing the testing framework to ensure core functionality. We attempted to fix some issues initially, but doing so caused delays in our testing framework development. As a result, we made a team decision not to address the remaining issues.
 
 - ...
