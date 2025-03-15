@@ -124,27 +124,103 @@ As you can see, our tests are configured to run against a dockerized backend so 
 
 ### 4.1. Location in Git of Front-end Test Suite:
 
-`frontend/src/androidTest/java/com/studygroupfinder/`
+`frontend/app/src/androidTest/java/com/example/gameon/`
 
 ### 4.2. Tests
 
-- **Use Case: Login**
+![FrontEnd Test Results](images/FrontendTestCoverage.png)
 
+- **Use Case: Find Group**
   - **Expected Behaviors:**
     | **Scenario Steps** | **Test Case Steps** |
     | ------------------ | ------------------- |
-    | 1. The user opens â€œAdd Todo Itemsâ€ screen. | Open â€œAdd Todo Itemsâ€ screen. |
-    | 2. The app shows an input text field and an â€œAddâ€ button. The add button is disabled. | Check that the text field is present on screen.<br>Check that the button labelled â€œAddâ€ is present on screen.<br>Check that the â€œAddâ€ button is disabled. |
-    | 3a. The user inputs an ill-formatted string. | Input â€œ_^_^^OQ#$â€ in the text field. |
-    | 3a1. The app displays an error message prompting the user for the expected format. | Check that a dialog is opened with the text: â€œPlease use only alphanumeric charactersâ€. |
-    | 3. The user inputs a new item for the list and the add button becomes enabled. | Input â€œbuy milkâ€ in the text field.<br>Check that the button labelled â€œaddâ€ is enabled. |
-    | 4. The user presses the â€œAddâ€ button. | Click the button labelled â€œaddâ€. |
-    | 5. The screen refreshes and the new item is at the bottom of the todo list. | Check that a text box with the text â€œbuy milkâ€ is present on screen.<br>Input â€œbuy chocolateâ€ in the text field.<br>Click the button labelled â€œaddâ€.<br>Check that two text boxes are present on the screen with â€œbuy milkâ€ on top and â€œbuy chocolateâ€ at the bottom. |
-    | 5a. The list exceeds the maximum todo-list size. | Repeat steps 3 to 5 ten times.<br>Check that a dialog is opened with the text: â€œYou have too many items, try completing one firstâ€. |
+    | 1. User is on the main page of GameOn. | Log into GameOn and verify main page is opened. |
+    | 2. User clicks the “Find Group” button. | Check that the button labelled Find Group is present on screen.<br>Click the Find Group button. |
+    | 3. The "Find Group" button becomes disabled and says "Finding". | Check that the Find Group button text switches to "Finding". |
+    | 4. A matchmaking request is submitted, and the user is added to the matchmaking queue. |  |
+    | 5. A group is found based on the user's preferences. |  |
+    | 6. A popup appears stating "You have been matched with a group!" | Wait for up to a minute (timeout) and check that a matchmaking popup appears with the text: "You have been matched with a group! |
+    | 7. The new group appears in the "My Groups" section of the main page. | Check that a group with the name "Valorant Matchmaking Group" is present under "My Groups" |
 
   - **Test Logs:**
     ```
-    [Placeholder for Espresso test execution logs]
+    STATUS: FAILED
+    03-14 16:03:58.551  5765  5782 I TestRunner: started: testFindGroupSuccess(com.example.gameon.FindGroupTest)
+    03-14 16:03:58.884  5765  5782 I Tracing : Tracer added: class androidx.test.platform.tracing.AndroidXTracer
+    03-14 16:07:08.431  5765  5782 E TestRunner: failed: testFindGroupSuccess(com.example.gameon.FindGroupTest)
+    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:441)
+    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:306)
+    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.internal.runner.junit4.statement.RunBefores.evaluate(RunBefores.java:80)
+    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:123)
+    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:68)
+    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:59)
+    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:463)
+    03-14 16:07:08.441  5765  5782 I TestRunner: finished: testFindGroupSuccess(com.example.gameon.FindGroupTest)
+    androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 120000 ms
+    at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:441)
+    at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:306)
+    at com.example.gameon.FindGroupTest.testFindGroupSuccess(FindGroupTest.kt:106)
+
+    ```
+
+- **Use Case: Find Group**
+  - **Expected Behaviors:**
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | 1. User is on the main page of GameOn. | Log into GameOn and verify main page is opened. |
+    | 2. User clicks the “Find Group” button. | Check that the button labelled Find Group is present on screen.<br>Click the Find Group button. |
+    | 3. The "Find Group" button becomes disabled and says "Finding". | Check that the Find Group button text switches to "Finding". |
+    | 4. A matchmaking request is submitted, and the user is added to the matchmaking queue. |  |
+    | 5. A group is not found based on the user's preferences within the timeout of 1 minute. |  |
+    | 6. A popup appears stating "Matchmaking timed out. Please try again." | Wait for up to a minute (timeout) and check that a matchmaking popup appears with the text: "Matchmaking timed out. Please try again." |
+
+  - **Test Logs:**
+    ```
+    STATUS: PASSED
+    03-14 17:17:36.613 24945 24962 I TestRunner: started: testFindGroupFailure(com.example.gameon.FindGroupTest)
+    03-14 17:17:42.562 24945 24962 I TestRunner: finished: testFindGroupFailure(com.example.gameon.FindGroupTest)
+    03-14 17:17:42.563 24945 24962 I TestRunner: passed: testFindGroupFailure(com.example.gameon.FindGroupTest)
+
+    ```
+                1. User is on the main page of GameOn.
+                2. User clicks on an existing group from the "My Groups" section.
+                3. The View Existing Groups page opens, displaying the group name, group members, and a "Go to Discord Group" button.
+                4. User clicks the "Go to Discord Group"
+                5. Discord opens to the newly created group with members added.
+- **Use Case: Navigate to Existing Group**
+  - **Expected Behaviors:**
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | 1. User is on the main page of GameOn. | Log into GameOn and verify main page is opened. |
+    | 2. User clicks on an existing group from the "My Groups" section. | Check that the expected test group "Valorant Matchmaking Group" is present on screen.<br>Click the "Valorant Matchmaking Group" button. |
+    | 3. The View Existing Groups page opens, displaying the group name, group members, and a "Go to Discord Group" button. | Check that the title "Valorant Matchmaking Group" is present.<br> Check that the test group member "sanhal23" is present.<br> Check that the "Go to Discord Group" is present. |
+    | 4. User clicks the "Go to Discord Group". | Click the "Go to Discord Group" button |
+    | 5. Chrome opens the Discord web version and displays the newly created group with the added members. | Check that text "discord.com/channels/" is present in the URL, to verify browser has launched. |
+
+  - **Test Logs:**
+    ```
+    STATUS: PASSED
+    03-14 17:22:23.885 25410 25427 I TestRunner: started: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
+    03-14 17:22:42.562 25410 25427 I TestRunner: finished: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
+    03-14 17:22:42.563 25410 25427 I TestRunner: passed: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
+    ```
+
+- **Use Case: Navigate to Existing Group**
+  - **Expected Behaviors:**
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | 1. User is on the main page of GameOn. | Log into GameOn and verify main page is opened. |
+    | 2. User tries to click on an existing group from "My Groups" but the list is empty. | Check that the test group "Valorant Matchmaking Group" is initially present. <br> Clear the group list dynamically during runtime. <br>Attempt to find the group in the UI. |
+    | 3. User attempts to select the now non-existent group. | Try to click on "Valorant Matchmaking Group" after it has been removed. |
+    | 4. System displays an error message instead of proceeding. | Check for the "No groups found" text on screen. |
+    | 5. User cannot proceed to the View Existing Group page. |  |
+
+  - **Test Logs:**
+    ```
+    STATUS: PASSED
+    03-14 17:34:45.291  5328  5346 I TestRunner: started: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
+    03-14 17:34:54.070  5328  5346 I TestRunner: finished: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
+    03-14 17:34:54.071  5328  5346 I TestRunner: passed: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
     ```
 
 - **Use Case: ...**
