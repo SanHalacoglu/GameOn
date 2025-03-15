@@ -145,21 +145,21 @@ As you can see, our tests are configured to run against a dockerized backend so 
   - **Test Logs:**
     ```
     STATUS: FAILED
-    03-14 16:03:58.551  5765  5782 I TestRunner: started: testFindGroupSuccess(com.example.gameon.FindGroupTest)
-    03-14 16:03:58.884  5765  5782 I Tracing : Tracer added: class androidx.test.platform.tracing.AndroidXTracer
-    03-14 16:07:08.431  5765  5782 E TestRunner: failed: testFindGroupSuccess(com.example.gameon.FindGroupTest)
-    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:441)
-    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:306)
-    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.internal.runner.junit4.statement.RunBefores.evaluate(RunBefores.java:80)
-    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:123)
-    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:68)
-    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:59)
-    03-14 16:07:08.436  5765  5782 E TestRunner: 	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:463)
-    03-14 16:07:08.441  5765  5782 I TestRunner: finished: testFindGroupSuccess(com.example.gameon.FindGroupTest)
+    03-14 22:16:09.986 17778 17902 I TestRunner: started: testFindGroupSuccess(com.example.gameon.FindGroupTest)
+    03-14 22:16:10.109 17778 17902 I Tracing : Tracer added: class androidx.test.platform.tracing.AndroidXTracer
+    03-14 22:19:24.567 17778 17902 E TestRunner: failed: testFindGroupSuccess(com.example.gameon.FindGroupTest)
+    03-14 22:19:24.567 17778 17902 E TestRunner: 	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:441)
+    03-14 22:19:24.567 17778 17902 E TestRunner: 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:306)
+    03-14 22:19:24.567 17778 17902 E TestRunner: 	at androidx.test.internal.runner.junit4.statement.RunBefores.evaluate(RunBefores.java:80)
+    03-14 22:19:24.568 17778 17902 E TestRunner: 	at androidx.test.runner.AndroidJUnit4.run(AndroidJUnit4.java:123)
+    03-14 22:19:24.568 17778 17902 E TestRunner: 	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:68)
+    03-14 22:19:24.568 17778 17902 E TestRunner: 	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:59)
+    03-14 22:19:24.568 17778 17902 E TestRunner: 	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:463)
+    03-14 22:19:24.571 17778 17902 I TestRunner: finished: testFindGroupSuccess(com.example.gameon.FindGroupTest)
     androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 120000 ms
     at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:441)
     at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:306)
-    at com.example.gameon.FindGroupTest.testFindGroupSuccess(FindGroupTest.kt:106)
+    at com.example.gameon.FindGroupTest.testFindGroupSuccess(FindGroupTest.kt:120)
 
     ```
 
@@ -177,16 +177,12 @@ As you can see, our tests are configured to run against a dockerized backend so 
   - **Test Logs:**
     ```
     STATUS: PASSED
-    03-14 17:17:36.613 24945 24962 I TestRunner: started: testFindGroupFailure(com.example.gameon.FindGroupTest)
-    03-14 17:17:42.562 24945 24962 I TestRunner: finished: testFindGroupFailure(com.example.gameon.FindGroupTest)
-    03-14 17:17:42.563 24945 24962 I TestRunner: passed: testFindGroupFailure(com.example.gameon.FindGroupTest)
+    03-14 22:19:25.966 17778 17902 I TestRunner: started: testFindGroupFailure(com.example.gameon.FindGroupTest)
+    03-14 22:20:44.757 17778 17902 I TestRunner: finished: testFindGroupFailure(com.example.gameon.FindGroupTest)
+    03-14 22:20:44.758 17778 17902 I TestRunner: passed: testFindGroupFailure(com.example.gameon.FindGroupTest)
 
     ```
-                1. User is on the main page of GameOn.
-                2. User clicks on an existing group from the "My Groups" section.
-                3. The View Existing Groups page opens, displaying the group name, group members, and a "Go to Discord Group" button.
-                4. User clicks the "Go to Discord Group"
-                5. Discord opens to the newly created group with members added.
+
 - **Use Case: Navigate to Existing Group**
   - **Expected Behaviors:**
     | **Scenario Steps** | **Test Case Steps** |
@@ -200,9 +196,9 @@ As you can see, our tests are configured to run against a dockerized backend so 
   - **Test Logs:**
     ```
     STATUS: PASSED
-    03-14 17:22:23.885 25410 25427 I TestRunner: started: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
-    03-14 17:22:42.562 25410 25427 I TestRunner: finished: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
-    03-14 17:22:42.563 25410 25427 I TestRunner: passed: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
+    03-14 22:21:37.175 17778 17902 I TestRunner: started: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
+    03-14 22:21:59.986 17778 17902 I TestRunner: finished: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
+    03-14 22:21:59.987 17778 17902 I TestRunner: passed: testViewExistingGroupSuccess(com.example.gameon.ViewExistingGroupTest)
     ```
 
 - **Use Case: Navigate to Existing Group**
@@ -218,25 +214,78 @@ As you can see, our tests are configured to run against a dockerized backend so 
   - **Test Logs:**
     ```
     STATUS: PASSED
-    03-14 17:34:45.291  5328  5346 I TestRunner: started: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
-    03-14 17:34:54.070  5328  5346 I TestRunner: finished: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
-    03-14 17:34:54.071  5328  5346 I TestRunner: passed: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
+    03-14 22:21:59.989 17778 17902 I TestRunner: started: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
+    03-14 22:22:14.192 17778 17902 I TestRunner: finished: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
+    03-14 22:22:14.193 17778 17902 I TestRunner: passed: testViewExistingGroupFailure(com.example.gameon.ViewExistingGroupTest)
     ```
 
-- **Use Case: ...**
+- **Use Case: Submit Report**
 
   - **Expected Behaviors:**
 
     | **Scenario Steps** | **Test Case Steps** |
     | ------------------ | ------------------- |
-    | ...                | ...                 |
+    | 1. User is on the main page of GameOn. | Log into GameOn and verify main page is opened. |
+    | 2. User clicks the “Submit a Report” button. | Check that the button labelled Submit a Report is present on screen.<br>Click the Find Group button. |
+    | 3. User is now on the Reports page of GameOn. | Check that the button labelled Submit Report is present on screen and is not enabled. |
+    | 4. User selects a group from the Group dropdown menu. | Check that the dropdown menu labelled Group is present on screen.<br> Click on the dropdown menu and check that at least on dropdown value exists.<br> Click on the first dropdown option, check that the dropdown menu is closed, and check that the selected value is now displayed on the dropdown.<br> Lastly, check that the Submit Report button is still not enabled. |
+    | 5. User selects a user to report from the User dropdown menu. | Check that the dropdown menu labelled User is present on screen.<br> Click on the dropdown menu and check that at least on dropdown value exists.<br> Click on the first dropdown option, check that the dropdown menu is closed, and check that the selected value is now displayed on the dropdown.<br> Lastly, check that the Submit Report button is still not enabled. |
+    | 6. User types a reason for reporting the selected user in the Reason text input | Check that the text input labelled Reason is present on screen.<br> Click on the text input and input a string of text with a length less than 500 characters.<br> Lastly, check that the Submit Report button is now enabled. |
+    | 7. User submits the report by clicking the "Submit Report" button and is taken back to the main page. | Click Submit Report button. |
+    | 8. User clicks the "View Reports" button and navigates to the List Reports page of GameOn. | Check that the button labelled View Reports is present on screen and click that button. |
+    | 9. User looks at the list of reports and confirms that the submitted report is present at the bottom of the list. | Check that the list of submitted reports is displayed and has at least one item.<br> Check that the last item in this list displays the username of the user who had been reported during this sequence. |
 
   - **Test Logs:**
     ```
-    [Placeholder for Espresso test execution logs]
+    STATUS: PASSED
+    03-14 22:20:46.112 17778 17902 I TestRunner: started: testReportSuccess(com.example.gameon.ReportTest)
+    03-14 22:21:02.942 17778 17902 I TestRunner: finished: testReportSuccess(com.example.gameon.ReportTest)
+    03-14 22:21:02.943 17778 17902 I TestRunner: passed: testReportSuccess(com.example.gameon.ReportTest)
     ```
 
-- **...**
+- **Use Case: Submit Report**
+
+  - **Expected Behaviors:**
+
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | 1. User is on the main page of GameOn. | Log into GameOn and verify main page is opened. |
+    | 2. User clicks the “Submit a Report” button. | Check that the button labelled Submit a Report is present on screen.<br>Click the Find Group button. |
+    | 3. User is now on the Reports page of GameOn. | Check that the button labelled Submit Report is present on screen and is not enabled. |
+    | 4. User cancels the process by clicking the "Cancel" button | Check that the button labelled Cancel is displayed.<br> Click the Cancel button. |
+    | 5. User is back on the main page of GameOn. | Verify that the main page is opened. |
+
+
+  - **Test Logs:**
+    ```
+    STATUS: PASSED
+    03-14 22:21:04.310 17778 17902 I TestRunner: started: testCancelReportFailure(com.example.gameon.ReportTest)
+    03-14 22:21:18.089 17778 17902 I TestRunner: finished: testCancelReportFailure(com.example.gameon.ReportTest)
+    03-14 22:21:18.090 17778 17902 I TestRunner: passed: testCancelReportFailure(com.example.gameon.ReportTest)
+    ```
+
+- **Use Case: Submit Report**
+
+  - **Expected Behaviors:**
+
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | 1. User is on the main page of GameOn. | Log into GameOn and verify main page is opened. |
+    | 2. User clicks the “Submit a Report” button. | Check that the button labelled Submit a Report is present on screen.<br>Click the Find Group button. |
+    | 3. User is now on the Reports page of GameOn. | Check that the button labelled Submit Report is present on screen and is not enabled. |
+    | 4. User selects a group from the Group dropdown menu. | Check that the dropdown menu labelled Group is present on screen.<br> Click on the dropdown menu and check that at least on dropdown value exists.<br> Click on the first dropdown option, check that the dropdown menu is closed, and check that the selected value is now displayed on the dropdown.<br> Lastly, check that the Submit Report button is still not enabled. |
+    | 5. User selects a user to report from the User dropdown menu. | Check that the dropdown menu labelled User is present on screen.<br> Click on the dropdown menu and check that at least on dropdown value exists.<br> Click on the first dropdown option, check that the dropdown menu is closed, and check that the selected value is now displayed on the dropdown.<br> Lastly, check that the Submit Report button is still not enabled. |
+    | 6. User types a reason for reporting the selected user in the Reason text input | Check that the text input labelled Reason is present on screen.<br> Click on the text input and input a string of text with a length more than 500 characters.<br> Lastly, check that the Submit Report button is now enabled. |
+    | 7. User clicks the Submit Report button. | Click Submit Report button. |
+    | 8. User can now see the Reason text input turn red and display an error message beneath it declaring the number of characters input should be less than 500. | |
+
+  - **Test Logs:**
+    ```
+    STATUS: PASSED
+    03-14 22:21:19.497 17778 17902 I TestRunner: started: testReportReasonTooLargeFailure(com.example.gameon.ReportTest)
+    03-14 22:21:35.867 17778 17902 I TestRunner: finished: testReportReasonTooLargeFailure(com.example.gameon.ReportTest)
+    03-14 22:21:35.867 17778 17902 I TestRunner: passed: testReportReasonTooLargeFailure(com.example.gameon.ReportTest)
+    ```
 
 ---
 

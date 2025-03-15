@@ -143,6 +143,11 @@
 - **Modified Sections**: Functional Requirements
 - **Rationale**: Updated View Existing Group use case based on actual implementation.
 
+#### 3.3 Functional Requirements - Report User
+- **Change**: Update use case.
+- **Modified Sections**: Functional Requirements
+- **Rationale**: Updated Submit Report use case based on actual implementation.
+
 ## 2. Project Description
 **GameOn** is a social matchmaking platform designed for gamers to find ideal teammates and build lasting connections. By authenticating through Discord, players create personalized profiles, sharing details like preferred games, skill levels, communication styles, and playstyles. The app intelligently matches players based on their preferences, instantly creating a dedicated Discord group for seamless in-game coordination and ongoing communication. With integrated feedback systems, including reviews and ratings, GameOn fosters a supportive and positive gaming community.
 
@@ -279,18 +284,20 @@
     
     - **Detailed Flow for Each Independent Scenario**: 
         1. **Submit Report**:
-            - **Description**: When a user long-presses a user within the "Existing Group"  screen, an option appears to “Report User”.  Upon clicking “Report User”, a pop-up appears where a user can write a summary on why the user is being reported.  Upon clicking “Submit”, the report is submitted to the administrators.
+            - **Description**: When a user presses "Submit a Report" on the main page, a new page appears where a user can write a summary on why the user is being reported.  Upon clicking “Submit Report”, the report is submitted to the administrators.
             - **Primary actor(s)**: User, Admin 
             - **Main success scenario**:
-                1. User selects the "Submit a report" button
+                1. User selects the "Submit a Report" button on the main page.
                 2. User selects a group from the dropdown
                 3. User selects a user to report from the dropdown
                 4. User writes a reason for the report
                 5. User selects "Submit report"
                 6. System successfully sends the report to the database
             - **Failure scenario(s)**:
-                - 2a. User does not click “Submit” and the report is not submitted to the admin.
-                - 2b. User presses "Cancel" and report is not submitted.
+                - 6a. User presses "Cancel" and report is not submitted.
+                - 6b. User presses "Submit" and an error pops up. (See **3.5.2**)
+                    - 6b1. The "Reason" textbox turns red and an error message pops up warning the user that the input must be less than 500 characters.
+                    - 6b2. The user can shorten their input and attempt to submit again.
 
 <a name="fr6"></a>
 

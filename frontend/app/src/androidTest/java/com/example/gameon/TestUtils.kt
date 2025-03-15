@@ -8,26 +8,34 @@ import androidx.test.uiautomator.Until
 
 fun clearDiscordCookies(device: UiDevice) {
     try {
-        val connectionSecure = device.wait(Until.findObject(By.descContains("Connection is secure")), 20_000)
-        if (connectionSecure == null) {
-            throw AssertionError("Page did not load: 'Connection is secure' not found!")
-        }
+        val connectionSecure =
+            device.wait(Until.findObject(By.descContains("Connection is secure")), 20_000)
+                ?: throw AssertionError("Page did not load: 'Connection is secure' not found!")
         connectionSecure.click()
         Thread.sleep(1000)
 
         device.findObject(UiSelector().textContains("Cookies")).click()
         Thread.sleep(1000)
 
-        device.findObject(UiSelector().descriptionContains("Clear cookies")).click()
-        Thread.sleep(1000)
+        val clearCookies = device.findObject(UiSelector().descriptionContains("Clear cookies"))
+        if (clearCookies.exists()) {
+            clearCookies.click()
+            Thread.sleep(1000)
 
-        device.findObject(UiSelector().text("Clear")).click()
-        Thread.sleep(1000)
+            device.findObject(UiSelector().text("Clear")).click()
+            Thread.sleep(1000)
+        } else {
+            device.findObject(UiSelector().textContains("stored data")).click()
+            Thread.sleep(1000)
 
-        Log.d("FindGroupTest", "Successfully cleared Discord cookies!")
+            device.findObject(UiSelector().text("Delete")).click()
+            Thread.sleep(1000)
+        }
+
+        Log.d("UiAutomator", "Successfully cleared Discord cookies!")
 
     } catch (e: Exception) {
-        Log.e("FindGroupTest", "Failed to clear Discord cookies", e)
+        Log.e("UiAutomator", "Failed to clear Discord cookies", e)
     }
 }
 

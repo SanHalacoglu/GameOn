@@ -1,30 +1,25 @@
 package com.example.gameon
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
-import com.example.gameon.classes.Group
-import com.example.gameon.classes.User
-import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -46,7 +41,20 @@ class ViewExistingGroupTest {
     fun setup() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+
+        val startupIntent = Intent(context, StartupActivity::class.java)
+        val startupScenario = ActivityScenario.launch<LoginActivity>(startupIntent)
+
+        startupScenario.use {
+            composeTestRule.waitForIdle()
+
+            // Skip if logged in to the correct account
+            if(device.findObject(UiSelector().text("gameonapp")).exists()) {
+                return
+            }
+        }
+
         val discordIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.com/oauth2/authorize?client_id=1342993900419420181&redirect_uri=http://52.160.40.146:3000/auth/redirect&response_type=code&scope=identify+email+gdm.join+guilds.join")).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
