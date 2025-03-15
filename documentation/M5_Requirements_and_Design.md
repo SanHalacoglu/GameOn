@@ -156,7 +156,7 @@
 
 ### March 12th 2025 Changes
 
-#### 3.3 Non Functional Requirements
+#### 3.5 Non Functional Requirements
 - **Change**: Change non functional requirements.
 - **Modified Sections**: Non Functional Requirements
 - **Rationale**: Based on the feedback received from Milestone 3, we revised and updated our non-functional requirements. The previous requirements were untestable and lacked measurable criteria. We have now replaced them with two new non-functional requirements that are clear, measurable, and testable.
@@ -245,10 +245,10 @@
                 1. User is on the main page of GameOn.
                 2. User clicks the “Find Group” button.
                 3. The "Find Group" button becomes disabled and says "Finding".
-                4. A matchamking request is submitted, and the user is added to the matchmaking queue.
+                4. A matchmaking request is submitted, and the user is added to the matchmaking queue.
                 5. A group is found based on the user's preferences.
                 6. A popup appears stating "You have been matched with a group!" 
-                7. The new group appears in the "view existing group" section of the main page.
+                7. The new group appears in the "My Groups" section of the main page.
             - **Failure scenario(s)**:
                 - 1a. Not enough users in the matchmaking queue, After a timeout, the system removes the user from matchmaking queue and displays a timeout popup.
 
@@ -266,10 +266,10 @@
                 1. User is on the main page of GameOn.
                 2. User clicks on an existing group from the "My Groups" section.
                 3. The View Existing Groups page opens, displaying the group name, group members, and a "Go to Discord Group" button.
-                4. User clicks the "Go to Discord Group"
-                5. Discord opens to the newly created group with members added.
+                4. User clicks the "Go to Discord Group."
+                5. Chrome opens the Discord web version and displays the newly created group with the added members.
             - **Failure scenario(s)**:
-                - 1a. The group has been deleted or is no longer available when the user tries to click it. The groups list is update and displays "No groups found".
+                - 1a. The group has been deleted or is no longer available when the user tries to click it. The groups list is updated and displays "No groups found".
 
 <a name="fr5"></a>
 
