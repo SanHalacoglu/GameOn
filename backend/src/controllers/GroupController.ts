@@ -10,8 +10,8 @@ import { ChannelType, Client, GatewayIntentBits, OverwriteResolvable, OverwriteT
 
 
 const DISCORD_CHANNEL_URL = "https://discord.com/channels/";
-const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || "";
-const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID || "";
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN ?? "";
+const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID ?? "";
 
 export const getGroups = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -55,7 +55,7 @@ export const createGroup = async (req: Request, res: Response): Promise<void> =>
     const gameRepository = AppDataSource.getRepository(Game);
 
     const game = await gameRepository.findOne({
-      where: { game_id: parseInt(game_id) },
+      where: { game_id: parseInt(game_id as string) },
     });
 
     if (!game) {

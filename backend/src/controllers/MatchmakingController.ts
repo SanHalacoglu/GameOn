@@ -15,9 +15,9 @@ export const initiateMatchmaking = async (req: Request, res: Response): Promise<
   try {
     const preferencesRepository = AppDataSource.getRepository(Preferences);
     const preferences = await preferencesRepository.findOne({
-      where: { preference_id: parseInt(preference_id) },
+      where: { preference_id: parseInt(preference_id as string) },
       relations: ["user", "game"],
-    });
+    }) as Preferences|undefined;
 
     if (!preferences) {
       res.status(404).json({ message: "Preferences not found" });

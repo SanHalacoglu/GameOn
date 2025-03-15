@@ -5,7 +5,7 @@ import { User } from "../entity/User";
 import { Group } from "../entity/Group";
 import axios from "axios";
 
-const DB_SERVICE_URL = process.env.DB_SERVICE_URL || "";
+const DB_SERVICE_URL = process.env.DB_SERVICE_URL ?? "";
 
 export const getReports = async (req: Request, res: Response) => {
   try {

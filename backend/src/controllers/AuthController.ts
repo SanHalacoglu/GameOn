@@ -9,11 +9,11 @@ dotenv.config();
 const DISCORD_AUTH_URL = "https://discord.com/api/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
 const DISCORD_USER_URL = "https://discord.com/api/users/@me";
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
-const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || "";
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID ?? "";
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET ?? "";
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI ?? "";
 
-const DB_SERVICE_URL = process.env.DB_SERVICE_URL || "";
+const DB_SERVICE_URL = process.env.DB_SERVICE_URL ?? "";
 
 
 /** Simply used to tell the frontend to redirect to the Preferences Activity.\
@@ -206,7 +206,7 @@ export async function handleDiscordCallback(req: Request, res: Response) {
  */
 export async function handleRegister(req: Request, res: Response) {
   const sessionData = req.session.user!;
-  if (sessionData.discord_id != req.body.discord_id as String | null) {
+  if (sessionData.discord_id != req.body.discord_id as string|null) {
     res.status(403).json({ message: "Discord ID does not match session information." })
     return
   }

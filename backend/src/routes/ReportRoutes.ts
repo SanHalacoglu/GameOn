@@ -1,5 +1,5 @@
 import express from "express";
-import { protectEndpoint } from "../controllers/AuthController";
+// import { protectEndpoint } from "../controllers/AuthController";
 import {
   getReports,
   getReportById,

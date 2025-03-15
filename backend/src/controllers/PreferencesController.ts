@@ -86,7 +86,7 @@ export const createPreferences = async (req: Request, res: Response): Promise<vo
     }
 
     const game = await gameRepository.findOne({
-      where: { game_id: parseInt(game_id) },
+      where: { game_id: parseInt(game_id as string) },
     });
 
     if (!game) {
