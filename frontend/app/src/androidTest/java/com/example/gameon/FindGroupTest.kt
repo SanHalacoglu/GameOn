@@ -104,7 +104,7 @@ class FindGroupTest {
         composeTestRule.onNodeWithTag("FindGroupButton").assertTextContains("Finding...")
 
         composeTestRule.waitUntil(timeoutMillis = 120000) {
-            composeTestRule.onAllNodesWithText("Group found! Navigating to group page.").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithText("You have been matched with a group!").fetchSemanticsNodes().isNotEmpty()
         }
 
         composeTestRule.onNodeWithTag("MatchmakingPopup").assertIsDisplayed()
@@ -114,6 +114,8 @@ class FindGroupTest {
         composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule.onAllNodesWithTag("MatchmakingPopup").fetchSemanticsNodes().isEmpty()
         }
+
+        composeTestRule.onNodeWithTag("Valorant Matchmaking Group").assertIsDisplayed()
     }
 
     @Test

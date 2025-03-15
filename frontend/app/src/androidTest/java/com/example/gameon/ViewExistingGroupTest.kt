@@ -147,9 +147,8 @@ class ViewExistingGroupTest {
         val testGroup = composeTestRule.onNodeWithTag("Valorant Matchmaking Group")
         composeTestRule.waitUntil { testGroup.isDisplayed() }
 
-        // Mock group deletion before clicking on group
         mainActivity?.runOnUiThread {
-            mainActivity?.getGroupListState()?.value = emptyList() // Simulate API returning no groups
+            mainActivity?.getGroupListState()?.value = emptyList()
         }
 
         composeTestRule.waitUntil(timeoutMillis = 5000) {
