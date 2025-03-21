@@ -162,6 +162,7 @@ export async function handleDiscordCallback(req: Request, res: Response) {
         discord_refresh_token: tokenData.refresh_token,
         discord_email: discordUserData.email,
         discord_username: discordUserData.username,
+        discord_avatar: discordUserData.avatar,
         temp_session: true
       }
 
@@ -215,7 +216,8 @@ export async function handleRegister(req: Request, res: Response) {
   const userData = {
     discord_id: sessionData.discord_id,
     email: sessionData.discord_email!,
-    username: sessionData.discord_username!
+    username: sessionData.discord_username!,
+    avatar: sessionData.discord_avatar || null
   } as User
 
   try {
