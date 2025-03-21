@@ -59,7 +59,7 @@
 
 #### 2.1.2. Commit Hash Where Tests Run
 
-`[Insert Commit SHA here]`
+`13ed3639a32a3011a88a8c7c4c0cacd565c83c25`
 
 #### 2.1.3. Explanation on How to Run the Tests
 
