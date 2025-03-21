@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -36,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -53,17 +56,24 @@ import com.example.gameon.classes.User
 import com.example.gameon.composables.Header
 import com.example.gameon.composables.ReportButton
 import kotlinx.coroutines.launch
+import java.util.Date
+import androidx.compose.material3.AlertDialog
 
 class ViewGroupActivity : ComponentActivity() {
+    val groupMembersState = mutableStateOf<List<User>>(emptyList())
+    fun getGroupMemberState() = groupMembersState
+    val showDialog = mutableStateOf(false)
+    val dialogMessage = mutableStateOf("")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         val group: Group? = intent.getParcelableExtra("selected_group")
+        Log.d("ViewGroupActivity", "Group: $group")
         val groupId = group?.group_id ?: 0
         val groupName = group?.group_name ?: "Unknown Group"
         val groupMembersState = mutableStateOf<List<User>>(emptyList())
-
         val user = SessionDetails(this).getUser()
         val discordId = user?.discord_id ?: "0"
         val discordUsername = user?.username ?: "Unknown"
@@ -74,6 +84,11 @@ class ViewGroupActivity : ComponentActivity() {
         lifecycleScope.launch {
             val groupMemberList = getGroupMembers(groupId, this@ViewGroupActivity)
             val userList = groupMemberList.mapNotNull { it.user }
+
+            if (userList.isEmpty()) {
+                dialogMessage.value = "Failed to load group members. Please try again later."
+                showDialog.value = true
+            }
             groupMembersState.value = userList
         }
 
@@ -107,6 +122,23 @@ class ViewGroupActivity : ComponentActivity() {
                 Column(modifier = Modifier.weight(1f)) {
                     MainContent(groupMembersState, groupName, groupId)
                 }
+
+                if (showDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = { showDialog.value = false },
+                        title = { Text("Error") },
+                        text = { Text(dialogMessage.value) },
+                        confirmButton = {
+                            TextButton(
+                                onClick = { showDialog.value = false }
+                            ) {
+                                Text("OK")
+                            }
+                        },
+                        modifier = Modifier.testTag("GroupMembersErrorPopup")
+                    )
+                }
+
                 ReportButton(
                     "Back",
                     outlined = true,
@@ -181,7 +213,8 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
                                     .fillMaxWidth()
                                     .height(50.dp)
                                     .clip(RoundedCornerShape(15.dp))
-                                    .background(Purple.copy(alpha = 0.2f)),
+                                    .background(Purple.copy(alpha = 0.2f))
+                                    .testTag("$username"),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -223,7 +256,8 @@ fun GoToDiscord(groupId: Int, context: Context) {
                         context.startActivity(intent)
                     }
                 }
-            },
+            }
+            .testTag("DiscordButton"),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -257,7 +291,8 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .testTag("$groupName"),
             textAlign = TextAlign.Center
         )
 

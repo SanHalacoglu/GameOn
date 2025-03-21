@@ -1,0 +1,75 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+      tag:
+        description: 'Tag to deploy (optional)'
+        required: false
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - name: Checkout tag if provided
+        if: ${{ github.event.inputs.tag != '' }}
+        run: git checkout ${{ github.event.inputs.tag }}
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup SSH known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOL
+          DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}
+          DISCORD_CLIENT_SECRET=${{ secrets.DISCORD_CLIENT_SECRET }}
+          DISCORD_REDIRECT_URI=${{ secrets.PROD_DISCORD_REDIRECT_URI }}
+          DISCORD_GUILD_ID=${{ secrets.DISCORD_GUILD_ID }}
+          DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}
+          PORT=${{ secrets.PROD_PORT }}
+          DB_SERVICE_URL=${{ secrets.PROD_DB_SERVICE_URL }}
+          MYSQL_HOST=${{ secrets.PROD_MYSQL_HOST }}
+          MYSQL_PORT=${{ secrets.PROD_MYSQL_PORT }}
+          MYSQL_USER=${{ secrets.PROD_MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.PROD_MYSQL_PASSWORD }}
+          MYSQL_DB=${{ secrets.PROD_MYSQL_DB }}
+          SESSION_SECRET=${{ secrets.PROD_SESSION_SECRET }}
+          REDIS_URL=${{ secrets.PROD_REDIS_URL }}
+          EOL
+
+      - name: Create backup
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "if [ -d ~/production ]; then \
+            mkdir -p ~/backups && \
+            cp -r ~/production ~/backups/production-backup-\$(date +%Y%m%d%H%M%S) && \
+            echo 'Backup created'; \
+          fi"
+    
+      - name: Deploy to production environment
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "mkdir -p ~/production"
+          scp -r ./backend ./docker-compose.yml ./.env ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:~/production/
+
+      - name: Stop current services and start new ones
+        run: |
+          ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "cd ~/production && \
+          docker compose -p production down || true && \
+          docker compose -p production up -d --build && \
+          echo 'Production deployment completed successfully'"

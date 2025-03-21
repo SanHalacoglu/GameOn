@@ -7,7 +7,7 @@ export class GroupMember {
   @PrimaryGeneratedColumn()
   group_member_id!: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.groupMembers)
   @JoinColumn({ name: "discord_id" })
   user!: User;
 

@@ -8,8 +8,8 @@ import { Preferences } from "../entity/Preference";
 import { createDiscordGroup } from "../controllers/GroupController";
 
 const MATCHMAKING_QUEUE = "matchmaking_queue";
-const MATCHMAKING_TIMEOUT = 3 * 60 * 1000; // 3 minutes
-const GROUP_SIZE = 3;
+const MATCHMAKING_TIMEOUT = 1 * 60 * 1000; // 3 minutes
+const GROUP_SIZE = 2;
 const STATUS_CACHE_EXPIRATION = 60; // 1 minute
 
 interface MatchmakingRequest {
@@ -178,10 +178,11 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
   console.log(`MATCHMAKING: Request details: ${uniqueMembers.map(m => 
     `discord_id=${m.discord_id}, token=${m.discord_access_token.substring(0, 8)}...`
   ).join(' | ')}`);
-  const discordAuthTokens = uniqueMembers.map(member => member.discord_access_token);
-  // broken for now
-  // const groupUrl = await createDiscordGroup(discordAuthTokens);
-  group.groupurl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  const discordAuthTokens = members.map(member => member.discord_access_token);
+  const discordIds = members.map(member => member.discord_id);
+
+  const groupUrl = await createDiscordGroup(discordAuthTokens, discordIds);
+  group.groupurl = groupUrl;
 
   await groupRepository.save(group);
 

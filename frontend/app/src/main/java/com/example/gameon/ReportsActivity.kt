@@ -19,6 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -57,6 +64,7 @@ class ReportsActivity : ComponentActivity() {
         val discordUsername = user?.username ?: "Unknown"
         val discordAvatar = user?.avatar
 
+        val reasonError = mutableStateOf(false)
         val canSubmit = mutableStateOf(false)
 
         val width = 300.dp
@@ -120,6 +128,7 @@ class ReportsActivity : ComponentActivity() {
                             userListState.value,
                             selectedUser,
                             reason,
+                            reasonError,
                             canSubmit,
                             Modifier.width(width)
                         ) {
@@ -139,7 +148,7 @@ class ReportsActivity : ComponentActivity() {
                             "Submit Report",
                             containerColor = Red,
                             enabled = canSubmit.value,
-                            modifier = Modifier.width(width)
+                            modifier = Modifier.width(width).testTag("SubmitReportButton")
                         ) {
                             lifecycleScope.launch {
                                 // Default to 0 if not found
@@ -155,13 +164,15 @@ class ReportsActivity : ComponentActivity() {
                                         reason = reason.value,
                                     ),
                                     context = this@ReportsActivity,
-                                )
+                                ) {
+                                    reasonError.value = true
+                                }
                             }
                         }
                         ReportButton(
                             "Cancel",
                             outlined = true,
-                            modifier = Modifier.width(width)
+                            modifier = Modifier.width(width).testTag("CancelReportButton")
                         ) {
                             finish()
                         }
@@ -179,6 +190,7 @@ fun Reports(
     userList: List<User>,
     selectedUser: MutableState<User?>,
     reason: MutableState<String>,
+    reasonError: MutableState<Boolean>,
     canSubmit: MutableState<Boolean>,
     modifier: Modifier,
     onSelectedGroup: () -> Unit = { },
@@ -210,7 +222,9 @@ fun Reports(
             )
         TextInput(
             reason,
-            modifier = modifier.height(350.dp)
+            modifier = modifier.height(350.dp).testTag("ReasonInput"),
+            "Error: Please limit your input to 500 characters",
+            reasonError.value
         )
     }
 }
@@ -258,6 +272,7 @@ fun ReportsPreview() {
                 userList,
                 selectedUser,
                 reason,
+                remember { mutableStateOf(false) },
                 remember { mutableStateOf(true) },
                 Modifier.width(width)
             )

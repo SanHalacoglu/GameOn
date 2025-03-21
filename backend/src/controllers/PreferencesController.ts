@@ -5,46 +5,61 @@ import { User } from "../entity/User";
 import { Game } from "../entity/Game";
 
 export const getPreferences = async (req: Request, res: Response): Promise<void> => {
-  const preferencesRepository = AppDataSource.getRepository(Preferences);
-  const preferences = await preferencesRepository.find({ relations: ["user", "game"] });
-  res.json(preferences);
+  try {
+    const preferencesRepository = AppDataSource.getRepository(Preferences);
+    const preferences = await preferencesRepository.find({ relations: ["user", "game"] });
+    res.json(preferences);
+  } catch (error) {
+    console.error("Error fetching preferences:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 export const getPreferencesById = async (req: Request, res: Response): Promise<void> => {
-  const preferencesRepository = AppDataSource.getRepository(Preferences);
-  const preferences = await preferencesRepository.findOne({
-    where: { preference_id: parseInt(req.params.id) },
-    relations: ["user", "game"],
-  });
-  if (preferences) {
-    res.json(preferences);
-  } else {
-    res.status(404).json({ message: "Preferences not found" });
+  try {
+    const preferencesRepository = AppDataSource.getRepository(Preferences);
+    const preferences = await preferencesRepository.findOne({
+      where: { preference_id: parseInt(req.params.id) },
+      relations: ["user", "game"],
+    });
+    if (preferences) {
+      res.json(preferences);
+    } else {
+      res.status(404).json({ message: "Preferences not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching preferences by ID:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const getPreferencesByUserId = async (req: Request, res: Response): Promise<void> => {
-  const preferencesRepository = AppDataSource.getRepository(Preferences);
-  const userRepository = AppDataSource.getRepository(User);
+  try {
+    const preferencesRepository = AppDataSource.getRepository(Preferences);
+    const userRepository = AppDataSource.getRepository(User);
 
-  const user = await userRepository.findOne({
-    where: { discord_id: req.params.userId },
-  });
+    const user = await userRepository.findOne({
+      where: { discord_id: req.params.userId },
+    });
 
-  if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
-  }
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
-  const preferences = await preferencesRepository.findOne({
-    where: { user: { discord_id: req.params.userId } },
-    relations: ["user", "game"],
-  });
+    const preferences = await preferencesRepository.findOne({
+      where: { user: { discord_id: req.params.userId } },
+      relations: ["user", "game"],
+    });
 
-  if (preferences) {
-    res.json(preferences);
-  } else {
-    res.status(404).json({ message: "Preferences not found" });
+    if (preferences) {
+      res.json(preferences);
+    } else {
+      res.status(404).json({ message: "Preferences not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching preferences by user ID:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -71,7 +86,7 @@ export const createPreferences = async (req: Request, res: Response): Promise<vo
     }
 
     const game = await gameRepository.findOne({
-      where: { game_id: parseInt(game_id) },
+      where: { game_id: parseInt(game_id as string) },
     });
 
     if (!game) {
@@ -96,47 +111,57 @@ export const createPreferences = async (req: Request, res: Response): Promise<vo
 };
 
 export const updatePreferences = async (req: Request, res: Response): Promise<void> => {
-  const preferencesRepository = AppDataSource.getRepository(Preferences);
-  const gameRepository = AppDataSource.getRepository(Game);
+  try {
+    const preferencesRepository = AppDataSource.getRepository(Preferences);
+    const gameRepository = AppDataSource.getRepository(Game);
 
-  const preferences = await preferencesRepository.findOne({
-    where: { preference_id: parseInt(req.params.id) },
-    relations: ["game"],
-  });
+    const preferences = await preferencesRepository.findOne({
+      where: { preference_id: parseInt(req.params.id) },
+      relations: ["game"],
+    });
 
-  if (preferences) {
-    const { preference_id, game_id, ...updateData } = req.body;
+    if (preferences) {
+      const { preference_id, game_id, ...updateData } = req.body;
 
-    if (game_id) {
-      const game = await gameRepository.findOne({
-        where: { game_id: parseInt(game_id) },
-      });
+      if (game_id) {
+        const game = await gameRepository.findOne({
+          where: { game_id: parseInt(game_id) },
+        });
 
-      if (!game) {
-        res.status(404).json({ message: "Game not found" });
-        return;
+        if (!game) {
+          res.status(404).json({ message: "Game not found" });
+          return;
+        }
+
+        preferences.game = game;
       }
 
-      preferences.game = game;
+      preferencesRepository.merge(preferences, updateData);
+      await preferencesRepository.save(preferences);
+      res.json(preferences);
+    } else {
+      res.status(404).json({ message: "Preferences not found" });
     }
-
-    preferencesRepository.merge(preferences, updateData);
-    await preferencesRepository.save(preferences);
-    res.json(preferences);
-  } else {
-    res.status(404).json({ message: "Preferences not found" });
+  } catch (error) {
+    console.error("Error updating preferences:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const deletePreferences = async (req: Request, res: Response): Promise<void> => {
-  const preferencesRepository = AppDataSource.getRepository(Preferences);
-  const preferences = await preferencesRepository.findOne({
-    where: { preference_id: parseInt(req.params.id) },
-  });
-  if (preferences) {
-    await preferencesRepository.remove(preferences);
-    res.status(204).send();
-  } else {
-    res.status(404).json({ message: "Preferences not found" });
+  try {
+    const preferencesRepository = AppDataSource.getRepository(Preferences);
+    const preferences = await preferencesRepository.findOne({
+      where: { preference_id: parseInt(req.params.id) },
+    });
+    if (preferences) {
+      await preferencesRepository.remove(preferences);
+      res.status(204).send();
+    } else {
+      res.status(404).json({ message: "Preferences not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting preferences:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

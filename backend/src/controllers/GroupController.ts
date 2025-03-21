@@ -5,153 +5,215 @@ import { Game } from "../entity/Game";
 import { User } from "../entity/User";
 import { GroupMember } from "../entity/GroupMember";
 import { Not } from "typeorm";
-import { RedisQueryResultCache } from "typeorm/cache/RedisQueryResultCache.js";
 import axios from "axios";
+import { ChannelType, Client, GatewayIntentBits, OverwriteResolvable, OverwriteType } from 'discord.js';
 
-const DISCORD_USERS_CHANNELS_URL = "https://discord.com/api/users/@me/channels";
-const DISCORD_CUSTOM_CHANNEL_URL = "https://discord.com/channels/@me/";
+
+const DISCORD_CHANNEL_URL = "https://discord.com/channels/";
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN ?? "";
+const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID ?? "";
 
 export const getGroups = async (req: Request, res: Response): Promise<void> => {
-  const groupRepository = AppDataSource.getRepository(Group);
-  const groups = await groupRepository.find({ relations: ["game", "members"] });
-  res.json(groups);
+  try {
+    const groupRepository = AppDataSource.getRepository(Group);
+    const groups = await groupRepository.find({ relations: ["game", "members"] });
+    res.json(groups);
+  } catch (error) {
+    console.error("Error fetching groups:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 export const getGroupById = async (req: Request, res: Response): Promise<void> => {
-  const groupRepository = AppDataSource.getRepository(Group);
-  const group = await groupRepository.findOne({
-    where: { group_id: parseInt(req.params.id) },
-    relations: ["game", "members"],
-  });
-  if (group) {
-    res.json(group);
-  } else {
-    res.status(404).json({ message: "Group not found" });
+  try {
+    const groupRepository = AppDataSource.getRepository(Group);
+    const group = await groupRepository.findOne({
+      where: { group_id: parseInt(req.params.group_id) },
+      relations: ["game", "members"],
+    });
+    if (group) {
+      res.json(group);
+    } else {
+      res.status(404).json({ message: "Group not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching group by ID:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const createGroup = async (req: Request, res: Response): Promise<void> => {
-  const { game_id, group_name, max_players } = req.body;
+  try {
+    const { game_id, group_name, max_players } = req.body;
 
-  if (!game_id || !group_name || !max_players) {
-    res.status(400).json({ message: "All fields are required" });
-    return;
+    if (!game_id || !group_name || !max_players) {
+      res.status(400).json({ message: "All fields are required" });
+      return;
+    }
+
+    const groupRepository = AppDataSource.getRepository(Group);
+    const gameRepository = AppDataSource.getRepository(Game);
+
+    const game = await gameRepository.findOne({
+      where: { game_id: parseInt(game_id as string) },
+    });
+
+    if (!game) {
+      res.status(404).json({ message: "Game not found" });
+      return;
+    }
+
+    const group = groupRepository.create({
+      game,
+      group_name,
+      max_players
+    });
+    await groupRepository.save(group);
+    res.status(201).json(group);
+  } catch (error) {
+    console.error("Error creating group:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  const groupRepository = AppDataSource.getRepository(Group);
-  const gameRepository = AppDataSource.getRepository(Game);
-
-  const game = await gameRepository.findOne({
-    where: { game_id: parseInt(game_id) },
-  });
-
-  if (!game) {
-    res.status(404).json({ message: "Game not found" });
-    return;
-  }
-
-  const group = groupRepository.create({
-    game,
-    group_name,
-    max_players
-  });
-  await groupRepository.save(group);
-  res.status(201).json(group);
 };
 
 export const updateGroup = async (req: Request, res: Response): Promise<void> => {
-  const groupRepository = AppDataSource.getRepository(Group);
-  const group = await groupRepository.findOne({
-    where: { group_id: parseInt(req.params.id) },
-  });
-  if (group) {
-    const { group_id, ...updateData } = req.body;
-    groupRepository.merge(group, updateData);
-    await groupRepository.save(group);
-    res.json(group);
-  } else {
-    res.status(404).json({ message: "Group not found" });
+  try {
+    const groupRepository = AppDataSource.getRepository(Group);
+    const group = await groupRepository.findOne({
+      where: { group_id: parseInt(req.params.group_id) },
+    });
+    if (group) {
+      const { group_id, ...updateData } = req.body;
+      groupRepository.merge(group, updateData);
+      await groupRepository.save(group);
+      res.json(group);
+    } else {
+      res.status(404).json({ message: "Group not found" });
+    }
+  } catch (error) {
+    console.error("Error updating group:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const deleteGroup = async (req: Request, res: Response): Promise<void> => {
-  const groupRepository = AppDataSource.getRepository(Group);
-  const group = await groupRepository.findOne({
-    where: { group_id: parseInt(req.params.id) },
-  });
-  if (group) {
-    await groupRepository.remove(group);
-    res.status(204).send();
-  } else {
-    res.status(404).json({ message: "Group not found" });
+  try {
+    const groupRepository = AppDataSource.getRepository(Group);
+    const group = await groupRepository.findOne({
+      where: { group_id: parseInt(req.params.group_id) },
+    });
+    if (group) {
+      await groupRepository.remove(group);
+      res.status(204).send();
+    } else {
+      res.status(404).json({ message: "Group not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting group:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const joinGroup = async (req: Request, res: Response): Promise<void> => {
-  const { group_id } = req.params;
-  const { discord_id } = req.body;
+  try {
+    const { group_id } = req.params;
+    const { discord_id } = req.body;
 
-  const groupRepository = AppDataSource.getRepository(Group);
-  const userRepository = AppDataSource.getRepository(User);
-  const groupMemberRepository = AppDataSource.getRepository(GroupMember);
+    const parsedGroupId = parseInt(group_id);
+    if (isNaN(parsedGroupId)) {
+      res.status(400).json({ message: "Invalid group ID" });
+      return;
+    }
 
-  const group = await groupRepository.findOne({
-    where: { group_id: parseInt(group_id) },
-    relations: ["members"],
-  });
+    const groupRepository = AppDataSource.getRepository(Group);
+    const userRepository = AppDataSource.getRepository(User);
+    const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
-  if (!group) {
-    res.status(404).json({ message: "Group not found" });
-    return;
-  }
+    // Find the group
+    const group = await groupRepository.findOne({
+      where: { group_id: parsedGroupId },
+      relations: ["members"],
+    });
 
-  const user = await userRepository.findOne({
-    where: { discord_id },
-  });
+    if (!group) {
+      res.status(404).json({ message: "Group not found" });
+      return;
+    }
 
-  if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
-  }
+    // Find the user
+    const user = await userRepository.findOne({
+      where: { discord_id },
+    });
 
-  const groupMember = groupMemberRepository.create({
-    group,
-    user,
-  });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
-  await groupMemberRepository.save(groupMember);
+    // Check if the user is already a member of the group
+    const existingMember = await groupMemberRepository.findOne({
+      where: {
+        group: { group_id: group.group_id },
+        user: { discord_id },
+      },
+    });
 
-  // Reload the group to ensure it has the members relation populated
-  const updatedGroup = await groupRepository.findOne({
-    where: { group_id: group.group_id },
-    relations: ["members"],
-  });
+    if (existingMember) {
+      res.status(409).json({ message: "User is already a member of the group" });
+      return;
+    }
 
-  if (updatedGroup) {
-    console.log(`Group ${updatedGroup.group_name} has ${updatedGroup.members.length} members`);
-    res.json(updatedGroup);
-  } else {
-    res.status(500).json({ message: "Failed to update group members" });
+    // Create a new GroupMember
+    const groupMember = groupMemberRepository.create({
+      group,
+      user,
+    });
+
+    await groupMemberRepository.save(groupMember);
+
+    // Reload the group to ensure it has the members relation populated
+    const updatedGroup = await groupRepository.findOne({
+      where: { group_id: group.group_id },
+      relations: ["members"],
+    });
+
+    if (updatedGroup) {
+      res.json(updatedGroup);
+    } else {
+      res.status(500).json({ message: "Error reloading group after adding member" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const leaveGroup = async (req: Request, res: Response): Promise<void> => {
-  const groupRepository = AppDataSource.getRepository(Group);
-  const groupMemberRepository = AppDataSource.getRepository(GroupMember);
+  try {
+    const { group_id } = req.params;
+    const { discord_id } = req.body;
 
-  const groupMember = await groupMemberRepository.findOne({
-    where: {
-      group: { group_id: parseInt(req.params.id) },
-      user: { discord_id: req.body.discord_id },
-    },
-  });
+    const groupRepository = AppDataSource.getRepository(Group);
+    const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
-  if (groupMember) {
+    // Find the group member
+    const groupMember = await groupMemberRepository.findOne({
+      where: {
+        group: { group_id: parseInt(group_id) },
+        user: { discord_id },
+      },
+    });
+
+    if (!groupMember) {
+      res.status(404).json({ message: "Group member not found" });
+      return;
+    }
+
+    // Remove the group member
     await groupMemberRepository.remove(groupMember);
 
     // Reload the group to ensure it has the members relation populated
     const updatedGroup = await groupRepository.findOne({
-      where: { group_id: parseInt(req.params.id) },
+      where: { group_id: parseInt(group_id) },
       relations: ["members"],
     });
 
@@ -161,66 +223,130 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
     } else {
       res.status(500).json({ message: "Failed to update group members" });
     }
-  } else {
-    res.status(404).json({ message: "Group member not found" });
+  } catch (error) {
+    console.error("Error leaving group:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 export const getGroupMembers = async (req: Request, res: Response) => {
-  const groupMemberRepository = AppDataSource.getRepository(GroupMember);
+  try {
+    const groupMemberRepository = AppDataSource.getRepository(GroupMember);
 
-  const groupMembers = await groupMemberRepository.find({
-    where: {
-      group: { group_id: parseInt(req.params.id) },
-      user: { discord_id: Not(req.session.user!.discord_id) }
-    },
-    relations: ["user"]
-  })
+    const groupMembers = await groupMemberRepository.find({
+      where: {
+        group: { group_id: parseInt(req.params.group_id) },
+        user: { discord_id: Not(req.session.user!.discord_id) }
+      },
+      relations: ["user"]
+    });
 
-  if (groupMembers.length) {
-    res.json(groupMembers)
-  } else {
-    res.status(404).json({ message: "No group members found" })
-  }
-}
-
-export const getGroupUrl = async (req: Request, res: Response): Promise<void> => {
-  const groupRepository = AppDataSource.getRepository(Group);
-  const group = await groupRepository.findOne({
-    where: { group_id: parseInt(req.params.id) },
-  });
-  if (group) {
-    res.json({ groupurl: group.groupurl });
-  } else {
-    res.status(404).json({ message: "Group not found" });
+    if (groupMembers.length) {
+      res.json(groupMembers);
+    } else {
+      res.status(404).json({ message: "No group members found" });
+    }
+  } catch (error) {
+    console.error("Error fetching group members:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-/**
- * Creates a Group DM in discord with the provided discord auth tokens.
- * Requires gdm.join scope.
- * @param discord_auth_tokens 
- * @returns Channel URL of the created group.
- */
-export const createDiscordGroup = async (discord_auth_tokens: string[]): Promise<string> => {
-  const payload = {
-    access_tokens: discord_auth_tokens
+export const getGroupUrl = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const groupRepository = AppDataSource.getRepository(Group);
+    const group = await groupRepository.findOne({
+      where: { group_id: parseInt(req.params.group_id) },
+    });
+    if (group) {
+      res.json({ groupurl: group.groupurl });
+    } else {
+      res.status(404).json({ message: "Group not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching group URL:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//TODO: Implement Error Handling
+export const createDiscordGroup = async (discord_auth_tokens: string[], discord_ids: string[]): Promise<string> => {
+  const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates]
+  });
+
+  await client.login(DISCORD_BOT_TOKEN);
+  console.log(`Bot login successful`);
+  const guild = await client.guilds.fetch(DISCORD_GUILD_ID);
+  console.log(`Guild fetched: ${guild}`);
+
+  if (!guild) {
+    console.error('Guild not found');
+    return "";
   }
 
-  console.log("Trying to create group for " + discord_auth_tokens + " users");
-  const response_channel_info = await axios.post(DISCORD_USERS_CHANNELS_URL, JSON.stringify(payload), {
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${discord_auth_tokens[0]}`
+  for (let i = 0; i < discord_auth_tokens.length; i++) {
+    const discord_id = discord_ids[i];
+    const discord_auth_token = discord_auth_tokens[i];
+    await addDiscordUserToGuild(discord_auth_token, discord_id, guild.id);
+  }
+  console.log(`Added users to guild`);
+
+  const randomNumber = Math.floor(Math.random() * 20001);
+  const group_name = `Matchmaking-${randomNumber}-Text`;
+
+  const permissionOverwrites: OverwriteResolvable[] = [];
+
+  permissionOverwrites.push({
+    id: guild.id,
+    deny: ['ViewChannel']
+  });
+
+  for (const discord_id of discord_ids) {
+    permissionOverwrites.push({
+      id: discord_id,
+      type: OverwriteType.Member,
+      allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory']
+    });
+  }
+
+  console.log(`Trying to create channel: ${group_name}`);
+  try {
+    const channel = await guild.channels.create({
+      name: group_name,
+      type: ChannelType.GuildText,
+      permissionOverwrites: permissionOverwrites
+    });
+    console.log(`Created channel: ${channel.name}`);
+
+    client.destroy();
+
+    return `${DISCORD_CHANNEL_URL}${guild.id}/${channel.id}`;
+  }  catch (err) {
+    console.error('Error creating channel:', err);
+    return "";
+  }
+};
+
+const addDiscordUserToGuild = async (discord_auth_token: string, discord_id: string, guild_id: string): Promise<void> => {
+  console.log(`Adding Discord user to guild: ${discord_id} ${guild_id} with token ${discord_auth_token}`);
+  const response = await axios({
+    method: 'put',
+    url: `https://discord.com/api/v10/guilds/${guild_id}/members/${discord_id}`,
+    data: {
+        "access_token": discord_auth_token,
+    },
+    headers: {
+        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json',
     },
   });
 
-  if (response_channel_info.status === 200) {
-    console.log("Discord group created successfully");
-    return DISCORD_CUSTOM_CHANNEL_URL + response_channel_info.data.id;
+  if (response.status == 201) {
+    console.log("Discord user added to guild successfully.");
+  }else if (response.status == 204) {
+    console.log("Discord user already in guild.");
   } else {
-    console.error("Error creating Discord group" + response_channel_info.data);
-    return "";
+    console.error("Error adding Discord user to guild " + response.status);
   }
 };

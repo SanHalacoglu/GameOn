@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -78,6 +79,7 @@ fun <T> DropdownInput(
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .testTag("${label}TextField")
         )
 
         ExposedDropdownMenu(
@@ -88,13 +90,13 @@ fun <T> DropdownInput(
                 .padding(horizontal = 2.dp)
                 .heightIn(max = 250.dp)
         ) {
-            options.forEach { option ->
+            options.forEachIndexed { index, option ->
                 val optionText = displayText(option)
                 val selectedText = selectedOption.value?.let { displayText(it) }
 
                 val textColor = if (selectedText == optionText) BlueLight else White
                 val bgColor = if (selectedText == optionText) BlueDarker else BlueDark
-
+                
                 DropdownMenuItem(
                     text = { Text(optionText) },
                     onClick = {
@@ -111,7 +113,7 @@ fun <T> DropdownInput(
                         disabledTrailingIconColor = Color.Transparent
                     ),
                     leadingIcon = leadingIcon?.invoke(option),
-                    modifier = Modifier.background(bgColor)
+                    modifier = Modifier.background(bgColor).testTag("${label}_option_$index")
                 )
             }
         }
