@@ -4,7 +4,7 @@ import { Preferences } from "../../../src/entity/Preference";
 import { User } from "../../../src/entity/User";
 import { Game } from "../../../src/entity/Game";
 import { initiateMatchmaking, checkMatchmakingStatus } from "../../../src/controllers/MatchmakingController";
-import { addMatchmakingRequest, isUserInMatchmakingQueue, getUserMatchmakingStatus } from "../../../src/services/MatchmakingService";
+import { addMatchmakingRequest, getUserMatchmakingStatus } from "../../../src/services/MatchmakingService";
 
 // Mock the entire data-source module
 jest.mock("../../../src/data-source", () => ({
@@ -152,8 +152,8 @@ it("should return 400 if user is already in the matchmaking queue", async () => 
   };
   mockPreferencesRepository.findOne.mockResolvedValue(mockPreferences);
 
-  // Mock isUserInMatchmakingQueue to return "in_progress"
-  (isUserInMatchmakingQueue as jest.Mock).mockResolvedValue({ status: "in_progress" });
+  // Mock getUserMatchmakingStatus to return "in_progress"
+  (getUserMatchmakingStatus as jest.Mock).mockResolvedValue("in_progress");
 
   await initiateMatchmaking(req as Request, res as Response);
 
@@ -207,8 +207,8 @@ it("should initiate matchmaking and return 200 on success", async () => {
   };
   mockPreferencesRepository.findOne.mockResolvedValue(mockPreferences);
 
-  // Mock isUserInMatchmakingQueue to return "not_in_queue"
-  (isUserInMatchmakingQueue as jest.Mock).mockResolvedValue({ status: "not_in_queue" });
+  // Mock getUserMatchmakingStatus to return "not_found"
+  (getUserMatchmakingStatus as jest.Mock).mockResolvedValue("not_found");
 
   // Mock addMatchmakingRequest
   (addMatchmakingRequest as jest.Mock).mockResolvedValue(undefined);
@@ -263,24 +263,34 @@ it("should return 500 if an error occurs", async () => {
 // Input: Valid user ID with matchmaking in progress
 // Expected status code: 200
 // Expected behavior: Returns the matchmaking status
-// Expected output: { message: "Matchmaking in progress", timestamp: "2023-10-01T00:00:00Z" }
+// Expected output: { message: "Matchmaking in progress" }
 it("should return 200 with matchmaking status", async () => {
-  req.params = { discord_id: "test_user_123" };
-
-  // Mock getUserMatchmakingStatus to return "in_progress"
-  (getUserMatchmakingStatus as jest.Mock).mockResolvedValue({
-    status: "in_progress",
-    timestamp: "2023-10-01T00:00:00Z",
+    req.params = { discord_id: "test_user_123" };
+  
+    // Mock getUserMatchmakingStatus to return "in_progress"
+    (getUserMatchmakingStatus as jest.Mock).mockResolvedValue("in_progress");
+  
+    await checkMatchmakingStatus(req as Request, res as Response);
+  
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({ message: "Matchmaking in progress" });
   });
-
-  await checkMatchmakingStatus(req as Request, res as Response);
-
-  expect(status).toHaveBeenCalledWith(200);
-  expect(json).toHaveBeenCalledWith({
-    message: "Matchmaking in progress",
-    timestamp: "2023-10-01T00:00:00Z",
+  
+  // Input: Valid user ID with matchmaking completed (group found)
+  // Expected status code: 200
+  // Expected behavior: Returns the matchmaking status showing group found
+  // Expected output: { message: "Group found" }
+  it("should return 200 with group found status", async () => {
+    req.params = { discord_id: "test_user_123" };
+  
+    // Mock getUserMatchmakingStatus to return "group_found"
+    (getUserMatchmakingStatus as jest.Mock).mockResolvedValue("group_found");
+  
+    await checkMatchmakingStatus(req as Request, res as Response);
+  
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({ message: "Group found" });
   });
-});
 
 // Input: Valid user ID with no matchmaking in progress
 // Expected status code: 404
@@ -289,8 +299,8 @@ it("should return 200 with matchmaking status", async () => {
 it("should return 404 if matchmaking is not in progress", async () => {
   req.params = { discord_id: "test_user_123" };
 
-  // Mock getUserMatchmakingStatus to return "not_in_queue"
-  (getUserMatchmakingStatus as jest.Mock).mockResolvedValue({ status: "not_in_queue" });
+  // Mock getUserMatchmakingStatus to return "not_found"
+  (getUserMatchmakingStatus as jest.Mock).mockResolvedValue("not_found");
 
   await checkMatchmakingStatus(req as Request, res as Response);
 

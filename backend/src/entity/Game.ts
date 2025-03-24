@@ -12,6 +12,9 @@ export class Game {
   @Column({ nullable: true })
   description!: string;
 
+  @Column({ default: 2})
+  group_size!: number;
+
   @OneToMany(() => Group, (group) => group.game)
   groups!: Group[];
 }
