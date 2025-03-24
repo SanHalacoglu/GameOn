@@ -1,14 +1,9 @@
 package com.example.gameon.api.methods
 
 import android.content.Context
-import android.util.Log
 import com.example.gameon.api.Api
 import com.example.gameon.api.interfaces.UsersApi
 import com.example.gameon.classes.Group
-import com.example.gameon.classes.Preferences
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import retrofit2.Response
 
 suspend fun getUserGroups(
     discordId: String? = null,

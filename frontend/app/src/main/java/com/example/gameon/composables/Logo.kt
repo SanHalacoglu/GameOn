@@ -30,11 +30,11 @@ fun Logo(
     large: Boolean = false
 ) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
-    val fontSize = if (large) 96.sp else 40.sp
-    val blurRadius = if (large) 40F else 18F
-    val iconWidth = if (large) 51.dp else 20.75.dp
-    val offsetX = if (large) 76.dp else 31.5.dp
-    val offsetY = if (large) 20.dp else 8.5.dp
+    val fontSize = if (large) 96.sp else 55.sp
+    val blurRadius = if (large) 40F else 20F
+    val iconWidth = if (large) 51.dp else 30.dp
+    val offsetX = if (large) 76.dp else 43.dp
+    val offsetY = if (large) 20.dp else 10.dp
 
     Box (
         contentAlignment = Alignment.TopCenter,

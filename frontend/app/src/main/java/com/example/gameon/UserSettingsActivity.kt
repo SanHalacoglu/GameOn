@@ -44,8 +44,10 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -98,7 +100,7 @@ class UserSettingsActivity : ComponentActivity() {
 
                 selectedLanguage.value = preferences.spoken_language ?: ""
                 selectedTimezone.value = preferences.time_zone ?: ""
-                selectedSkillLevel.value = preferences.skill_level ?: ""
+                selectedSkillLevel.value = preferences.skill_level.capitalize(Locale.current) ?: ""
                 selectedGameName.value = preferences.game?.game_name ?: ""
                 selectedRegion.value = preferences.time_zone?.split("/")?.firstOrNull() ?: ""
 
