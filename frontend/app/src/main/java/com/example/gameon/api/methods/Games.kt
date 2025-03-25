@@ -8,8 +8,7 @@ import retrofit2.Response
 import com.example.gameon.classes.Game
 import com.google.gson.Gson
 
-suspend fun fetchGames(
-    context: Context): List<Game> {
+suspend fun fetchGames(context: Context): List<Game> {
 
     val gamesApi = Api.init(context)
         .getInstance(false)

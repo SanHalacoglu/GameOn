@@ -21,9 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.getGroupMembers
 import com.example.gameon.api.methods.getUserGroups
 import com.example.gameon.api.methods.logout
@@ -53,124 +53,50 @@ class ReportsActivity : ComponentActivity() {
         val selectedUser = mutableStateOf<User?>(null)
         val reason = mutableStateOf("")
 
-        val user = SessionDetails(this).getUser()
-        val discordId = user?.discord_id ?: "0"
-        val discordUsername = user?.username ?: "Unknown"
-        val discordAvatar = user?.avatar
-
         val reasonError = mutableStateOf(false)
         val canSubmit = mutableStateOf(false)
-
         val width = 300.dp
 
-        lifecycleScope.launch{
-            val groupList = getUserGroups(
-                context = this@ReportsActivity
-            )
-            if (groupList.isNotEmpty()) {
-                groupListState.value = groupList
-            }
-        }
+        lifecycleScope.launch{ groupListState.value = getUserGroups(context = this@ReportsActivity) }
 
         setContent {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = BlueDarker),
-                verticalArrangement = Arrangement.Top, // Keep everything stacked from the top
-                horizontalAlignment = Alignment.CenterHorizontally
+                Modifier.fillMaxSize().background(color = BlueDarker),
+                Arrangement.Top, Alignment.CenterHorizontally
             ){
                 Header(
-                    discordId,
-                    discordUsername,
-                    discordAvatar,
-                    {
-                        val intent = Intent(
-                            this@ReportsActivity,
-                            UserSettingsActivity::class.java
-                        )
-                        startActivity(intent)
-                    },
-                    {
-                        lifecycleScope.launch {
-                            logout(this@ReportsActivity)
-                        }
-                    }
+                    this@ReportsActivity,
+                    { startActivity(Intent(
+                        this@ReportsActivity,
+                        UserSettingsActivity::class.java
+                    )) },
+                    { lifecycleScope.launch { logout(this@ReportsActivity) } }
                 )
-                Box (
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = BlueDarker)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .align(alignment = Alignment.TopStart)
-                            .offset(15.dp, 30.dp)
+                Column (
+                    Modifier.fillMaxSize(), Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+                    Alignment.CenterHorizontally
+                ){
+                    ReportTitle("Report User", Modifier.width(width))
+                    ReportInputs(
+                        groupListState.value, selectedGroup, userListState.value, selectedUser,
+                        reason, reasonError, canSubmit, Modifier.width(width)
+                    ) { lifecycleScope.launch {
+                        val groupId = selectedGroup.value?.group_id ?: -1
+                        val groupMemberList = getGroupMembers(groupId, this@ReportsActivity)
+                        userListState.value = groupMemberList.map { it.user!! }
+                    } }
+                    ReportButtonArray(
+                        canSubmit, width,
+                        { lifecycleScope.launch { submitReport(
+                            Report(
+                                group_id = selectedGroup.value?.group_id ?: -1,
+                                reported_discord_id = selectedUser.value?.discord_id ?: "0",
+                                reason = reason.value,
+                            ),
+                            context = this@ReportsActivity,
+                        ) { reasonError.value = true } } },
+                        { finish() }
                     )
-                    Column (
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ){
-                        ReportTitle(
-                            "Report User",
-                            Modifier.width(width)
-                        )
-                        Reports(
-                            groupListState.value,
-                            selectedGroup,
-                            userListState.value,
-                            selectedUser,
-                            reason,
-                            reasonError,
-                            canSubmit,
-                            Modifier.width(width)
-                        ) {
-                            lifecycleScope.launch {
-                                // Default to 0 if not found
-                                val groupId = selectedGroup.value?.group_id ?: 0
-
-                                val groupMemberList =
-                                    getGroupMembers(groupId, this@ReportsActivity)
-
-                                val userList = groupMemberList.map { it.user!! }
-
-                                userListState.value = userList
-                            }
-                        }
-                        ReportButton(
-                            "Submit Report",
-                            containerColor = Red,
-                            enabled = canSubmit.value,
-                            modifier = Modifier.width(width).testTag("SubmitReportButton")
-                        ) {
-                            lifecycleScope.launch {
-                                // Default to 0 if not found
-                                val groupId = selectedGroup.value?.group_id ?: 0
-
-                                // Default to "0" if not found
-                                val reportedDiscordId = selectedUser.value?.discord_id ?: "0"
-
-                                submitReport(
-                                    Report(
-                                        group_id = groupId,
-                                        reported_discord_id = reportedDiscordId,
-                                        reason = reason.value,
-                                    ),
-                                    context = this@ReportsActivity,
-                                ) {
-                                    reasonError.value = true
-                                }
-                            }
-                        }
-                        ReportButton(
-                            "Cancel",
-                            outlined = true,
-                            modifier = Modifier.width(width).testTag("CancelReportButton")
-                        ) {
-                            finish()
-                        }
-                    }
                 }
             }
         }
@@ -178,7 +104,7 @@ class ReportsActivity : ComponentActivity() {
 }
 
 @Composable
-fun Reports(
+fun ReportInputs(
     groupList: List<Group>,
     selectedGroup: MutableState<Group?>,
     userList: List<User>,
@@ -223,6 +149,28 @@ fun Reports(
     }
 }
 
+@Composable
+fun ReportButtonArray(
+    canSubmit: MutableState<Boolean>,
+    width: Dp,
+    onSubmit: () -> Unit,
+    onCancel: () -> Unit
+) {
+    ReportButton(
+        "Submit Report",
+        containerColor = Red,
+        enabled = canSubmit.value,
+        modifier = Modifier.width(width).testTag("SubmitReportButton"),
+        onClick = onSubmit
+    )
+    ReportButton(
+        "Cancel",
+        outlined = true,
+        modifier = Modifier.width(width).testTag("CancelReportButton"),
+        onClick = onCancel
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ReportsPreview() {
@@ -260,7 +208,7 @@ fun ReportsPreview() {
                 "Report User",
                 Modifier.width(width)
             )
-            Reports(
+            ReportInputs(
                 groupList,
                 selectedGroup,
                 userList,

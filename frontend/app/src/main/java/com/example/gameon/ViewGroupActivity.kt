@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -48,7 +47,6 @@ import com.example.gameon.classes.Group
 import com.example.gameon.ui.theme.*
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.fetchGroupUrl
 import com.example.gameon.api.methods.getGroupMembers
 import com.example.gameon.api.methods.logout
@@ -74,10 +72,6 @@ class ViewGroupActivity : ComponentActivity() {
         val groupId = group?.group_id ?: 0
         val groupName = group?.group_name ?: "Unknown Group"
         val groupMembersState = mutableStateOf<List<User>>(emptyList())
-        val user = SessionDetails(this).getUser()
-        val discordId = user?.discord_id ?: "0"
-        val discordUsername = user?.username ?: "Unknown"
-        val discordAvatar = user?.avatar
 
         Log.d("ViewGroupActivity", "Group: $group")
 
@@ -103,9 +97,7 @@ class ViewGroupActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Header(
-                    discordId,
-                    discordUsername,
-                    discordAvatar,
+                    this@ViewGroupActivity,
                     {
                         val intent = Intent(
                             this@ViewGroupActivity,

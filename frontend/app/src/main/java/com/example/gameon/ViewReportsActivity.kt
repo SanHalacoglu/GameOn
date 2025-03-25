@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -24,13 +23,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.getReportById
 import com.example.gameon.api.methods.resolveReport
 import com.example.gameon.classes.User
 import com.example.gameon.composables.Avatar
-import com.example.gameon.composables.Logo
 import com.example.gameon.composables.ReportButton
 import com.example.gameon.composables.ReportTitle
 import com.example.gameon.ui.theme.*
@@ -59,62 +58,35 @@ class ViewReportsActivity : ComponentActivity() {
         }
 
         setContent {
-            Box (
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = BlueDarker)
+            Column(
+                modifier = Modifier.fillMaxSize().background(color = BlueDarker),
+                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .align(alignment = Alignment.TopStart)
-                        .offset(15.dp, 30.dp)
-                ) { Logo() }
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    ReportTitle(
-                        "Report $reportId",
-                        Modifier.width(width)
-                    )
-                    ReportDetails(
-                        groupName.value,
-                        reporter.value,
-                        reportedUser.value,
-                        reason.value,
-                        Modifier.width(width)
-                    )
-                    ReportButton(
-                        "Ban User",
-                        containerColor = Red,
-                        modifier = Modifier.width(width)
-                    ) {
-                        lifecycleScope.launch {
-                            resolveReport(reportId, true, this@ViewReportsActivity)
-                        }
-                    }
-                    ReportButton(
-                        "Acquit User",
-                        containerColor = Blue,
-                        modifier = Modifier.width(width)
-                    ) {
-                        lifecycleScope.launch {
-                            resolveReport(reportId, false, this@ViewReportsActivity)
-                        }
-                    }
-                    ReportButton(
-                        "Cancel",
-                        outlined = true,
-                        modifier = Modifier.width(width)
-                    ) {
+                ReportTitle("Report $reportId", Modifier.width(width))
+                ReportDetails(
+                    groupName.value,
+                    reporter.value,
+                    reportedUser.value,
+                    reason.value,
+                    Modifier.width(width)
+                )
+                ViewReportsButtonArray(
+                    width,
+                    { lifecycleScope.launch {
+                        resolveReport(reportId, true, this@ViewReportsActivity)
+                    } },
+                    { lifecycleScope.launch {
+                        resolveReport(reportId, false, this@ViewReportsActivity)
+                    } },
+                    {
                         startActivity(Intent(
                             this@ViewReportsActivity,
                             ListReportsActivity::class.java
                         ))
                         finish()
                     }
-                }
+                )
             }
         }
     }
@@ -131,9 +103,7 @@ fun ReportDetails(
     Column(
         verticalArrangement = Arrangement.spacedBy(25.dp, Alignment.CenterVertically),
     ) {
-        InputReadable(
-            groupName,"Group", modifier = modifier,
-        )
+        InputReadable( groupName,"Group", modifier = modifier )
         if (reporter != null)
             InputReadable(
                 reporter.username,
@@ -190,6 +160,33 @@ fun InputReadable(
     )
 }
 
+@Composable
+fun ViewReportsButtonArray(
+    width: Dp,
+    onBan: () -> Unit,
+    onAcquit: () -> Unit,
+    onCancel: () -> Unit
+) {
+    ReportButton(
+        "Ban User",
+        containerColor = Red,
+        modifier = Modifier.width(width),
+        onClick = onBan
+    )
+    ReportButton(
+        "Acquit User",
+        containerColor = Blue,
+        modifier = Modifier.width(width),
+        onClick = onAcquit
+    )
+    ReportButton(
+        "Cancel",
+        outlined = true,
+        modifier = Modifier.width(width),
+        onClick = onCancel
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ViewReportsPreview() {
@@ -201,11 +198,6 @@ fun ViewReportsPreview() {
             .fillMaxSize()
             .background(color = BlueDarker)
     ) {
-        Box(
-            modifier = Modifier
-                .align(alignment = Alignment.TopStart)
-                .offset(15.dp, 30.dp)
-        ) { Logo() }
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
@@ -222,21 +214,7 @@ fun ViewReportsPreview() {
                 "This person wasn't very nice to me.",
                 Modifier.width(width)
             )
-            ReportButton(
-                "Ban User",
-                containerColor = Red,
-                modifier = Modifier.width(width)
-            )
-            ReportButton(
-                "Acquit User",
-                containerColor = Blue,
-                modifier = Modifier.width(width)
-            )
-            ReportButton(
-                "Cancel",
-                outlined = true,
-                modifier = Modifier.width(width)
-            )
+            ViewReportsButtonArray(width, {}, {}, {})
         }
     }
 }

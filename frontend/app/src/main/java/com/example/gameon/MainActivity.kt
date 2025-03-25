@@ -72,7 +72,6 @@ class MainActivity : ComponentActivity() {
 
         val discordUsername = user?.username ?: "Unknown"
         val discordId = user?.discord_id ?: "Unknown"
-        val discordAvatar = user?.avatar
 
         lifecycleScope.launch {
             val preferences = getPreferencesByUserId(this@MainActivity, discordId)
@@ -143,9 +142,7 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Header(
-                    discordId,
-                    discordUsername,
-                    discordAvatar,
+                    this@MainActivity,
                     {
                         val intent = Intent(
                             this@MainActivity,

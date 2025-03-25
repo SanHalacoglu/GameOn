@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -27,7 +29,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.api.methods.getReports
 import com.example.gameon.api.methods.logout
 import com.example.gameon.classes.Group
@@ -46,76 +47,34 @@ class ListReportsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        val reportListState = mutableStateOf<List<Report>>(emptyList())
         val width = 300.dp
 
-        val reportListState = mutableStateOf<List<Report>>(emptyList())
-        val user = SessionDetails(this).getUser()
-        val discordId = user?.discord_id ?: "0"
-        val discordUsername = user?.username ?: "Unknown"
-        val discordAvatar = user?.avatar
-
         lifecycleScope.launch{
-
-            val reportList = getReports(
-                unresolved = true,
-                context = this@ListReportsActivity
-            )
-            if (reportList.isNotEmpty()) {
-                reportListState.value = reportList
-            }
+            reportListState.value = getReports(true, this@ListReportsActivity)
         }
 
         setContent {
-
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = BlueDarker),
-                verticalArrangement = Arrangement.Top, // Keep everything stacked from the top
-                horizontalAlignment = Alignment.CenterHorizontally
+                Modifier.fillMaxSize().background(color = BlueDarker),
+                Arrangement.Top, Alignment.CenterHorizontally
             ){
                 Header(
-                    discordId,
-                    discordUsername,
-                    discordAvatar,
-                    {
-                        val intent = Intent(
-                            this@ListReportsActivity,
-                            UserSettingsActivity::class.java
-                        )
-                        startActivity(intent)
-                    },
-                    {
-                        lifecycleScope.launch {
-                            logout(this@ListReportsActivity)
-                        }
-                    }
+                    this@ListReportsActivity,
+                    { startActivity(Intent(
+                        this@ListReportsActivity,
+                        UserSettingsActivity::class.java
+                    )) },
+                    { lifecycleScope.launch { logout(this@ListReportsActivity) } }
                 )
-                Box (
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = BlueDarker)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .align(alignment = Alignment.TopStart)
-                            .offset(15.dp, 30.dp)
-                    )
+                Box (Modifier.fillMaxSize()) {
                     Column (
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        Modifier.fillMaxSize(),
+                        Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+                        Alignment.CenterHorizontally
                     ) {
-                        ReportTitle(
-                            "List Reports",
-                            Modifier.width(width)
-                        )
-                        ReportList(
-                            reportListState.value,
-                            Modifier
-                                .width(width)
-                                .height(550.dp)
-                        ) {
+                        ReportTitle("List Reports", Modifier.width(width))
+                        ReportList(reportListState.value, Modifier.width(width).height(550.dp)) {
                                 reportId ->
                             startActivity(Intent(
                                 this@ListReportsActivity,
@@ -127,9 +86,7 @@ class ListReportsActivity : ComponentActivity() {
                             "Back",
                             outlined = true,
                             modifier = Modifier.width(width).testTag("ListReportsBackButton")
-                        ) {
-                            finish()
-                        }
+                        ) { finish() }
                     }
                 }
             }
@@ -143,8 +100,10 @@ fun ReportList(
     modifier: Modifier,
     onClick: (reportId: Int) -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
     Column(
-        modifier.testTag("ReportList"),
+        modifier.verticalScroll(scrollState).testTag("ReportList"),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         reportList.forEach { report ->

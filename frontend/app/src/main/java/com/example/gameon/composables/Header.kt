@@ -1,5 +1,6 @@
 package com.example.gameon.composables
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -30,16 +31,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gameon.R
+import com.example.gameon.api.methods.SessionDetails
 import com.example.gameon.ui.theme.*
 
 @Composable
 fun Header(
-    discordId: String,
-    username: String,
-    avatarId: String?,
+    context: Context,
     onSettings: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val user = SessionDetails(context).getUser()
+    val discordId = user?.discord_id ?: "0"
+    val username = user?.username ?: "Unknown"
+    val avatarId = user?.avatar
+
     Row (
         modifier = Modifier
             .fillMaxWidth()

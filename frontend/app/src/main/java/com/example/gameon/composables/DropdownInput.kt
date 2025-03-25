@@ -12,6 +12,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -58,26 +59,12 @@ fun <T> DropdownInput(
             label = { Text(label, fontFamily = fontFamily) },
             singleLine = false,
             textStyle = TextStyle(fontFamily = fontFamily),
-            colors = TextFieldDefaults.colors(
-                unfocusedTextColor = White,
-                unfocusedLabelColor = White,
-                unfocusedTrailingIconColor = White,
-                unfocusedContainerColor = BlueDark,
-                unfocusedIndicatorColor = BlueDark,
-                unfocusedPlaceholderColor = Color(0xAAFFFFFF),
-                focusedTextColor = White,
-                focusedLabelColor = White,
-                focusedTrailingIconColor = White,
-                focusedContainerColor = BlueDark,
-                focusedIndicatorColor = White,
-                focusedPlaceholderColor = Color(0xCCFFFFFF),
-            ),
+            colors = dropdownTextFieldColors(),
             leadingIcon = selectedOption.value?.let { leadingIcon?.invoke(it) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 .testTag("${label}TextField")
         )
@@ -91,31 +78,50 @@ fun <T> DropdownInput(
                 .heightIn(max = 250.dp)
         ) {
             options.forEachIndexed { index, option ->
-                val optionText = displayText(option)
-                val selectedText = selectedOption.value?.let { displayText(it) }
-
-                val textColor = if (selectedText == optionText) BlueLight else White
-                val bgColor = if (selectedText == optionText) BlueDarker else BlueDark
+                val textColor = if (option == selectedOption.value) BlueLight else White
+                val bgColor = if (option == selectedOption.value) BlueDarker else BlueDark
                 
                 DropdownMenuItem(
-                    text = { Text(optionText) },
+                    text = { Text(displayText(option)) },
                     onClick = {
                         selectedOption.value = option
                         onSelect()
                         expanded = false
                     },
-                    colors = MenuItemColors(
-                        textColor = textColor,
-                        leadingIconColor = Color.Transparent,
-                        trailingIconColor = Color.Transparent,
-                        disabledTextColor = Color.Transparent,
-                        disabledLeadingIconColor = Color.Transparent,
-                        disabledTrailingIconColor = Color.Transparent
-                    ),
+                    colors = dropdownMenuItemColors(textColor),
                     leadingIcon = leadingIcon?.invoke(option),
                     modifier = Modifier.background(bgColor).testTag("${label}_option_$index")
                 )
             }
         }
     }
+}
+
+@Composable
+fun dropdownTextFieldColors(): TextFieldColors {
+    return TextFieldDefaults.colors(
+        unfocusedTextColor = White,
+        unfocusedLabelColor = White,
+        unfocusedTrailingIconColor = White,
+        unfocusedContainerColor = BlueDark,
+        unfocusedIndicatorColor = BlueDark,
+        unfocusedPlaceholderColor = Color(0xAAFFFFFF),
+        focusedTextColor = White,
+        focusedLabelColor = White,
+        focusedTrailingIconColor = White,
+        focusedContainerColor = BlueDark,
+        focusedIndicatorColor = White,
+        focusedPlaceholderColor = Color(0xCCFFFFFF),
+    )
+}
+
+fun dropdownMenuItemColors(textColor: Color): MenuItemColors {
+    return MenuItemColors(
+        textColor = textColor,
+        leadingIconColor = Color.Transparent,
+        trailingIconColor = Color.Transparent,
+        disabledTextColor = Color.Transparent,
+        disabledLeadingIconColor = Color.Transparent,
+        disabledTrailingIconColor = Color.Transparent
+    )
 }
