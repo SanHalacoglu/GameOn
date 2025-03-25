@@ -14,7 +14,7 @@ import reportRoutes from "./routes/ReportRoutes";
 import adminRoutes from "./routes/AdminRoutes";
 import matchmakingRoutes from "./routes/MatchmakingRoutes";
 import { connectToRedisClient, redisClient } from "./redis_client";
-import { processMatchmakingQueue } from './services/MatchmakingService';
+import { initializeMatchmakingService, processMatchmakingQueue } from './services/MatchmakingService';
 
 // Load environment variables
 dotenv.config();
@@ -75,11 +75,8 @@ AppDataSource.initialize()
       console.log(`Server is running on http://localhost:${PORT}`);
     });
 
-    // Periodically process the matchmaking queue
-    setInterval(async () => {
-      console.log('Processing matchmaking queue...');
-      await processMatchmakingQueue();
-    }, 10000); // Adjust the interval as needed (e.g., every 10 seconds)
+    // Initialize the matchmaking service
+    await initializeMatchmakingService();
   })
   .catch((error) => {
     console.error("Error during Data Source initialization:", error);
