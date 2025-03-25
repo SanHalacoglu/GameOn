@@ -5,9 +5,10 @@ data class Admin(
     val discord_id: String? = null,
     val user: User? = null,
 ) {
-    init {
-        require( discord_id != null || user != null ) {
-            "Either discord_id or user must not be null"
-        }
-    }
+    // The below init requirement causes errors in getAdmins()
+//    init {
+//        require( discord_id != null || user != null ) {
+//            "Either discord_id or user must not be null"
+//        }
+//    }
 }

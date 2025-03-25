@@ -22,9 +22,20 @@ class SessionDetails(context: Context) {
         return gson.fromJson(userJson, User::class.java)
     }
 
+    // Save user's admin ID
+    // Default -1 if user is not an admin
+    fun saveAdminId(adminId: Int?) {
+        prefs.edit().putInt("admin_id", adminId ?: -1).apply()
+    }
+
+    // Retrieve user's admin ID
+    fun getAdminId(): Int {
+        return prefs.getInt("admin_id", -1)
+    }
+
     // Clear all stored user data (used for logout)
     fun clearUser() {
-        prefs.edit().remove("user_data").apply()
+        prefs.edit().remove("user_data").remove("admin_id").apply()
     }
 
     fun getDiscordId(): String? = getUser()?.discord_id

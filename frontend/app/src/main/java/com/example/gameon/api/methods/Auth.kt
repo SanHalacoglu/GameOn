@@ -25,7 +25,17 @@ suspend fun checkLoggedIn (context: Context) {
     val intent: Intent = if (result.isSuccessful) {
         val user = result.body()
         if (user != null && !user.banned) {
+            // Save user information
             sessionDetails.saveUser(user)
+            // Save admin ID
+            val admins = getAdmins(context)
+            val admin = admins.find {
+                    a ->
+                a.discord_id == user.discord_id ||
+                        a.user?.discord_id == user.discord_id
+            }
+            sessionDetails.saveAdminId(admin?.admin_id)
+
             Intent(context, MainActivity::class.java)
         } else if (user != null) {
             Intent(context, BannedActivity::class.java)
@@ -73,7 +83,17 @@ suspend fun finishLogin (
     val intent: Intent = if (result.isSuccessful) {
         val user = result.body()
         if (user != null && !user.banned) {
+            // Save user information
             sessionDetails.saveUser(user)
+            // Save admin ID
+            val admins = getAdmins(context)
+            val admin = admins.find {
+                    a ->
+                a.discord_id == user.discord_id ||
+                        a.user?.discord_id == user.discord_id
+            }
+            sessionDetails.saveAdminId(admin?.admin_id)
+
             Intent(context, MainActivity::class.java)
         } else if (user != null) {
             Intent(context, BannedActivity::class.java)
@@ -116,6 +136,8 @@ suspend fun register(
         val user = result.body()
         if (user != null) {
             sessionDetails.saveUser(user)
+            // User will not be an admin upon registering
+            sessionDetails.saveAdminId(null)
         }
         Log.d("Auth", "Preferences created successfully: $user")
         Intent(context, MainActivity::class.java)

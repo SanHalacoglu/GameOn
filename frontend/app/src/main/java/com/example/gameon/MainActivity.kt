@@ -66,8 +66,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val user = SessionDetails(this).getUser()
-        Log.d("UserSettings", "User: $user")
+        val sessionDetails = SessionDetails(this)
+        val user = sessionDetails.getUser()
+        val adminId = sessionDetails.getAdminId()
+        Log.d("UserSettings", "User: $user, Admin ID: $adminId")
         val preferenceIDState = mutableStateOf(-1)
 
         val discordUsername = user?.username ?: "Unknown"
@@ -152,7 +154,7 @@ class MainActivity : ComponentActivity() {
                     },
                     { lifecycleScope.launch { logout(this@MainActivity) } }
                 )
-                MainContent(preferenceIDState, groupListState, discordUsername, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
+                MainContent(preferenceIDState, groupListState, discordUsername, discordId, adminId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
             }
         }
     }
@@ -349,7 +351,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
 }
 
 @Composable
-fun ReportsSection(context: Context) {
+fun ReportsSection(context: Context, adminId: Int) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
 
     Box(
@@ -393,36 +395,46 @@ fun ReportsSection(context: Context) {
                     fontSize = 18.sp
                 )
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(Purple)
-                    .clickable {
-                        val intent = Intent(
-                            context,
-                            ListReportsActivity::class.java
-                        )
-                        context.startActivity(intent)
-                    }
-                    .testTag("ViewReportsButton"),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "View Reports",
-                    color = BlueDarker,
-                    fontFamily = fontFamily,
-                    fontSize = 18.sp
-                )
-            }
+            if (adminId != -1)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(Purple)
+                        .clickable {
+                            val intent = Intent(
+                                context,
+                                ListReportsActivity::class.java
+                            )
+                            context.startActivity(intent)
+                        }
+                        .testTag("ViewReportsButton"),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "View Reports",
+                        color = BlueDarker,
+                        fontFamily = fontFamily,
+                        fontSize = 18.sp
+                    )
+                }
         }
     }
 }
 
 @Composable
-fun MainContent(preferenceIDState: MutableState<Int>, groupListState: MutableState<List<Group>>, discordUsername : String, discordId: String, isMatchmakingActive: MutableState<Boolean>,
-                matchmakingStatus: MutableState<String?>, showDialog: MutableState<Boolean>, dialogMessage: MutableState<String>) {
+fun MainContent(
+    preferenceIDState: MutableState<Int>,
+    groupListState: MutableState<List<Group>>,
+    discordUsername : String,
+    discordId: String,
+    adminId: Int,
+    isMatchmakingActive: MutableState<Boolean>,
+    matchmakingStatus: MutableState<String?>,
+    showDialog: MutableState<Boolean>,
+    dialogMessage: MutableState<String>
+) {
     val context = LocalContext.current
 
     Column(
@@ -436,7 +448,7 @@ fun MainContent(preferenceIDState: MutableState<Int>, groupListState: MutableSta
 
         ViewExistingGroups(context, groupListState, discordUsername, discordId)
 
-        ReportsSection(context)
+        ReportsSection(context, adminId)
     }
 }
 
