@@ -9,8 +9,8 @@ import { createDiscordGroup } from "../controllers/GroupController";
 
 const REDISKEYSPACE_MATCHMAKING_STATUS = "matchmaking_status";
 const REDISKEYSPACE_MATCHMAKING_BUCKET = "matchmaking_bucket";
-const MATCHMAKING_TIMEOUT = 1 * 60;
-const POLING_INTERVAL = 0.5 * 60;
+const MATCHMAKING_TIMEOUT = 1 * 60 * 1000;
+const POLING_INTERVAL = 0.5 * 60 * 1000;
 
 let gameInfoCache: Map<number, number> = new Map();
 
@@ -171,11 +171,11 @@ async function createMatchmakingGroup(members: MatchmakingRequest[]) {
     max_players: game.group_size,
   });
 
-  // const discordAuthTokens = members.map(member => member.discord_access_token);
-  // const discordIds = members.map(member => member.discord_id);
+  const discordAuthTokens = members.map(member => member.discord_access_token);
+  const discordIds = members.map(member => member.discord_id);
 
-  // const groupUrl = await createDiscordGroup(discordAuthTokens, discordIds);
-  group.groupurl = "https://discord.com/invite/12345"; // TODO CHANGE BACK: groupUrl;
+  const groupUrl = await createDiscordGroup(discordAuthTokens, discordIds);
+  group.groupurl = groupUrl;
 
   await groupRepository.save(group);
 
@@ -209,10 +209,10 @@ function getGameSizeForRedisBucketKey(redisBucketKey: string): number | undefine
   return gameSize
 }
 
-async function updateMatchmakingStatus(discord_id: string, status: string, expiryInSeconds?: number) {
+async function updateMatchmakingStatus(discord_id: string, status: string, expiryInMilliseconds?: number) {
   const key = REDISKEYSPACE_MATCHMAKING_STATUS + `:${discord_id}`;
-  if (expiryInSeconds !== undefined) {
-    await redisClient.set(key, status, { EX: expiryInSeconds });
+  if (expiryInMilliseconds !== undefined) {
+    await redisClient.set(key, status, { PX: expiryInMilliseconds });
   } else {
     await redisClient.set(key, status);
   }
