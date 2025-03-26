@@ -12,8 +12,7 @@ suspend fun initiateMatchmaking(
     context: Context,
     preferenceId: Int
 ): Boolean {
-    val matchmakingApi = Api.init(context)
-        .getInstance(false)
+    val matchmakingApi = Api.getInstance(context, false)
         .create(MatchmakingApi::class.java)
 
     val request = MatchmakingRequest(preference_id = preferenceId)
@@ -29,8 +28,7 @@ suspend fun initiateMatchmaking(
 }
 
 suspend fun checkMatchmakingStatus(context: Context, discordId: String): String {
-    val matchmakingApi = Api.init(context)
-        .getInstance(false)
+    val matchmakingApi = Api.getInstance(context, false)
         .create(MatchmakingApi::class.java)
 
     val response: Response<MatchmakingStatusResponse> = matchmakingApi.checkMatchmakingStatus(discordId)

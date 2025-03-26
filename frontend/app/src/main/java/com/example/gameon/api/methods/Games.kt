@@ -9,8 +9,7 @@ import retrofit2.Response
 import com.example.gameon.classes.Game
 
 suspend fun fetchGames(context: Context): List<Game> {
-    val gamesApi = Api.init(context)
-        .getInstance(false)
+    val gamesApi = Api.getInstance(context, false)
         .create(GamesApi::class.java)
 
     val result: Response<List<Game>> = gamesApi.getGames()
@@ -30,8 +29,7 @@ suspend fun createGame(
     name: String,
     description: String
 ) {
-    val gamesApi = Api.init(context)
-        .getInstance(false)
+    val gamesApi = Api.getInstance(context, false)
         .create(GamesApi::class.java)
 
     val result: Response<Game> = gamesApi.createGame(Game(game_name=name, description=description))

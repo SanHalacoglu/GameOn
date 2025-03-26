@@ -11,7 +11,7 @@ suspend fun getGroupMembers(
     context: Context,
 ): List<GroupMember> {
     return try {
-        val groupsApi = Api.init(context).getInstance().create(GroupsApi::class.java)
+        val groupsApi = Api.getInstance(context).create(GroupsApi::class.java)
         val result = groupsApi.getGroupMembers(groupId)
 
         if (result.isSuccessful) {
@@ -27,7 +27,7 @@ suspend fun getGroupMembers(
 }
 
 suspend fun fetchGroupUrl(groupId: Int, context: Context): String? {
-    val groupsApi = Api.init(context).getInstance().create(GroupsApi::class.java)
+    val groupsApi = Api.getInstance(context).create(GroupsApi::class.java)
 
     val result = groupsApi.getGroupUrl(groupId)
 

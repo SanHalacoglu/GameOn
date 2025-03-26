@@ -8,8 +8,7 @@ import com.example.gameon.classes.Admin
 import retrofit2.Response
 
 suspend fun getAdmins(context: Context): List<Admin> {
-    val adminApi = Api.init(context)
-        .getInstance(false)
+    val adminApi = Api.getInstance(context, false)
         .create(AdminApi::class.java)
 
     val result: Response<List<Admin>> = adminApi.getAdmins()
@@ -28,8 +27,7 @@ suspend fun createAdmin(
     context: Context,
     discordId: String
 ): Boolean {
-    val adminApi = Api.init(context)
-        .getInstance(false)
+    val adminApi = Api.getInstance(context, false)
         .create(AdminApi::class.java)
 
     val result: Response<Admin> = adminApi.createAdmin(Admin(discord_id = discordId))

@@ -14,7 +14,7 @@ suspend fun submitReport(
     context: Context,
     onBadRequest: () -> Unit = {}
 ) {
-    val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
+    val reportsApi = Api.getInstance(context).create(ReportsApi::class.java)
 
     val result = reportsApi.createReport(report)
 
@@ -31,7 +31,7 @@ suspend fun getReports(
     unresolved: Boolean = false,
     context: Context,
 ): List<Report> {
-    val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
+    val reportsApi = Api.getInstance(context).create(ReportsApi::class.java)
 
     val result = reportsApi.getReports(unresolved)
 
@@ -47,7 +47,7 @@ suspend fun getReportById(
     reportId: Int,
     context: Context
 ): Report? {
-    val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
+    val reportsApi = Api.getInstance(context).create(ReportsApi::class.java)
 
     val result = reportsApi.getReportById(reportId)
 
@@ -64,7 +64,7 @@ suspend fun resolveReport(
     ban: Boolean,
     context: Context
 ) {
-    val reportsApi = Api.init(context).getInstance().create(ReportsApi::class.java)
+    val reportsApi = Api.getInstance(context).create(ReportsApi::class.java)
 
     val result = reportsApi.resolveReport(reportId, ban)
 

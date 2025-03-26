@@ -10,7 +10,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,8 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -57,6 +54,7 @@ import com.example.gameon.api.methods.getUsers
 import com.example.gameon.classes.User
 import com.example.gameon.composables.Avatar
 import com.example.gameon.composables.ReportButton
+import com.example.gameon.composables.SimpleHeader
 import com.example.gameon.composables.TextInput
 import com.example.gameon.ui.theme.*
 import kotlinx.coroutines.launch
@@ -91,7 +89,7 @@ class AdminActivity : ComponentActivity() {
                     .background(color = BlueDarker),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AdminHeader()
+                SimpleHeader("Admin Panel")
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
@@ -113,45 +111,6 @@ class AdminActivity : ComponentActivity() {
                         .padding(top = 0.dp, bottom = 50.dp),
                 ) { finish () }
             }
-        }
-    }
-}
-
-@Composable
-fun AdminHeader() {
-    val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
-    Column (
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = BlueDark)
-            .height(150.dp)
-            .padding(top = 30.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box {
-            Text(
-                text = "Admin Panel",
-                color = BlueLight,
-                style = TextStyle(
-                    fontFamily = fontFamily,
-                    fontSize = 36.sp,
-                    shadow = Shadow(
-                        color = Blue,
-                        blurRadius = 10F
-                    ),
-                )
-            )
-            //Text stroke
-            Text(
-                text = "Admin Panel",
-                color = Blue,
-                style = TextStyle(
-                    fontFamily = fontFamily,
-                    fontSize = 36.sp,
-                    drawStyle = Stroke(0.5F)
-                )
-            )
         }
     }
 }
@@ -201,7 +160,7 @@ fun PromoteAdminSection(
             modifier = Modifier.fillMaxWidth()
         ) {
             chosenUser = users.value.find { user -> user.username == usernameInput.value }
-            isError = if (chosenUser != null) false else true
+            isError = chosenUser == null
         }
     }
     if(chosenUser != null)
@@ -321,7 +280,7 @@ fun AdminPreview() {
             .background(color = BlueDarker),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AdminHeader()
+        SimpleHeader("Admin Panel")
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)

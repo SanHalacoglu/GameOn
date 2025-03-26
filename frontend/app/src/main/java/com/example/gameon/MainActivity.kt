@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
             val preferences = getPreferencesByUserId(this@MainActivity, discordId)
             if (preferences != null) {
                 Log.d("MainActivity", "User Preferences: $preferences")
-                preferenceIDState.value = preferences.preference_id?.toIntOrNull() ?: -1
+                preferenceIDState.value = preferences.preference_id ?: -1
             } else {
                 Log.e("MainActivity", "No preferences found for this user.")
             }

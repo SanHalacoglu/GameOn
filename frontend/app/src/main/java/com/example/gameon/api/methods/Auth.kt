@@ -16,8 +16,7 @@ import com.example.gameon.api.interfaces.AuthApi
 import com.example.gameon.classes.Preferences
 
 suspend fun checkLoggedIn (context: Context) {
-    val authApi = Api.init(context)
-        .getInstance(false)
+    val authApi = Api.getInstance(context, false)
         .create(AuthApi::class.java)
     val result = authApi.login()
 
@@ -75,7 +74,7 @@ suspend fun finishLogin (
     code: String,
     context: Context,
 ) {
-    val authApi = Api.init(context).getInstance(false).create(AuthApi::class.java)
+    val authApi = Api.getInstance(context, false).create(AuthApi::class.java)
     val result = authApi.discordCallback(code)
     val sessionDetails = SessionDetails(context)
 
@@ -125,8 +124,7 @@ suspend fun register(
     context: Context,
     preferences: Preferences
 ) {
-    val authApi = Api.init(context)
-        .getInstance(false)
+    val authApi = Api.getInstance(context, false)
         .create(AuthApi::class.java)
 
     val result = authApi.register(preferences)
@@ -159,8 +157,7 @@ suspend fun register(
 }
 
 suspend fun logout(context: Context) {
-    val authApi = Api.init(context)
-        .getInstance(false)
+    val authApi = Api.getInstance(context, false)
         .create(AuthApi::class.java)
 
     val result = authApi.logout()

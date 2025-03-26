@@ -7,7 +7,7 @@ import com.example.gameon.classes.Group
 import com.example.gameon.classes.User
 
 suspend fun getUsers(context: Context): List<User> {
-    val usersApi = Api.init(context).getInstance().create(UsersApi::class.java)
+    val usersApi = Api.getInstance(context).create(UsersApi::class.java)
 
     val result = usersApi.getUsers()
 
@@ -21,7 +21,7 @@ suspend fun getUserGroups(
     discordId: String? = null,
     context: Context,
 ): List<Group>  {
-    val usersApi = Api.init(context).getInstance().create(UsersApi::class.java)
+    val usersApi = Api.getInstance(context).create(UsersApi::class.java)
 
     val result = if (discordId != null)
         usersApi.getUserGroups(discordId)
