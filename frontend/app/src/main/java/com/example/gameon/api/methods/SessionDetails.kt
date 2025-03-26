@@ -2,7 +2,6 @@ package com.example.gameon.api.methods
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.gameon.classes.Preferences
 import com.example.gameon.classes.User
 import com.google.gson.Gson
 
@@ -37,16 +36,4 @@ class SessionDetails(context: Context) {
     fun clearUser() {
         prefs.edit().remove("user_data").remove("admin_id").apply()
     }
-
-    fun getDiscordId(): String? = getUser()?.discord_id
-
-    fun getUsername(): String? = getUser()?.username
-
-    fun getEmail(): String? = getUser()?.email
-
-    fun isBanned(): Boolean = getUser()?.banned ?: false
-
-    fun getPreferenceId(): Int? = getUser()?.preference_id
-
-    fun getPreferences(): Preferences? = getUser()?.preferences
 }

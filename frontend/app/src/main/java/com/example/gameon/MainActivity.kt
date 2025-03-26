@@ -236,91 +236,86 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
     val isLoading = groups == null
     val hasGroups = groups.isNotEmpty()
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .height(200.dp)
             .clip(RoundedCornerShape(20.dp))
             .border(2.dp, Purple, RoundedCornerShape(20.dp))
-            .padding(16.dp)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Text(
+            text = "My Groups",
+            color = White,
+            fontFamily = fontFamily,
+            fontSize = 20.sp
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Box(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "My Groups",
-                color = White,
-                fontFamily = fontFamily,
-                fontSize = 20.sp
-            )
+            when {
+                isLoading -> Text(
+                    text = "Loading...",
+                    color = Purple,
+                    fontFamily = fontFamily,
+                    fontSize = 16.sp
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                hasGroups -> LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 8.dp)
+                ) {
+                    items(groups) { group ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .clip(RoundedCornerShape(50.dp))
+                                .background(Purple.copy(alpha = 0.2f))
+                                .clickable {
+                                    val currentGroups = groupListState.value
+                                    if (currentGroups.any { it.group_id == group.group_id }) {
+                                        // Group exists, navigate to it
+                                        val intent = Intent(
+                                            context,
+                                            ViewGroupActivity::class.java
+                                        )
+                                        intent.putExtra("selected_group", group)
+                                        intent.putExtra("discord_username", discordUsername)
+                                        context.startActivity(intent)
+                                    } else {
+                                        // Group was deleted, show error
+                                        showErrorDialog.value = true
+                                        errorMessage.value = "This group no longer exists."
+                                        refreshGroupList(context, groupListState, discordId)
 
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                when {
-                    isLoading -> Text(
-                        text = "Loading...",
-                        color = Purple,
-                        fontFamily = fontFamily,
-                        fontSize = 16.sp
-                    )
-
-                    hasGroups -> LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        items(groups) { group ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp)
-                                    .clip(RoundedCornerShape(50.dp))
-                                    .background(Purple.copy(alpha = 0.2f))
-                                    .clickable {
-                                        val currentGroups = groupListState.value
-                                        if (currentGroups.any { it.group_id == group.group_id }) {
-                                            // Group exists, navigate to it
-                                            val intent = Intent(
-                                                context,
-                                                ViewGroupActivity::class.java
-                                            )
-                                            intent.putExtra("selected_group", group)
-                                            intent.putExtra("discord_username", discordUsername)
-                                            context.startActivity(intent)
-                                        } else {
-                                            // Group was deleted, show error
-                                            showErrorDialog.value = true
-                                            errorMessage.value = "This group no longer exists."
-                                            refreshGroupList(context, groupListState, discordId)
-
-                                        }
                                     }
-                                    .testTag("${group.group_name}"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = group.group_name,
-                                    color = White,
-                                    fontFamily = fontFamily,
-                                    fontSize = 16.sp
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
+                                }
+                                .testTag("${group.group_name}"),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = group.group_name,
+                                color = White,
+                                fontFamily = fontFamily,
+                                fontSize = 16.sp
+                            )
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
-
-                    else -> Text(
-                        text = "No groups found",
-                        color = Purple,
-                        fontFamily = fontFamily,
-                        fontSize = 16.sp
-                    )
                 }
+
+                else -> Text(
+                    text = "No groups found",
+                    color = Purple,
+                    fontFamily = fontFamily,
+                    fontSize = 16.sp
+                )
             }
         }
     }
@@ -344,17 +339,15 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
 fun ReportsSection(context: Context, adminId: Int) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .clip(RoundedCornerShape(20.dp))
             .border(2.dp, Purple, RoundedCornerShape(20.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
             Text(
                 text = "Reports",
                 color = White,
@@ -363,19 +356,14 @@ fun ReportsSection(context: Context, adminId: Int) {
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(Purple)
+                modifier = Modifier.fillMaxWidth().height(50.dp)
+                    .clip(RoundedCornerShape(50.dp)).background(Purple)
                     .clickable {
-                        val intent = Intent(
+                        context.startActivity(Intent(
                             context,
                             ReportsActivity::class.java
-                        )
-                        context.startActivity(intent)
-                    }
-                    .testTag("ReportButton"),
+                        ))
+                    }.testTag("ReportButton"),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -387,19 +375,14 @@ fun ReportsSection(context: Context, adminId: Int) {
             }
             if (adminId != -1)
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(Purple)
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                        .clip(RoundedCornerShape(50.dp)).background(Purple)
                         .clickable {
-                            val intent = Intent(
+                            context.startActivity(Intent(
                                 context,
                                 ListReportsActivity::class.java
-                            )
-                            context.startActivity(intent)
-                        }
-                        .testTag("ViewReportsButton"),
+                            ))
+                        }.testTag("ViewReportsButton"),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -410,7 +393,6 @@ fun ReportsSection(context: Context, adminId: Int) {
                     )
                 }
         }
-    }
 }
 
 @Composable
