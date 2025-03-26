@@ -2,7 +2,6 @@ package com.example.gameon.api.methods
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import com.example.gameon.api.Api
 import com.example.gameon.api.interfaces.AdminApi
 import com.example.gameon.classes.Admin
@@ -28,18 +27,19 @@ suspend fun getAdmins(context: Context): List<Admin> {
 suspend fun createAdmin(
     context: Context,
     discordId: String
-) {
+): Boolean {
     val adminApi = Api.init(context)
         .getInstance(false)
         .create(AdminApi::class.java)
 
     val result: Response<Admin> = adminApi.createAdmin(Admin(discord_id = discordId))
 
-    if (result.isSuccessful) {
+    return if (result.isSuccessful) {
         val admin = result.body()
         Log.d("createAdmins", "New admin created: $admin")
-        Toast.makeText(context, "Admin successfully created!", Toast.LENGTH_SHORT).show()
+        true
     } else {
         Log.e("createAdmins", "Failed to create admin: ${result.errorBody()?.string()}")
+        false
     }
 }

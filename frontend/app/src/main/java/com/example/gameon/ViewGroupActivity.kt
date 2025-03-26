@@ -96,21 +96,7 @@ class ViewGroupActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-                Header(
-                    this@ViewGroupActivity,
-                    {
-                        val intent = Intent(
-                            this@ViewGroupActivity,
-                            UserSettingsActivity::class.java
-                        )
-                        startActivity(intent)
-                    },
-                    {
-                        lifecycleScope.launch {
-                            logout(this@ViewGroupActivity)
-                        }
-                    }
-                )
+                Header(this@ViewGroupActivity, lifecycleScope)
                 Column(modifier = Modifier.weight(1f)) {
                     MainContent(groupMembersState, groupName, groupId)
                 }
@@ -284,7 +270,7 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .testTag("$groupName"),
+                .testTag(groupName),
             textAlign = TextAlign.Center
         )
 

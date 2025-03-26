@@ -1,6 +1,5 @@
 package com.example.gameon
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.getGroupMembers
 import com.example.gameon.api.methods.getUserGroups
-import com.example.gameon.api.methods.logout
 import com.example.gameon.api.methods.submitReport
 import com.example.gameon.classes.Group
 import com.example.gameon.classes.Report
@@ -64,14 +62,7 @@ class ReportsActivity : ComponentActivity() {
                 Modifier.fillMaxSize().background(color = BlueDarker),
                 Arrangement.Top, Alignment.CenterHorizontally
             ){
-                Header(
-                    this@ReportsActivity,
-                    { startActivity(Intent(
-                        this@ReportsActivity,
-                        UserSettingsActivity::class.java
-                    )) },
-                    { lifecycleScope.launch { logout(this@ReportsActivity) } }
-                )
+                Header(this@ReportsActivity, lifecycleScope)
                 Column (
                     Modifier.fillMaxSize(), Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
                     Alignment.CenterHorizontally
@@ -141,10 +132,10 @@ fun ReportInputs(
                 leadingIcon = {{ Avatar(it.discord_id, it.avatar) }}
             )
         TextInput(
-            reason,
-            modifier = modifier.height(300.dp).testTag("ReasonInput"),
-            "Error: Please limit your input to 500 characters",
-            reasonError.value
+            "Reason", reason, modifier.height(300.dp).testTag("ReasonInput"),
+            placeholder = "Why are you reporting this user?",
+            errorText = "Error: Please limit your input to 500 characters",
+            isError = reasonError.value
         )
     }
 }

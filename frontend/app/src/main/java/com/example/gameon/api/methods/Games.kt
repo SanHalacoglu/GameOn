@@ -2,6 +2,7 @@ package com.example.gameon.api.methods
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.example.gameon.api.Api
 import com.example.gameon.api.interfaces.GamesApi
 import retrofit2.Response
@@ -27,9 +28,7 @@ suspend fun fetchGames(context: Context): List<Game> {
 suspend fun createGame(
     context: Context,
     name: String,
-    description: String,
-    onSuccess: () -> Unit,
-    onFailure: () -> Unit
+    description: String
 ) {
     val gamesApi = Api.init(context)
         .getInstance(false)
@@ -40,9 +39,9 @@ suspend fun createGame(
     if (result.isSuccessful) {
         val game = result.body()
         Log.d("createGame", "Created game: $game")
-        onSuccess()
+        Toast.makeText(context, "${game?.game_name} added!", Toast.LENGTH_SHORT).show()
     } else {
         Log.e("createGame", "Failed to create game: ${result.errorBody()?.string()}")
-        onFailure()
+        Toast.makeText(context, "Error adding game!", Toast.LENGTH_SHORT).show()
     }
 }

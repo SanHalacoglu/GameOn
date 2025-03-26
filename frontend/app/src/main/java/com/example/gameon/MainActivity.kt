@@ -143,17 +143,7 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Header(
-                    this@MainActivity,
-                    {
-                        val intent = Intent(
-                            this@MainActivity,
-                            UserSettingsActivity::class.java
-                        )
-                        startActivity(intent)
-                    },
-                    { lifecycleScope.launch { logout(this@MainActivity) } }
-                )
+                Header(this@MainActivity, lifecycleScope)
                 MainContent(preferenceIDState, groupListState, discordUsername, discordId, adminId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
             }
         }

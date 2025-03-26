@@ -30,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.getReports
-import com.example.gameon.api.methods.logout
 import com.example.gameon.classes.Group
 import com.example.gameon.classes.Report
 import com.example.gameon.classes.User
@@ -59,14 +58,7 @@ class ListReportsActivity : ComponentActivity() {
                 Modifier.fillMaxSize().background(color = BlueDarker),
                 Arrangement.Top, Alignment.CenterHorizontally
             ){
-                Header(
-                    this@ListReportsActivity,
-                    { startActivity(Intent(
-                        this@ListReportsActivity,
-                        UserSettingsActivity::class.java
-                    )) },
-                    { lifecycleScope.launch { logout(this@ListReportsActivity) } }
-                )
+                Header(this@ListReportsActivity, lifecycleScope)
                 Box (Modifier.fillMaxSize()) {
                     Column (
                         Modifier.fillMaxSize(),
@@ -100,10 +92,8 @@ fun ReportList(
     modifier: Modifier,
     onClick: (reportId: Int) -> Unit
 ) {
-    val scrollState = rememberScrollState()
-
     Column(
-        modifier.verticalScroll(scrollState).testTag("ReportList"),
+        modifier.verticalScroll(rememberScrollState()).testTag("ReportList"),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         reportList.forEach { report ->
