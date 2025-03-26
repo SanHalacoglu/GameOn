@@ -1,5 +1,7 @@
 package com.example.gameon.composables
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,17 +31,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LifecycleCoroutineScope
+import com.example.gameon.AdminActivity
 import com.example.gameon.R
+import com.example.gameon.UserSettingsActivity
+import com.example.gameon.api.methods.SessionDetails
+import com.example.gameon.api.methods.logout
 import com.example.gameon.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
-fun Header(
-    discordId: String,
-    username: String,
-    avatarId: String?,
-    onSettings: () -> Unit,
-    onLogout: () -> Unit
-) {
+fun Header(context: Context, scope: LifecycleCoroutineScope) {
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -49,22 +51,18 @@ fun Header(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Logo()
-
         Spacer(modifier = Modifier.weight(1f))
-
-        HeaderDropdown(discordId, username, avatarId, onSettings, onLogout)
+        HeaderDropdown(context, scope)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HeaderDropdown(
-    discordId: String,
-    username: String,
-    avatarId: String?,
-    onSettings: () -> Unit,
-    onLogout: () -> Unit
-) {
+fun HeaderDropdown(context: Context, scope: LifecycleCoroutineScope) {
+    val sessionDetails = SessionDetails(context)
+    val user = sessionDetails.getUser()
+    val adminId = sessionDetails.getAdminId()
+
     val expanded = remember { mutableStateOf(false) }
 
     Column(
@@ -76,8 +74,8 @@ fun HeaderDropdown(
             onExpandedChange = { expanded.value = !expanded.value }
         ) {
             Avatar(
-                discordId = discordId,
-                avatarId = avatarId,
+                discordId = user?.discord_id ?: "0",
+                avatarId = user?.avatar,
                 size = 90.dp,
                 modifier = Modifier
                     .border(width = 2.dp, color = PurpleLight, shape = CircleShape)
@@ -87,16 +85,19 @@ fun HeaderDropdown(
                 expanded = expanded.value,
                 onDismissRequest = { expanded.value = false },
                 containerColor = Purple,
-                modifier = Modifier
-                    .width(120.dp)
+                modifier = Modifier.width(120.dp)
             ) {
-                HeaderDropdownItem(expanded, "Settings", onSettings)
-                HeaderDropdownItem(expanded, "Log Out", onLogout)
+                if (adminId != -1) HeaderDropdownItem(expanded, "Admin Panel")
+                { context.startActivity(Intent(context, AdminActivity::class.java)) }
+                HeaderDropdownItem(expanded, "Settings")
+                { context.startActivity(Intent(context, UserSettingsActivity::class.java)) }
+                HeaderDropdownItem(expanded, "Log Out")
+                { scope.launch { logout(context) } }
             }
         }
 
         Text(
-            text = username,
+            text = user?.username ?: "Unknown",
             color = Purple,
             style = TextStyle(
                 fontFamily = FontFamily(Font(R.font.barlowcondensed_bold)),

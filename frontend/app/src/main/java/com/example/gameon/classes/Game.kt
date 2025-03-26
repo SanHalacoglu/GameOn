@@ -6,7 +6,7 @@ import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class Game(
-    val game_id: Int,
+    val game_id: Int? = null, // generated on server-side
     val game_name: String,
     val description: String,
     val groups: List<Group>? = null

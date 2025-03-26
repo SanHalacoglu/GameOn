@@ -2,7 +2,6 @@ package com.example.gameon.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -15,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.example.gameon.R
 import com.example.gameon.ui.theme.BlueDark
@@ -25,10 +25,15 @@ import com.example.gameon.ui.theme.RedLight
 
 @Composable
 fun TextInput(
+    label: String,
     input: MutableState<String>,
     modifier: Modifier = Modifier,
+    fontSize: TextUnit = 14.sp,
+    placeholder: String? = null,
+    singleLine: Boolean = false,
     errorText: String? = null,
-    isError: Boolean = false
+    isError: Boolean = false,
+    containerColor: Color = BlueDark
 ) {
     val fontFamily = FontFamily(Font(R.font.lato_regular))
 
@@ -39,25 +44,19 @@ fun TextInput(
         TextField(
             value = input.value,
             onValueChange = { input.value = it },
-            label = { Text(
-                "Reason",
-                fontFamily=fontFamily
-            ) },
-            placeholder = { Text(
-                "Why are you reporting this user?",
-                fontFamily=fontFamily
-            ) },
-            singleLine = false,
-            textStyle = TextStyle(fontFamily = fontFamily),
+            label = { Text(label, fontFamily=fontFamily) },
+            placeholder = { placeholder?.let { Text(it, fontFamily=fontFamily) } },
+            singleLine = singleLine,
+            textStyle = TextStyle(fontFamily = fontFamily, fontSize = fontSize),
             colors = TextFieldDefaults.colors(
                 unfocusedTextColor = White,
                 unfocusedLabelColor = White,
-                unfocusedContainerColor = BlueDark,
-                unfocusedIndicatorColor = BlueDark,
+                unfocusedContainerColor = containerColor,
+                unfocusedIndicatorColor = containerColor,
                 unfocusedPlaceholderColor = Color(0xAAFFFFFF),
                 focusedTextColor = White,
                 focusedLabelColor = White,
-                focusedContainerColor = BlueDark,
+                focusedContainerColor = containerColor,
                 focusedIndicatorColor = White,
                 focusedPlaceholderColor = Color(0xAAFFFFFF),
                 errorTextColor = White,

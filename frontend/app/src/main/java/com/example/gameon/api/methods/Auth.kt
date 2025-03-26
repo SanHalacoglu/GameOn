@@ -16,8 +16,7 @@ import com.example.gameon.api.interfaces.AuthApi
 import com.example.gameon.classes.Preferences
 
 suspend fun checkLoggedIn (context: Context) {
-    val authApi = Api.init(context)
-        .getInstance(false)
+    val authApi = Api.getInstance(context, false)
         .create(AuthApi::class.java)
     val result = authApi.login()
 
@@ -25,7 +24,17 @@ suspend fun checkLoggedIn (context: Context) {
     val intent: Intent = if (result.isSuccessful) {
         val user = result.body()
         if (user != null && !user.banned) {
+            // Save user information
             sessionDetails.saveUser(user)
+            // Save admin ID
+            val admins = getAdmins(context)
+            val admin = admins.find {
+                    a ->
+                a.discord_id == user.discord_id ||
+                        a.user?.discord_id == user.discord_id
+            }
+            sessionDetails.saveAdminId(admin?.admin_id)
+
             Intent(context, MainActivity::class.java)
         } else if (user != null) {
             Intent(context, BannedActivity::class.java)
@@ -65,7 +74,7 @@ suspend fun finishLogin (
     code: String,
     context: Context,
 ) {
-    val authApi = Api.init(context).getInstance(false).create(AuthApi::class.java)
+    val authApi = Api.getInstance(context, false).create(AuthApi::class.java)
     val result = authApi.discordCallback(code)
     val sessionDetails = SessionDetails(context)
 
@@ -73,7 +82,17 @@ suspend fun finishLogin (
     val intent: Intent = if (result.isSuccessful) {
         val user = result.body()
         if (user != null && !user.banned) {
+            // Save user information
             sessionDetails.saveUser(user)
+            // Save admin ID
+            val admins = getAdmins(context)
+            val admin = admins.find {
+                    a ->
+                a.discord_id == user.discord_id ||
+                        a.user?.discord_id == user.discord_id
+            }
+            sessionDetails.saveAdminId(admin?.admin_id)
+
             Intent(context, MainActivity::class.java)
         } else if (user != null) {
             Intent(context, BannedActivity::class.java)
@@ -105,8 +124,7 @@ suspend fun register(
     context: Context,
     preferences: Preferences
 ) {
-    val authApi = Api.init(context)
-        .getInstance(false)
+    val authApi = Api.getInstance(context, false)
         .create(AuthApi::class.java)
 
     val result = authApi.register(preferences)
@@ -116,6 +134,8 @@ suspend fun register(
         val user = result.body()
         if (user != null) {
             sessionDetails.saveUser(user)
+            // User will not be an admin upon registering
+            sessionDetails.saveAdminId(null)
         }
         Log.d("Auth", "Preferences created successfully: $user")
         Intent(context, MainActivity::class.java)
@@ -137,8 +157,7 @@ suspend fun register(
 }
 
 suspend fun logout(context: Context) {
-    val authApi = Api.init(context)
-        .getInstance(false)
+    val authApi = Api.getInstance(context, false)
         .create(AuthApi::class.java)
 
     val result = authApi.logout()

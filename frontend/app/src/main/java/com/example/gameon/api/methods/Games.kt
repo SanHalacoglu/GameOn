@@ -2,17 +2,14 @@ package com.example.gameon.api.methods
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.example.gameon.api.Api
 import com.example.gameon.api.interfaces.GamesApi
 import retrofit2.Response
 import com.example.gameon.classes.Game
-import com.google.gson.Gson
 
-suspend fun fetchGames(
-    context: Context): List<Game> {
-
-    val gamesApi = Api.init(context)
-        .getInstance(false)
+suspend fun fetchGames(context: Context): List<Game> {
+    val gamesApi = Api.getInstance(context, false)
         .create(GamesApi::class.java)
 
     val result: Response<List<Game>> = gamesApi.getGames()
@@ -24,5 +21,25 @@ suspend fun fetchGames(
     } else {
         Log.e("fetchGames", "Failed to fetch games: ${result.errorBody()?.string()}")
         emptyList()
+    }
+}
+
+suspend fun createGame(
+    context: Context,
+    name: String,
+    description: String
+) {
+    val gamesApi = Api.getInstance(context, false)
+        .create(GamesApi::class.java)
+
+    val result: Response<Game> = gamesApi.createGame(Game(game_name=name, description=description))
+
+    if (result.isSuccessful) {
+        val game = result.body()
+        Log.d("createGame", "Created game: $game")
+        Toast.makeText(context, "${game?.game_name} added!", Toast.LENGTH_SHORT).show()
+    } else {
+        Log.e("createGame", "Failed to create game: ${result.errorBody()?.string()}")
+        Toast.makeText(context, "Error adding game!", Toast.LENGTH_SHORT).show()
     }
 }

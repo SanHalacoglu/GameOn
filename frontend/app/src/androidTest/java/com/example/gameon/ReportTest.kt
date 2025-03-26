@@ -112,9 +112,7 @@ class ReportTest {
         // Load into Main Activity, click into Reports Activity via button
         composeTestRule.waitForIdle()
         val reportButton = composeTestRule.onNodeWithTag("ReportButton")
-        composeTestRule.waitUntil {
-            reportButton.isDisplayed()
-        }
+        composeTestRule.waitUntil { reportButton.isDisplayed() }
         reportButton.performClick()
 
         // Load into Reports Activity, check that submission is not yet possible
@@ -125,36 +123,27 @@ class ReportTest {
         // Open Group dropdown, determine if dropdown values exist
         composeTestRule.onNodeWithTag("GroupDropdown").assertIsDisplayed().performClick()
         val firstGroup = composeTestRule.onNodeWithTag("Group_option_0")
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstGroup.isDisplayed()
-        }
-        
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstGroup.isDisplayed() }
+
         // Select first dropdown value, ensure selection successful
         val firstGroupText = firstGroup.fetchSemanticsNode().config[SemanticsProperties.Text][0]
         firstGroup.performClick()
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstGroup.isNotDisplayed()
-        }
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstGroup.isNotDisplayed() }
         submitButton.assertIsNotEnabled()
         composeTestRule.waitUntil (timeoutMillis = 5000) {
             firstGroupText.text == composeTestRule.onNodeWithTag("GroupTextField")
                 .fetchSemanticsNode().config[SemanticsProperties.EditableText].text
         }
 
-
         // Open User dropdown, determine if dropdown values exist
         composeTestRule.onNodeWithTag("UserDropdown").assertIsDisplayed().performClick()
         val firstUser = composeTestRule.onNodeWithTag("User_option_0")
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstUser.isDisplayed()
-        }
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstUser.isDisplayed() }
 
         // Select first user value, ensure selection successful
         val firstUserText = firstUser.fetchSemanticsNode().config[SemanticsProperties.Text][0]
         firstUser.performClick()
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstUser.isNotDisplayed()
-        }
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstUser.isNotDisplayed() }
         submitButton.assertIsNotEnabled()
         composeTestRule.waitUntil (timeoutMillis = 5000) {
             firstUserText.text == composeTestRule.onNodeWithTag("UserTextField")
@@ -183,9 +172,7 @@ class ReportTest {
         submitButton.performClick()
         composeTestRule.waitForIdle()
         val viewReportsButton = composeTestRule.onNodeWithTag("ViewReportsButton")
-        composeTestRule.waitUntil {
-            viewReportsButton.isDisplayed()
-        }
+        composeTestRule.waitUntil { viewReportsButton.isDisplayed() }
         viewReportsButton.performClick()
 
         // Ensure that the report list exists and that there is at least one report
@@ -202,12 +189,9 @@ class ReportTest {
             .fetchSemanticsNode().config[SemanticsProperties.Text])
 
         // Return to main page and ensure you are in the main page
-        composeTestRule.onNodeWithTag("ListReportsBackButton")
-            .assertIsDisplayed().performClick()
+        composeTestRule.onNodeWithTag("ListReportsBackButton").assertIsDisplayed().performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.waitUntil {
-            reportButton.isDisplayed()
-        }
+        composeTestRule.waitUntil { reportButton.isDisplayed() }
     }
 
     @Test
@@ -241,9 +225,7 @@ class ReportTest {
         // Load into Main Activity, click into Reports Activity via button
         composeTestRule.waitForIdle()
         val reportButton = composeTestRule.onNodeWithTag("ReportButton")
-        composeTestRule.waitUntil {
-            reportButton.isDisplayed()
-        }
+        composeTestRule.waitUntil { reportButton.isDisplayed() }
         reportButton.performClick()
 
         // Load into Reports Activity, check that submission is not yet possible
@@ -254,16 +236,12 @@ class ReportTest {
         // Open Group dropdown, determine if dropdown values exist
         composeTestRule.onNodeWithTag("GroupDropdown").assertIsDisplayed().performClick()
         val firstGroup = composeTestRule.onNodeWithTag("Group_option_0")
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstGroup.isDisplayed()
-        }
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstGroup.isDisplayed() }
 
         // Select first dropdown value, ensure selection successful
         val firstGroupText = firstGroup.fetchSemanticsNode().config[SemanticsProperties.Text][0]
         firstGroup.performClick()
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstGroup.isNotDisplayed()
-        }
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstGroup.isNotDisplayed() }
         submitButton.assertIsNotEnabled()
         composeTestRule.waitUntil (timeoutMillis = 5000) {
             firstGroupText.text == composeTestRule.onNodeWithTag("GroupTextField")
@@ -274,16 +252,12 @@ class ReportTest {
         // Open User dropdown, determine if dropdown values exist
         composeTestRule.onNodeWithTag("UserDropdown").assertIsDisplayed().performClick()
         val firstUser = composeTestRule.onNodeWithTag("User_option_0")
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstUser.isDisplayed()
-        }
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstUser.isDisplayed() }
 
         // Select first user value, ensure selection successful
         val firstUserText = firstUser.fetchSemanticsNode().config[SemanticsProperties.Text][0]
         firstUser.performClick()
-        composeTestRule.waitUntil (timeoutMillis = 5000) {
-            firstUser.isNotDisplayed()
-        }
+        composeTestRule.waitUntil (timeoutMillis = 5000) { firstUser.isNotDisplayed() }
         submitButton.assertIsNotEnabled()
         composeTestRule.waitUntil (timeoutMillis = 5000) {
             firstUserText.text == composeTestRule.onNodeWithTag("UserTextField")
@@ -327,13 +301,10 @@ class ReportTest {
         )
 
         // Click the "Cancel" button
-        composeTestRule.onNodeWithTag("CancelReportButton")
-            .assertIsDisplayed().performClick()
+        composeTestRule.onNodeWithTag("CancelReportButton").assertIsDisplayed().performClick()
 
         // Confirm test is back on the main page
         composeTestRule.waitForIdle()
-        composeTestRule.waitUntil {
-            reportButton.isDisplayed()
-        }
+        composeTestRule.waitUntil { reportButton.isDisplayed() }
     }
 }
