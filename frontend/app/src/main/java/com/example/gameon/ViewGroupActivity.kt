@@ -5,16 +5,21 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,13 +54,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.fetchGroupUrl
 import com.example.gameon.api.methods.getGroupMembers
-import com.example.gameon.api.methods.logout
 import com.example.gameon.classes.User
 import com.example.gameon.composables.Header
 import com.example.gameon.composables.ReportButton
 import kotlinx.coroutines.launch
-import java.util.Date
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.window.Dialog
+import com.example.gameon.api.methods.updateGroup
+import com.example.gameon.composables.TextInput
 
 class ViewGroupActivity : ComponentActivity() {
     val groupMembersState = mutableStateOf<List<User>>(emptyList())
@@ -70,7 +79,6 @@ class ViewGroupActivity : ComponentActivity() {
         val group: Group? = intent.getParcelableExtra("selected_group")
         Log.d("ViewGroupActivity", "Group: $group")
         val groupId = group?.group_id ?: 0
-        val groupName = group?.group_name ?: "Unknown Group"
         val groupMembersState = mutableStateOf<List<User>>(emptyList())
 
         Log.d("ViewGroupActivity", "Group: $group")
@@ -98,7 +106,7 @@ class ViewGroupActivity : ComponentActivity() {
             ){
                 Header(this@ViewGroupActivity, lifecycleScope)
                 Column(modifier = Modifier.weight(1f)) {
-                    MainContent(groupMembersState, groupName, groupId)
+                    MainContent(groupMembersState, group)
                 }
 
                 if (showDialog.value) {
@@ -123,9 +131,7 @@ class ViewGroupActivity : ComponentActivity() {
                     modifier = Modifier
                         .width(300.dp)
                         .padding(bottom = 80.dp)
-                ) {
-                    finish()
-                }
+                ) {  finish() }
             }
         }
     }
@@ -192,7 +198,7 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
                                     .height(50.dp)
                                     .clip(RoundedCornerShape(15.dp))
                                     .background(Purple.copy(alpha = 0.2f))
-                                    .testTag("$username"),
+                                    .testTag(username),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -249,8 +255,15 @@ fun GoToDiscord(groupId: Int, context: Context) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, groupId: Int) {
+fun MainContent(groupMembers: MutableState<List<User>>, group: Group?) {
+    val groupId = group?.group_id ?: 0
+    val groupName = group?.group_name ?: "Unknown Group"
+
+    val openModal = remember { mutableStateOf(false) }
+    val groupDisplayName = remember { mutableStateOf(groupName)}
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -261,7 +274,7 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = groupName,
+            text = groupDisplayName.value,
             color = Blue,
             style = TextStyle(
                 fontFamily = FontFamily(Font(R.font.barlowcondensed_bold)),
@@ -270,6 +283,8 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .combinedClickable(onClick = {}, onLongClick = { openModal.value = true },
+                    indication = null, interactionSource = remember { MutableInteractionSource() })
                 .testTag(groupName),
             textAlign = TextAlign.Center
         )
@@ -281,5 +296,70 @@ fun MainContent(groupMembers: MutableState<List<User>>, groupName: String, group
         Spacer(modifier = Modifier.height(20.dp))
 
         GoToDiscord(groupId, LocalContext.current)
+    }
+    if (openModal.value) GroupRenameModal(group, groupDisplayName, openModal)
+}
+
+@Composable
+fun GroupRenameModal(
+    group: Group?,
+    groupDisplayName: MutableState<String>,
+    openModal: MutableState<Boolean>,
+) {
+    val fontFamily = FontFamily(Font(R.font.lato_bold))
+    val groupRename = remember { mutableStateOf(groupDisplayName.value) }
+
+    val onDismissRequest = { openModal.value = false; groupRename.value = groupDisplayName.value }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    Dialog(onDismissRequest) {
+        Card(
+            modifier = Modifier.fillMaxWidth().height(250.dp).padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor=BlueDark, contentColor=White)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "Rename plan?",
+                    style = TextStyle(
+                        fontFamily = fontFamily,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center
+                    )
+                )
+                TextInput(
+                    "Name", groupRename, Modifier.height(60.dp).padding(horizontal = 16.dp), 14.sp,
+                    singleLine = true, containerColor = Color(0xccffffff), textColor = BlueDarker
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ReportButton(
+                        "Cancel", outlined=true, containerColor=BlueDark,
+                        modifier = Modifier.width(100.dp),
+                        onClick = onDismissRequest
+                    )
+                    ReportButton(
+                        "Confirm", textColor = BlueDarker, containerColor = Blue,
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        coroutineScope.launch {
+                            val success = group?.let { updateGroup(context, it.group_id!!, Group(
+                                group_id = it.group_id, group_name = groupRename.value,
+                                max_players = it.max_players, game = it.game, game_id = it.game_id
+                            )) } ?: false
+                            if (success) {
+                                groupDisplayName.value = groupRename.value
+                                openModal.value = false
+                            }
+                            else Toast.makeText(context, "Error renaming group!", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
     }
 }

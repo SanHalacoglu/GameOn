@@ -33,7 +33,8 @@ fun TextInput(
     singleLine: Boolean = false,
     errorText: String? = null,
     isError: Boolean = false,
-    containerColor: Color = BlueDark
+    containerColor: Color = BlueDark,
+    textColor: Color = White
 ) {
     val fontFamily = FontFamily(Font(R.font.lato_regular))
 
@@ -49,15 +50,15 @@ fun TextInput(
             singleLine = singleLine,
             textStyle = TextStyle(fontFamily = fontFamily, fontSize = fontSize),
             colors = TextFieldDefaults.colors(
-                unfocusedTextColor = White,
-                unfocusedLabelColor = White,
+                unfocusedTextColor = textColor,
+                unfocusedLabelColor = textColor,
                 unfocusedContainerColor = containerColor,
                 unfocusedIndicatorColor = containerColor,
                 unfocusedPlaceholderColor = Color(0xAAFFFFFF),
-                focusedTextColor = White,
-                focusedLabelColor = White,
+                focusedTextColor = textColor,
+                focusedLabelColor = textColor,
                 focusedContainerColor = containerColor,
-                focusedIndicatorColor = White,
+                focusedIndicatorColor = textColor,
                 focusedPlaceholderColor = Color(0xAAFFFFFF),
                 errorTextColor = White,
                 errorLabelColor = RedLight,

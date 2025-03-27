@@ -32,12 +32,12 @@ class UserSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        val user = SessionDetails(this).getUser()
-        Log.d("UserSettings", "User: $user")
-        val discordId =  user?.discord_id ?: "-1"
-        val gamesListState = mutableStateOf<List<Game>>(emptyList())
-        val preferenceIDState = mutableStateOf(-1)
+        
+        val discordId = SessionDetails(this).getUser()?.discord_id ?: "-1"
+        Log.d("UserSettings", "Discord ID: $discordId")
+        
+        val gamesList = mutableStateOf<List<Game>>(emptyList())
+        val preferenceId = mutableStateOf(-1)
 
         val selectedLanguage = mutableStateOf<String?>(null)
         val selectedRegion = mutableStateOf<String?>(null)
@@ -48,33 +48,22 @@ class UserSettingsActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             val preferences = getPreferencesByUserId(this@UserSettingsActivity, discordId)
-            if (preferences != null)
-                preferenceIDState.value = preferences.preference_id ?: -1
-
             if (preferences != null) {
-                Log.d("UserSettings", "Fetched Preferences: $preferences")
+                preferenceId.value = preferences.preference_id ?: -1
 
                 selectedLanguage.value = preferences.spoken_language
                 selectedTimezone.value = preferences.time_zone
                 selectedSkillLevel.value = preferences.skill_level.capitalize(Locale.current)
                 selectedGame.value = preferences.game
                 selectedRegion.value = preferences.time_zone.split("/").firstOrNull()
-            } else Log.e("UserSettings", "Failed to fetch preferences")
+            }
         }
 
-        lifecycleScope.launch {
-            val gamesList = fetchGames(this@UserSettingsActivity)
-            gamesListState.value = gamesList
-            Log.d(TAG, "Received games: $gamesList")
-        }
-
-        Log.d(TAG, "Discord ID: $discordId")
+        lifecycleScope.launch { gamesList.value = fetchGames(this@UserSettingsActivity) }
 
         setContent {
-            canConfirm.value = selectedLanguage.value != null &&
-                    selectedRegion.value != null &&
-                    selectedTimezone.value != null &&
-                    selectedSkillLevel.value != null &&
+            canConfirm.value = selectedLanguage.value != null && selectedRegion.value != null &&
+                    selectedTimezone.value != null && selectedSkillLevel.value != null &&
                     selectedGame.value != null
 
             Column(
@@ -83,28 +72,18 @@ class UserSettingsActivity : ComponentActivity() {
             ) {
                 SimpleHeader("User Settings")
                 Preferences(
-                    modifier = Modifier.weight(1F, true),
-                    gamesList = gamesListState.value,
-                    selectedLanguage = selectedLanguage,
-                    selectedRegion = selectedRegion,
-                    selectedTimezone = selectedTimezone,
-                    selectedSkillLevel = selectedSkillLevel,
-                    selectedGame = selectedGame
+                    Modifier.weight(1F, true), gamesList.value, selectedLanguage, 
+                    selectedRegion, selectedTimezone, selectedSkillLevel, selectedGame
                 )
-               PreferenceFooter(canConfirm){
-                   lifecycleScope.launch {
-                       val preferences = Preferences(
-                           preference_id = preferenceIDState.value,
-                           discord_id = discordId,
-                           spoken_language = selectedLanguage.value ?: "",
-                           time_zone = selectedTimezone.value ?: "",
-                           skill_level = selectedSkillLevel.value ?: "",
-                           game_id = selectedGame.value?.game_id ?: 0
-                       )
-                       Log.d(TAG, "Saving preferences: $preferences")
-                       updatePreferences(this@UserSettingsActivity, preferenceIDState.value, preferences)
-                   }
-                }
+                PreferenceFooter(canConfirm){ lifecycleScope.launch {
+                    val preferences = Preferences(
+                        preferenceId.value, selectedLanguage.value ?: "",
+                        selectedTimezone.value ?: "", selectedSkillLevel.value ?: "",
+                        discordId, game_id = selectedGame.value?.game_id ?: 0
+                    )
+                    Log.d(TAG, "Saving preferences: $preferences")
+                    updatePreferences(this@UserSettingsActivity, preferenceId.value, preferences)
+                } }
             }
         }
     }

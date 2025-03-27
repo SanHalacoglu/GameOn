@@ -146,7 +146,7 @@ fun PromoteAdminSection(
         )
         TextInput(
             "Username", usernameInput,
-            modifier=Modifier.height(60.dp),
+            modifier=Modifier.height(if (isError) 70.dp else 60.dp),
             fontSize = 16.sp, singleLine=true,
             errorText = "This user is either already an admin or doesn't exist.",
             isError = isError,

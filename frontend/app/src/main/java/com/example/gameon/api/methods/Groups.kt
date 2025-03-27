@@ -4,7 +4,26 @@ import android.content.Context
 import android.util.Log
 import com.example.gameon.api.Api
 import com.example.gameon.api.interfaces.GroupsApi
+import com.example.gameon.classes.Group
 import com.example.gameon.classes.GroupMember
+
+suspend fun updateGroup(
+    context: Context,
+    groupId: Int,
+    group: Group
+): Boolean {
+    val groupsApi = Api.getInstance(context).create(GroupsApi::class.java)
+    val result = groupsApi.updateGroup(groupId, group)
+
+    return if (result.isSuccessful) {
+        val updatedGroup = result.body()
+        Log.d("UpdateGroup", "Group updated successfully: $updatedGroup")
+        true
+    } else {
+        Log.e("UpdateGroup", "Error updating group!")
+        false
+    }
+}
 
 suspend fun getGroupMembers(
     groupId: Int,
