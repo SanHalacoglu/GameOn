@@ -131,6 +131,12 @@
 - **Modified Sections**: Non Functional Requirements
 - **Rationale**: Based on the feedback received from Milestone 3, we revised and updated our non-functional requirements. The previous requirements were untestable and lacked measurable criteria. We have now replaced them with two new non-functional requirements that are clear, measurable, and testable.
 
+  
+#### 4.7 Non Functional Requirements Design
+- **Change**: Updated validation.
+- **Modified Sections**: Non Functional Requirements Design
+- **Rationale**: As mentioned above we have changed our non-functional requirements. Hence, we have also changed the validation required.
+
 ### March 14th 2025 Changes
 
 #### 3.3 Functional Requirements - Find Group
@@ -148,8 +154,28 @@
 - **Modified Sections**: Functional Requirements
 - **Rationale**: Updated Submit Report use case based on actual implementation.
 
+### March 27 2025 Changes
+
+#### 4.5 Dependencies Diagram
+- **Change**: Change dependendencies diagram to more accurately reflect the implementation and KISS principle.
+- **Modified Sections**: Dependency diagram
+- **Rationale**: We previously lost marks for violating the KISS principle.
+
+#### 3.1 Use Case Diagram
+- **Change**:Added the add-game use case for admin
+- **Modified Sections**: Use case diagram
+- **Rationale**: Reflect added functionality for admin user
+
+#### 3.1 Use Case Diagram
+- **Change**: Changed every use case diagram to more accurately reflect the application functionality
+- **Modified Sections**: Use case diagram
+- **Rationale**: Reflect correct functionality
+
+
 ## 2. Project Description
 **GameOn** is a social matchmaking platform designed for gamers to find ideal teammates and build lasting connections. By authenticating through Discord, players create personalized profiles, sharing details like preferred games, skill levels, communication styles, and playstyles. The app intelligently matches players based on their preferences, instantly creating a dedicated Discord group for seamless in-game coordination and ongoing communication. With integrated feedback systems, including reviews and ratings, GameOn fosters a supportive and positive gaming community.
+
+
 
 ## 3. Requirements Specification
 ### **3.1. Use-Case Diagram**
@@ -157,19 +183,7 @@
 
 ### **3.2. Actors Description**
 1. **User**: A player who uses Discord authentication to access the app. They can set preferences, join groups via group matching, interact with other users, and report users if needed.
-2. **Admin**: A system administrator who monitors user reports and has the authority to ban users if necessary, ensuring a safe and fair community environment.
-
-### March 12th 2025 Changes
-
-#### 3.5 Non Functional Requirements
-- **Change**: Change non functional requirements.
-- **Modified Sections**: Non Functional Requirements
-- **Rationale**: Based on the feedback received from Milestone 3, we revised and updated our non-functional requirements. The previous requirements were untestable and lacked measurable criteria. We have now replaced them with two new non-functional requirements that are clear, measurable, and testable.
-  
-#### 4.7 Non Functional Requirements Design
-- **Change**: Updated validation.
-- **Modified Sections**: Non Functional Requirements Design
-- **Rationale**: As mentioned above we have changed our non-functional requirements. Hence, we have also changed the validation required.
+2. **Admin**: A system administrator who monitors user reports and has the authority to ban users if necessary, ensuring a safe and fair community environment. They can also add additional games for users to play.
 
 
 ### **3.3. Functional Requirements**
@@ -233,7 +247,7 @@
                 4. User presses "Confirm," and system updates the database.
                 5. System confirms the update and redirects the user to the previous screen.
             - **Failure scenario(s)**:
-                - 1a. Actor leaves this screen without submitting, no settings are updated.
+                - 1a. Database rejects update, actor remains on this screen and receives an error
 
 <a name="fr3"></a>
 
@@ -252,7 +266,7 @@
                 3. The "Find Group" button becomes disabled and says "Finding".
                 4. A matchmaking request is submitted, and the user is added to the matchmaking queue.
                 5. A group is found based on the user's preferences.
-                6. A popup appears stating "You have been matched with a group!" 
+                6. A live update appears stating "You have been matched with a group!" 
                 7. The new group appears in the "My Groups" section of the main page.
             - **Failure scenario(s)**:
                 - 1a. Not enough users in the matchmaking queue, After a timeout, the system removes the user from matchmaking queue and displays a timeout popup.
@@ -274,7 +288,7 @@
                 4. User clicks the "Go to Discord Group."
                 5. Chrome opens the Discord web version and displays the newly created group with the added members.
             - **Failure scenario(s)**:
-                - 1a. The group has been deleted or is no longer available when the user tries to click it. The groups list is updated and displays "No groups found".
+                - 1a. The group is not available from the database, the user receives a 500 server error and stays on the main screen.
 
 <a name="fr5"></a>
 
@@ -294,10 +308,9 @@
                 5. User selects "Submit report"
                 6. System successfully sends the report to the database
             - **Failure scenario(s)**:
-                - 6a. User presses "Cancel" and report is not submitted.
-                - 6b. User presses "Submit" and an error pops up. (See **3.5.2**)
-                    - 6b1. The "Reason" textbox turns red and an error message pops up warning the user that the input must be less than 500 characters.
-                    - 6b2. The user can shorten their input and attempt to submit again.
+                - 6a. User presses "Submit" and an error pops up. (See **3.5.2**)
+                    - 6a1 The "Reason" textbox turns red and an error message pops up warning the user that the input must be less than 500 characters.
+                    - 6a2. The user can shorten their input and attempt to submit again.
 
 <a name="fr6"></a>
 
@@ -319,7 +332,7 @@
                 - 1a. System error prevents banning the user. Admin selects "Ban User," but a database or server error occurs, preventing the ban.
 
         2. **Acquit User**:
-            - **Description**: Admins view and action user reports from the view reports screen. Admin has the option to *not* ban the user based on the summmary they've been provided.
+            - **Description**: Admins view and action user reports from the view reports screen. Admin has the option to *not* ban the user based on the summary they've been provided.
             - **Primary actor(s)**: Admin 
             - **Main success scenario**:
                 1. Admin clicks "View reports"
@@ -327,7 +340,31 @@
                 3. Admin selects "Acquit User"
                 4. User can continue using the app normally.
             - **Failure scenario(s)**:
-                - 1a. System error prevents acquiting the user. Admin selects "Acquit User," but a database or server error occurs, preventing the ban.
+                - 1a. System error prevents acquitting the user. Admin selects "Acquit User," but a database or server error occurs, preventing the action.
+
+7.  **Add Game**
+    - **Overview**:
+        1. Add New Game to System
+    
+    - **Detailed Flow for Each Independent Scenario**: 
+        1. **Add New Game**:
+            - **Description**: Admins can add new games to the system from the admin panel. These games will be available for users to select in their preferences.
+            - **Primary actor(s)**: Admin
+            - **Main success scenario**:
+                1. Admin clicks their avatar to access the admin panel.
+                2. Admin selects "Manage Games" from the admin panel.
+                3. Admin clicks "Add New Game" button.
+                4. Admin enters the game name and description.
+                5. Admin clicks "Submit" to add the game.
+                6. System validates and stores the new game in the database.
+                7. System displays a success message and the game appears in the games list.
+            - **Failure scenario(s)**:
+                - 5a. Admin enters a game name that already exists.
+                    - 5a1. System displays an error message indicating the game already exists.
+                    - 5a2. Admin can modify the game name and try again.
+                - 6a. Database error prevents adding the game.
+                    - 6a1. System displays an error message about the database issue.
+                    - 6a2. Admin can try again later.
 
 ### **3.4. Screen Mockups**
 
@@ -599,8 +636,10 @@
 ![Nav to Existing SD](images/NavToExistingGroup.svg)
 5. [**Report User**](#fr5)\
 ![Report User](images/ReportUser.svg)
-6. [**View Reports**](#fr6)\
-![View Reports](images/ViewReports.svg)
+6. [**Handle Reports**](#fr6)\
+![View Reports](images/HandeReports.svg)
+7. [**Add Game**](#fr6)\
+![View Reports](images/AddGame.svg)
 
 
 ### **4.7. Non-Functional Requirements Design**
@@ -611,51 +650,51 @@
 
 
 ### **4.8. Main Project Complexity Design**
-**Group-Based Gaming Matchmaking Using Gale-Shapley (No Ranked User Preferences)**
-- **Description**: This system matches users into stable gaming groups based on preferences such as **language**, **time zone**, and **game choice**. The **Gale-Shapley algorithm** is adapted to form groups **without ranking individual users**. Instead, users propose to groups that match their preferences, and groups accept users until they reach capacity.
+**Real-Time Gaming Group Matchmaking with Redis Queue**
+
+- **Description**: Our matchmaking system creates gaming groups based on user preferences including **language**, **time zone**, and **game choice**. It uses **Redis** as a real-time queue to efficiently manage matchmaking requests and **TypeORM** to persist data once matches are made.
+
 - **Why complex?**:
-    - **Many-to-many matching**: Unlike traditional Gale-Shapley (one-to-one), this involves grouping multiple users.
-    - **Dynamic group formation**: Instead of ranking users, groups fill up based on availability, requiring a mechanism for reassignment.
-    - **Fairness and stability**: Users must be placed in the best possible group without needing an explicit ranking system.
-    - **Real time matchmaking**: The algorithm must match people in real-time as they join or leave the queue.
+    - **Concurrent real-time matchmaking**: System handles multiple users joining and leaving the queue simultaneously.
+    - **Preference-based matching**: Users are matched based on multiple criteria rather than simple FIFO queuing.
+    - **Distributed state management**: Redis maintains matchmaking state separately from the persistent database.
+    - **Timeout handling**: Users are automatically removed from the queue after a timeout period if no match is found.
+    - **Integration with external systems**: Successfully matched groups trigger Discord group creation.
+
 - **Design**:
     - **Input**:
-        1. A list of users with:
-            - Preferred **language**
-            - Preferred **time zone**
-            - Preferred **game**
-        2. A list of groups with:
-            - Max **group size**
-            - List of **current members**
-    - **Output**: A list of **stable gaming groups**, ensuring that all users are placed in a group that aligns with their preferences.
+        1. **User matchmaking requests** containing:
+            - User's `discord_id`
+            - User's preferences (`language`, `time_zone`, `game_id`)
+        2. **System parameters**:
+            - Max **group size** (typically 4-6 players)
+            - Timeout duration (60 seconds)
+
+    - **Output**:
+        - Successfully created gaming groups in both the database and Discord.
+        - Timeout notifications when matches can't be found.
+
     - **Main computational logic**:
-        1. **Initialize empty groups** based on unique (language, time zone, game) combinations.
-        2. **Users propose** to the first available group matching their preferences.
-        3. If a group has space, it **accepts the user**.
-        4. If a group is full, the **user searches for the next closest match**.
-        5. If no exact match exists, a **fallback mechanism** places users in the closest possible group.
-        6. The process continues until **all users are placed**.
+        1. **Queue management**: When users initiate matchmaking, they're added to Redis queues organized by game preference.
+        2. **Preference matching**: The system searches queues for users with compatible language and timezone preferences.
+        3. **Group formation**: When enough compatible users are found, they're removed from the queue and a group is created.
+        4. **Discord integration**: A Discord group is created for the newly matched users.
+        5. **Persistence**: The group and its members are stored in the MySQL database via TypeORM.
+        6. **Timeout handling**: Users who remain in the queue longer than the timeout period are removed and notified.
 
-    - **Pseudo-code**: 
+    - **Pseudo-code**:
         ```
-        function findMatches(users, max_group_size):
-            groups = createEmptyGroups(users, max_group_size)  // Initialize groups based on preferences
-            ungrouped_users = users  // Users still searching for a group
-
-            while ungrouped_users is not empty:
-                for user in ungrouped_users:
-                    preferred_group = findFirstAvailableGroup(user, groups)
-
-                    if preferred_group is not null:
-                        addUserToGroup(user, preferred_group)
-                        ungrouped_users.remove(user)
+        function matchmake(users, max_group_size, timeout):
+            redis_queues = initializeRedisQueues(users)  // Organize users by game preference
+            while redis_queues are not empty:
+                for queue in redis_queues:
+                    compatible_users = findCompatibleUsers(queue, max_group_size)
+                    if compatible_users.length == max_group_size:
+                        createGroup(compatible_users)  // Create group in Discord and persist in DB
+                        removeUsersFromQueue(compatible_users, queue)
                     else:
-                        backup_group = findClosestMatchingGroup(user, groups)  // Fallback mechanism
-                        if backup_group is not null:
-                            addUserToGroup(user, backup_group)
-                            ungrouped_users.remove(user)
-
-            return groups
+                        handleTimeouts(queue, timeout)  // Remove users exceeding timeout
+            return "Matchmaking complete"
         ```
 
 
