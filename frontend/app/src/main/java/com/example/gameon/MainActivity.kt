@@ -45,11 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.gameon.api.methods.SessionDetails
-import com.example.gameon.api.methods.checkMatchmakingStatus
 import com.example.gameon.api.methods.getPreferencesByUserId
 import com.example.gameon.api.methods.getUserGroups
-import com.example.gameon.api.methods.initiateMatchmaking
-import com.example.gameon.api.methods.logout
 import com.example.gameon.classes.Group
 import com.example.gameon.composables.Header
 import com.example.gameon.ui.theme.*
