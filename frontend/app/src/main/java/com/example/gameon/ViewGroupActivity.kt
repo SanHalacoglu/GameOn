@@ -48,6 +48,9 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.foundation.layout.size
 import com.example.gameon.classes.Group
 import com.example.gameon.ui.theme.*
 import androidx.compose.ui.unit.sp
@@ -68,7 +71,6 @@ import com.example.gameon.composables.TextInput
 
 class ViewGroupActivity : ComponentActivity() {
     val groupMembersState = mutableStateOf<List<User>>(emptyList())
-    fun getGroupMemberState() = groupMembersState
     val showDialog = mutableStateOf(false)
     val dialogMessage = mutableStateOf("")
 
@@ -130,8 +132,11 @@ class ViewGroupActivity : ComponentActivity() {
                     outlined = true,
                     modifier = Modifier
                         .width(300.dp)
-                        .padding(bottom = 80.dp)
-                ) {  finish() }
+                        .padding(bottom = 310.dp)
+                ) {
+                    setResult(RESULT_OK)
+                    finish()
+                }
             }
         }
     }
@@ -139,7 +144,8 @@ class ViewGroupActivity : ComponentActivity() {
 
 @Composable
 fun GroupMembers(groupMembers: MutableState<List<User>>) {
-    val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
+    val title = FontFamily(Font(R.font.barlowcondensed_bold))
+    val regularText = FontFamily(Font(R.font.lato_regular))
 
     val isLoading = groupMembers.value.isEmpty()
     val errorMessage = if (isLoading) "No members found" else null
@@ -160,7 +166,7 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
             Text(
                 text = "Group Members",
                 color = White,
-                fontFamily = fontFamily,
+                fontFamily = title,
                 fontSize = 20.sp
             )
 
@@ -174,14 +180,14 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
                     isLoading -> Text(
                         text = "Loading...",
                         color = Purple,
-                        fontFamily = fontFamily,
+                        fontFamily = regularText,
                         fontSize = 16.sp
                     )
 
                     errorMessage != null -> Text(
                         text = errorMessage,
                         color = Purple,
-                        fontFamily = fontFamily,
+                        fontFamily = regularText,
                         fontSize = 16.sp
                     )
 
@@ -204,7 +210,7 @@ fun GroupMembers(groupMembers: MutableState<List<User>>) {
                                 Text(
                                     text = username,
                                     color = White,
-                                    fontFamily = fontFamily,
+                                    fontFamily = regularText,
                                     fontSize = 16.sp
                                 )
                             }
@@ -273,21 +279,34 @@ fun MainContent(groupMembers: MutableState<List<User>>, group: Group?) {
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = groupDisplayName.value,
-            color = Blue,
-            style = TextStyle(
-                fontFamily = FontFamily(Font(R.font.barlowcondensed_bold)),
-                fontSize = 30.sp,
-            ),
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .combinedClickable(onClick = {}, onLongClick = { openModal.value = true },
-                    indication = null, interactionSource = remember { MutableInteractionSource() })
-                .testTag(groupName),
-            textAlign = TextAlign.Center
-        )
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = groupDisplayName.value,
+                color = Blue,
+                style = TextStyle(
+                    fontFamily = FontFamily(Font(R.font.barlowcondensed_bold)),
+                    fontSize = 30.sp,
+                ),
+                modifier = Modifier.testTag(groupName)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            androidx.compose.material3.Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit Group Name",
+                tint = Blue,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { openModal.value = true }
+            )
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -325,7 +344,7 @@ fun GroupRenameModal(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "Rename plan?",
+                    "Rename group?",
                     style = TextStyle(
                         fontFamily = fontFamily,
                         fontSize = 18.sp,

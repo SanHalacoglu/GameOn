@@ -7,6 +7,9 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -55,84 +58,55 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.testTag
 
 class MainActivity : ComponentActivity() {
-    private val isMatchmakingActive = mutableStateOf(false)
-    private val matchmakingStatus = mutableStateOf<String?>(null)
     private val groupListState = mutableStateOf<List<Group>>(emptyList())
     fun getGroupListState(): MutableState<List<Group>> = groupListState
-    private val showDialog = mutableStateOf(false)
-    private val dialogMessage = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val viewModel: MainViewModel by viewModels()
 
         val sessionDetails = SessionDetails(this)
         val user = sessionDetails.getUser()
         val adminId = sessionDetails.getAdminId()
         Log.d("UserSettings", "User: $user, Admin ID: $adminId")
         val preferenceIDState = mutableStateOf(-1)
+        lateinit var viewGroupLauncher: ActivityResultLauncher<Intent>
+        lateinit var preferencesLauncher: ActivityResultLauncher<Intent>
 
         val discordUsername = user?.username ?: "Unknown"
         val discordId = user?.discord_id ?: "Unknown"
 
-        lifecycleScope.launch {
-            val preferences = getPreferencesByUserId(this@MainActivity, discordId)
-            if (preferences != null) {
-                Log.d("MainActivity", "User Preferences: $preferences")
-                preferenceIDState.value = preferences.preference_id ?: -1
-            } else {
-                Log.e("MainActivity", "No preferences found for this user.")
+        viewGroupLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                lifecycleScope.launch {
+                    val updatedGroups = getUserGroups(discordId, this@MainActivity)
+                    groupListState.value = updatedGroups
+                }
             }
         }
 
-        lifecycleScope.launch {
-            while (true) {
-                delay(10_000)
-
-                if (isMatchmakingActive.value) {
-                    Log.d("MainActivity", "Polling started: isMatchmakingActive = TRUE")
-                    val status = checkMatchmakingStatus(this@MainActivity, discordId)
-                    Log.d("MainActivity", "Matchmaking Status: $status")
-
-                    matchmakingStatus.value = status
-
-                    when (status) {
-                        "in_progress" -> Log.d("MainActivity", "Matchmaking is still in progress.")
-                        "timed_out" -> {
-                            isMatchmakingActive.value = false
-                            Log.d("MainActivity", "Matchmaking timed out.")
-                            dialogMessage.value = "Matchmaking timed out. Please try again."
-                            showDialog.value = true
-                        }
-                        "group_found" -> {
-                            isMatchmakingActive.value = false
-                            Log.d("MainActivity", "Group found! Navigating to group page.")
-                            dialogMessage.value = "You have been matched with a group!"
-                            showDialog.value = true
-                        }
-                        "not_in_progress" -> {
-                            isMatchmakingActive.value = false
-                            Log.d("MainActivity", "Matchmaking no longer in progress.")
-                        }
-                        "error" -> Log.e("MainActivity", "Error checking matchmaking status.")
+        preferencesLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                Log.d("MainActivity", "result from matchmaking preferences activity: $result")
+                lifecycleScope.launch {
+                    val updatedPreferences = getPreferencesByUserId(this@MainActivity, discordId)
+                    if (updatedPreferences != null) {
+                        val updatedPrefId = updatedPreferences.preference_id ?: -1
+                        preferenceIDState.value = updatedPrefId
+                        viewModel.startMatchmaking(this@MainActivity, updatedPrefId, discordId)
                     }
-                } else {
-                    Log.d("MainActivity", "Polling skipped: isMatchmakingActive = FALSE")
                 }
             }
         }
 
         lifecycleScope.launch {
             val initialGroupList = getUserGroups(discordId, this@MainActivity)
-            Log.d("MainActivity", "Initial Group List: $initialGroupList")
-
             groupListState.value = initialGroupList
-
             while (true) {
                 delay(10_000)
                 val updatedGroupList = getUserGroups(discordId, this@MainActivity)
-                Log.d("MainActivity", "Updated Group List: $updatedGroupList")
-
                 groupListState.value = updatedGroupList
             }
         }
@@ -144,7 +118,16 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Header(this@MainActivity, lifecycleScope)
-                MainContent(preferenceIDState, groupListState, discordUsername, discordId, adminId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
+                MainContent(
+                    groupListState,
+                    discordUsername,
+                    adminId,
+                    viewModel.isMatchmakingActive,
+                    viewModel.showDialog,
+                    viewModel.dialogMessage,
+                    viewGroupLauncher,
+                    preferencesLauncher
+                )
             }
         }
     }
@@ -152,33 +135,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun FindGroup(
-    preferenceIDState: MutableState<Int>,
     context: Context,
-    discordId: String,
     isMatchmakingActive: MutableState<Boolean>,
-    matchmakingStatus: MutableState<String?>,
     showDialog: MutableState<Boolean>,
-    dialogMessage: MutableState<String>
+    dialogMessage: MutableState<String>,
+    preferencesLauncher: ActivityResultLauncher<Intent>
 ) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
     val coroutineScope = rememberCoroutineScope()
 
-    fun startMatchmaking() {
-        coroutineScope.launch {
-            Log.d("FindGroup", "Find Group button clicked!")
-            isMatchmakingActive.value = true
-            Log.d("FindGroup", "isMatchmakingActive set to TRUE")
-            val success = initiateMatchmaking(context, preferenceIDState.value)
-
-            if (success) {
-                Log.d("FindGroup", "Matchmaking started.")
-                matchmakingStatus.value = "in_progress"
-            } else {
-                Log.e("FindGroup", "Failed to initiate matchmaking")
-                isMatchmakingActive.value = false
-                Log.d("FindGroup", "isMatchmakingActive set to FALSE due to failure")
-            }
-        }
+    fun openPreferences() {
+        val intent = Intent(context, SetMatchmakingPreferences::class.java)
+        preferencesLauncher.launch(intent)
     }
 
     LaunchedEffect(showDialog.value) {
@@ -196,7 +164,7 @@ fun FindGroup(
             .height(70.dp)
             .clip(RoundedCornerShape(50.dp))
             .background(buttonColor)
-            .clickable( enabled = !isMatchmakingActive.value) { startMatchmaking() }
+            .clickable(enabled = !isMatchmakingActive.value) { openPreferences() }
             .testTag("FindGroupButton"),
         contentAlignment = Alignment.Center
     ) {
@@ -226,8 +194,9 @@ fun FindGroup(
 }
 
 @Composable
-fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group>>, discordUsername: String, discordId: String) {
-    val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
+fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group>>, discordUsername: String, viewGroupLauncher: ActivityResultLauncher<Intent>) {
+    val title = FontFamily(Font(R.font.barlowcondensed_bold))
+    val regularText = FontFamily(Font(R.font.lato_regular))
     val groups = groupListState.value
 
     val showErrorDialog = remember { mutableStateOf(false) }
@@ -248,7 +217,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
         Text(
             text = "My Groups",
             color = White,
-            fontFamily = fontFamily,
+            fontFamily = title,
             fontSize = 20.sp
         )
 
@@ -262,7 +231,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                 isLoading -> Text(
                     text = "Loading...",
                     color = Purple,
-                    fontFamily = fontFamily,
+                    fontFamily = regularText,
                     fontSize = 16.sp
                 )
 
@@ -278,23 +247,11 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                                 .clip(RoundedCornerShape(50.dp))
                                 .background(Purple.copy(alpha = 0.2f))
                                 .clickable {
-                                    val currentGroups = groupListState.value
-                                    if (currentGroups.any { it.group_id == group.group_id }) {
-                                        // Group exists, navigate to it
-                                        val intent = Intent(
-                                            context,
-                                            ViewGroupActivity::class.java
-                                        )
-                                        intent.putExtra("selected_group", group)
-                                        intent.putExtra("discord_username", discordUsername)
-                                        context.startActivity(intent)
-                                    } else {
-                                        // Group was deleted, show error
-                                        showErrorDialog.value = true
-                                        errorMessage.value = "This group no longer exists."
-                                        refreshGroupList(context, groupListState, discordId)
-
+                                    val intent = Intent(context, ViewGroupActivity::class.java).apply {
+                                        putExtra("selected_group", group)
+                                        putExtra("discord_username", discordUsername)
                                     }
+                                    viewGroupLauncher.launch(intent)
                                 }
                                 .testTag("${group.group_name}"),
                             contentAlignment = Alignment.Center
@@ -302,7 +259,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                             Text(
                                 text = group.group_name,
                                 color = White,
-                                fontFamily = fontFamily,
+                                fontFamily = regularText,
                                 fontSize = 16.sp
                             )
                         }
@@ -313,7 +270,7 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
                 else -> Text(
                     text = "No groups found",
                     color = Purple,
-                    fontFamily = fontFamily,
+                    fontFamily = regularText,
                     fontSize = 16.sp
                 )
             }
@@ -337,7 +294,8 @@ fun ViewExistingGroups(context: Context, groupListState: MutableState<List<Group
 
 @Composable
 fun ReportsSection(context: Context, adminId: Int) {
-    val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
+    val title = FontFamily(Font(R.font.barlowcondensed_bold))
+    val regularText = FontFamily(Font(R.font.lato_regular))
 
     Column(
         modifier = Modifier
@@ -348,91 +306,78 @@ fun ReportsSection(context: Context, adminId: Int) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = "Reports",
+            color = White,
+            fontFamily = title,
+            fontSize = 20.sp,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Box(
+            modifier = Modifier.fillMaxWidth().height(50.dp)
+                .clip(RoundedCornerShape(50.dp)).background(Purple)
+                .clickable {
+                    context.startActivity(Intent(
+                        context,
+                        ReportsActivity::class.java
+                    ))
+                }.testTag("ReportButton"),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                text = "Reports",
-                color = White,
-                fontFamily = fontFamily,
-                fontSize = 20.sp,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                text = "Submit a Report",
+                color = BlueDarker,
+                fontFamily = regularText,
+                fontSize = 18.sp
             )
+        }
+        if (adminId != -1) {
             Box(
                 modifier = Modifier.fillMaxWidth().height(50.dp)
                     .clip(RoundedCornerShape(50.dp)).background(Purple)
                     .clickable {
-                        context.startActivity(Intent(
-                            context,
-                            ReportsActivity::class.java
-                        ))
-                    }.testTag("ReportButton"),
+                        context.startActivity(
+                            Intent(
+                                context,
+                                ListReportsActivity::class.java
+                            )
+                        )
+                    }.testTag("ViewReportsButton"),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Submit a Report",
+                    text = "View Reports",
                     color = BlueDarker,
-                    fontFamily = fontFamily,
+                    fontFamily = title,
                     fontSize = 18.sp
                 )
             }
-            if (adminId != -1)
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(50.dp)
-                        .clip(RoundedCornerShape(50.dp)).background(Purple)
-                        .clickable {
-                            context.startActivity(Intent(
-                                context,
-                                ListReportsActivity::class.java
-                            ))
-                        }.testTag("ViewReportsButton"),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "View Reports",
-                        color = BlueDarker,
-                        fontFamily = fontFamily,
-                        fontSize = 18.sp
-                    )
-                }
         }
+    }
 }
 
 @Composable
 fun MainContent(
-    preferenceIDState: MutableState<Int>,
     groupListState: MutableState<List<Group>>,
     discordUsername : String,
-    discordId: String,
     adminId: Int,
     isMatchmakingActive: MutableState<Boolean>,
-    matchmakingStatus: MutableState<String?>,
     showDialog: MutableState<Boolean>,
-    dialogMessage: MutableState<String>
+    dialogMessage: MutableState<String>,
+    viewGroupLauncher: ActivityResultLauncher<Intent>,
+    preferencesLauncher: ActivityResultLauncher<Intent>
 ) {
     val context = LocalContext.current
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceEvenly,
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(80.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FindGroup(preferenceIDState, context, discordId, isMatchmakingActive, matchmakingStatus, showDialog, dialogMessage)
-
-        ViewExistingGroups(context, groupListState, discordUsername, discordId)
-
+        Spacer(modifier = Modifier.height(2.dp))
+        FindGroup(context, isMatchmakingActive, showDialog, dialogMessage, preferencesLauncher)
+        ViewExistingGroups(context, groupListState, discordUsername, viewGroupLauncher)
         ReportsSection(context, adminId)
-    }
-}
-
-fun refreshGroupList(context: Context, groupListState: MutableState<List<Group>>, discordId: String) {
-    val lifecycleScope = (context as? MainActivity)?.lifecycleScope
-    if (lifecycleScope != null) {
-        lifecycleScope.launch {
-            val updatedGroupList = getUserGroups(discordId, context)
-            Log.d("MainActivity", "Refreshed Group List: $updatedGroupList")
-            groupListState.value = updatedGroupList
-        }
-    } else {
-        Log.e("refreshGroupList", "Failed to refresh group list: lifecycleScope is null")
     }
 }

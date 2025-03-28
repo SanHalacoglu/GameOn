@@ -82,7 +82,8 @@ class UserSettingsActivity : ComponentActivity() {
                         discordId, game_id = selectedGame.value?.game_id ?: 0
                     )
                     Log.d(TAG, "Saving preferences: $preferences")
-                    updatePreferences(this@UserSettingsActivity, preferenceId.value, preferences)
+                    val success = updatePreferences(this@UserSettingsActivity, preferenceId.value, preferences)
+                    if (success) { finish() }
                 } }
             }
         }
