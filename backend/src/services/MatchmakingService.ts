@@ -25,15 +25,15 @@ interface MatchmakingRequest {
 
 export async function initializeMatchmakingService() {
   try {
-    const gameRepository = AppDataSource.getRepository(Game);
-    const games = await gameRepository.find();
-  
-    gameInfoCache.clear();
-    games.forEach((game) => {
-      gameInfoCache.set(game.game_id, game.group_size);
-    });
-
     setInterval(async () => {
+      const gameRepository = AppDataSource.getRepository(Game);
+      const games = await gameRepository.find();
+    
+      gameInfoCache.clear();
+      games.forEach((game) => {
+        gameInfoCache.set(game.game_id, game.group_size);
+      });
+      
       console.log('Processing matchmaking queue...');
       await processMatchmakingQueue();
     }, 5000);
