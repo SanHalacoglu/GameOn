@@ -345,7 +345,7 @@ fun ReportsSection(context: Context, adminId: Int) {
                 Text(
                     text = "View Reports",
                     color = BlueDarker,
-                    fontFamily = title,
+                    fontFamily = regularText,
                     fontSize = 18.sp
                 )
             }
@@ -369,7 +369,7 @@ fun MainContent(
     Column(
         modifier = Modifier
             .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(80.dp),
+        verticalArrangement = Arrangement.spacedBy(50.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(2.dp))
