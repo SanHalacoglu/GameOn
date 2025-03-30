@@ -56,12 +56,12 @@
             android:exported="true"
             android:theme="@style/Theme.GameOn">
             <intent-filter>
-
                 <!-- Defines the launcher activity -->
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-
+            </intent-filter>
+            <intent-filter>
                 <!-- Defines the activity to be callable from outside the app -->
                 <action android:name="android.intent.action.VIEW" />
 
