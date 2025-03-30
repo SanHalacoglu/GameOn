@@ -19,12 +19,11 @@ import com.example.gameon.api.methods.fetchGames
 import com.example.gameon.api.methods.getPreferencesByUserId
 import com.example.gameon.api.methods.updatePreferences
 import com.example.gameon.classes.Game
-import com.example.gameon.classes.Preferences
 import com.example.gameon.composables.SimpleHeader
-import com.example.gameon.ui.theme.*
+import com.example.gameon.ui.theme.BlueDarker
 import kotlinx.coroutines.launch
 
-class UserSettingsActivity : ComponentActivity() {
+class SetMatchmakingPreferences : ComponentActivity() {
     companion object {
         private const val TAG = "UserSettingsActivity"
     }
@@ -32,10 +31,10 @@ class UserSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         val discordId = SessionDetails(this).getUser()?.discord_id ?: "-1"
         Log.d("UserSettings", "Discord ID: $discordId")
-        
+
         val gamesList = mutableStateOf<List<Game>>(emptyList())
         val preferenceId = mutableStateOf(-1)
 
@@ -47,7 +46,7 @@ class UserSettingsActivity : ComponentActivity() {
         val canConfirm = mutableStateOf(false)
 
         lifecycleScope.launch {
-            val preferences = getPreferencesByUserId(this@UserSettingsActivity, discordId)
+            val preferences = getPreferencesByUserId(this@SetMatchmakingPreferences, discordId)
             if (preferences != null) {
                 preferenceId.value = preferences.preference_id ?: -1
 
@@ -59,7 +58,7 @@ class UserSettingsActivity : ComponentActivity() {
             }
         }
 
-        lifecycleScope.launch { gamesList.value = fetchGames(this@UserSettingsActivity) }
+        lifecycleScope.launch { gamesList.value = fetchGames(this@SetMatchmakingPreferences) }
 
         setContent {
             canConfirm.value = selectedLanguage.value != null && selectedRegion.value != null &&
@@ -70,21 +69,26 @@ class UserSettingsActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxSize().background(color = BlueDarker),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SimpleHeader("User Settings")
+                SimpleHeader("Set Matchmaking Preferences")
                 Preferences(
-                    Modifier.weight(1F, true), gamesList.value, selectedLanguage, 
+                    Modifier.weight(1F, true), gamesList.value, selectedLanguage,
                     selectedRegion, selectedTimezone, selectedSkillLevel, selectedGame
                 )
-                PreferenceFooter(canConfirm){ lifecycleScope.launch {
-                    val preferences = Preferences(
-                        preferenceId.value, selectedLanguage.value ?: "",
-                        selectedTimezone.value ?: "", selectedSkillLevel.value ?: "",
-                        discordId, game_id = selectedGame.value?.game_id ?: 0
-                    )
-                    Log.d(TAG, "Saving preferences: $preferences")
-                    val success = updatePreferences(this@UserSettingsActivity, preferenceId.value, preferences)
-                    if (success) { finish() }
-                } }
+                PreferenceFooter(canConfirm){
+                    lifecycleScope.launch {
+                        val preferences = com.example.gameon.classes.Preferences(
+                            preferenceId.value, selectedLanguage.value ?: "",
+                            selectedTimezone.value ?: "", selectedSkillLevel.value ?: "",
+                            discordId, game_id = selectedGame.value?.game_id ?: 0
+                        )
+                        Log.d(TAG, "Saving preferences: $preferences")
+                        val success = updatePreferences(this@SetMatchmakingPreferences, preferenceId.value, preferences)
+                        if (success) {
+                            setResult(RESULT_OK)
+                            finish()
+                        }
+                    }
+                }
             }
         }
     }

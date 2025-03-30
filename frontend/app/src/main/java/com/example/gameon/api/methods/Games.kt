@@ -27,12 +27,13 @@ suspend fun fetchGames(context: Context): List<Game> {
 suspend fun createGame(
     context: Context,
     name: String,
-    description: String
+    description: String,
+    group_size: Int
 ) {
     val gamesApi = Api.getInstance(context, false)
         .create(GamesApi::class.java)
 
-    val result: Response<Game> = gamesApi.createGame(Game(game_name=name, description=description))
+    val result: Response<Game> = gamesApi.createGame(Game(game_name=name, description=description, group_size=group_size))
 
     if (result.isSuccessful) {
         val game = result.body()

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -64,8 +65,11 @@ class ReportsActivity : ComponentActivity() {
             ){
                 Header(this@ReportsActivity, lifecycleScope)
                 Column (
-                    Modifier.fillMaxSize(), Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
-                    Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ){
                     ReportTitle("Report User", Modifier.width(width))
                     ReportInputs(

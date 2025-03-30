@@ -16,6 +16,9 @@
         android:theme="@style/Theme.GameOn"
         tools:targetApi="31">
         <activity
+            android:name=".SetMatchmakingPreferences"
+            android:exported="false" />
+        <activity
             android:name=".AdminActivity"
             android:exported="false"
             android:label="@string/title_activity_admin"

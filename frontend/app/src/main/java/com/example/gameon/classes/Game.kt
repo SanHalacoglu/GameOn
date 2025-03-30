@@ -9,5 +9,6 @@ data class Game(
     val game_id: Int? = null, // generated on server-side
     val game_name: String,
     val description: String,
+    val group_size: Int,
     val groups: List<Group>? = null
 ): Parcelable

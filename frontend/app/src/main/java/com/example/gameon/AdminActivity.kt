@@ -23,7 +23,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -68,6 +74,7 @@ class AdminActivity : ComponentActivity() {
         val gameDescription = mutableStateOf("")
 
         val userList = mutableStateOf(emptyList<User>())
+        val selectedGroupSize = mutableStateOf<Int?>(null)
 
         lifecycleScope.launch {
             val users = getUsers(this@AdminActivity)
@@ -98,10 +105,10 @@ class AdminActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.spacedBy(30.dp)
                 ){
                     PromoteAdminSection(this@AdminActivity, lifecycleScope, userList)
-                    AddGameSection( gameName, gameDescription )
+                    AddGameSection( gameName, gameDescription, selectedGroupSize )
                     { lifecycleScope.launch {
-                        createGame(this@AdminActivity, gameName.value, gameDescription.value)
-                        gameName.value = ""; gameDescription.value = ""
+                        createGame(this@AdminActivity, gameName.value, gameDescription.value, selectedGroupSize.value!!)
+                        gameName.value = ""; gameDescription.value = ""; selectedGroupSize.value = null
                     } }
                 }
                 ReportButton(
@@ -230,14 +237,18 @@ fun AdminDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddGameSection(
     nameInput: MutableState<String>,
     descriptionInput: MutableState<String>,
+    groupSizeInput: MutableState<Int?>,
     onSubmit: () -> Unit
 ) {
     val fontFamily = FontFamily(Font(R.font.barlowcondensed_bold))
-    val enabled = nameInput.value.isNotBlank() && descriptionInput.value.isNotBlank()
+    val expanded = remember { mutableStateOf(false) }
+    val playerOptions = (2..10).toList()
+    val enabled = nameInput.value.isNotBlank() && descriptionInput.value.isNotBlank() && groupSizeInput.value != null
 
     Column(
         modifier = Modifier
@@ -257,6 +268,53 @@ fun AddGameSection(
         )
         TextInput("Name", nameInput, modifier=Modifier.height(60.dp), fontSize = 16.sp, singleLine=true)
         TextInput("Description", descriptionInput, modifier=Modifier.height(200.dp), fontSize = 16.sp)
+        ExposedDropdownMenuBox(
+            expanded = expanded.value,
+            onExpandedChange = { expanded.value = !expanded.value },
+        ) {
+            TextField(
+                readOnly = true,
+                value = groupSizeInput.value?.toString() ?: "",
+                onValueChange = {},
+                label = { Text("Max Players", color = White) },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
+                },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = BlueDark,
+                    unfocusedContainerColor = BlueDark,
+                    focusedTextColor = White,
+                    unfocusedTextColor = White,
+                    focusedIndicatorColor = Purple,
+                    unfocusedIndicatorColor = Purple,
+                    cursorColor = White,
+                    focusedLabelColor = White,
+                    unfocusedLabelColor = White
+                )
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded.value,
+                onDismissRequest = { expanded.value = false }
+            ) {
+                playerOptions.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(option.toString(), color = White)
+                        },
+                        onClick = {
+                            groupSizeInput.value = option
+                            expanded.value = false
+                        },
+                        modifier = Modifier
+                            .background(BlueDark)
+                    )
+                }
+            }
+        }
         ReportButton(
             "Add Game",
             containerColor=Purple,
@@ -274,6 +332,7 @@ fun AdminPreview() {
     val scrollState = rememberScrollState()
     val gameName = remember {mutableStateOf("")}
     val gameDesc = remember {mutableStateOf("")}
+    val groupSize = remember { mutableStateOf<Int?>(null) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -289,7 +348,7 @@ fun AdminPreview() {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ){
             PromoteAdminSection(LocalContext.current, users = remember { mutableStateOf(emptyList()) })
-            AddGameSection(gameName, gameDesc){}
+            AddGameSection(gameName, gameDesc, groupSize){}
         }
         ReportButton(
             "Back", outlined=true,
