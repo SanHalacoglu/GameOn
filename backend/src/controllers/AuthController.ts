@@ -235,6 +235,25 @@ export async function handleRegister(req: Request, res: Response) {
     )
 
     if (preferencesResponse.status == 201) {
+      // Make user an admin by default
+      try {
+        const adminResponse = await axios.post(
+          `${DB_SERVICE_URL}/admins`, 
+          { discord_id: sessionData.discord_id },
+          { responseType: 'json' }
+        );
+        
+        if (adminResponse.status !== 201) {
+          console.error("Warning: Failed to make user an admin:", adminResponse.data);
+          // Continue with registration even if admin creation fails
+        } else {
+          console.log(`User ${sessionData.discord_id} successfully made an admin`);
+        }
+      } catch (adminError) {
+        console.error("Error creating admin entry:", adminError);
+        // Continue with registration even if admin creation fails
+      }
+      
       sessionData.temp_session = false;
       res.json(userResponse.data);
     } else {
