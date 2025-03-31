@@ -74,7 +74,7 @@ class SetMatchmakingPreferences : ComponentActivity() {
                     Modifier.weight(1F, true), gamesList.value, selectedLanguage,
                     selectedRegion, selectedTimezone, selectedSkillLevel, selectedGame
                 )
-                PreferenceFooter(canConfirm){
+                PreferenceFooter(canConfirm, "SetMatchmakingConfirm"){
                     lifecycleScope.launch {
                         val preferences = com.example.gameon.classes.Preferences(
                             preferenceId.value, selectedLanguage.value ?: "",

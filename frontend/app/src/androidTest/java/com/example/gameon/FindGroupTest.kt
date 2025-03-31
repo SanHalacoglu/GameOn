@@ -26,6 +26,7 @@ import androidx.test.uiautomator.UiSelector
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
+import kotlin.concurrent.thread
 
 @RunWith(AndroidJUnit4::class)
 class FindGroupTest {
@@ -115,14 +116,24 @@ class FindGroupTest {
         composeTestRule.runOnIdle {
             Log.d("FindGroupTest", "Waiting for UI to recompose.")
         }
-        composeTestRule.onNodeWithTag("FindGroupButton").assertTextContains("Finding...")
+
+        val confirm = composeTestRule.onNodeWithTag("SetMatchmakingConfirm")
+        composeTestRule.waitUntil {
+            confirm.isDisplayed()
+        }
+        Thread.sleep(2000)
+        confirm.performClick()
+        composeTestRule.waitUntil {
+            findGroupButton.isDisplayed()
+        }
+        Thread.sleep(2000)
+        findGroupButton.assertTextContains("Finding...")
 
         composeTestRule.waitUntil(timeoutMillis = 120000) {
             composeTestRule.onAllNodesWithText("You have been matched with a group!").fetchSemanticsNodes().isNotEmpty()
         }
 
         composeTestRule.onNodeWithTag("MatchmakingPopup").assertIsDisplayed()
-
         composeTestRule.onNodeWithText("OK").assertIsDisplayed().performClick()
 
         composeTestRule.waitUntil(timeoutMillis = 5000) {
@@ -146,14 +157,23 @@ class FindGroupTest {
         composeTestRule.runOnIdle {
             Log.d("FindGroupTest", "Waiting for UI to recompose.")
         }
-        composeTestRule.onNodeWithTag("FindGroupButton").assertTextContains("Finding...")
+        val confirm = composeTestRule.onNodeWithTag("SetMatchmakingConfirm")
+        composeTestRule.waitUntil {
+            confirm.isDisplayed()
+        }
+        Thread.sleep(2000)
+        confirm.performClick()
+        composeTestRule.waitUntil {
+            findGroupButton.isDisplayed()
+        }
+        Thread.sleep(2000)
+        findGroupButton.assertTextContains("Finding...")
 
         composeTestRule.waitUntil(timeoutMillis = 120000) {
             composeTestRule.onAllNodesWithText("Matchmaking timed out. Please try again.").fetchSemanticsNodes().isNotEmpty()
         }
 
         composeTestRule.onNodeWithTag("MatchmakingPopup").assertIsDisplayed()
-
         composeTestRule.onNodeWithText("OK").assertIsDisplayed().performClick()
 
         composeTestRule.waitUntil(timeoutMillis = 5000) {

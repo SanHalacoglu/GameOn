@@ -59,7 +59,7 @@ fun <T> DropdownInput(
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = modifier
+            modifier = modifier.testTag("${label}Dropdown")
         ) {
             DropdownTextField(label, selectedOption, expanded, outlined, displayText, leadingIcon,
                 Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable))

@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -158,7 +159,7 @@ fun Preferences(
 }
 
 @Composable
-fun PreferenceFooter(canConfirm: MutableState<Boolean>, onConfirm: () -> Unit) {
+fun PreferenceFooter(canConfirm: MutableState<Boolean>, testTag: String = "Confirm", onConfirm: () -> Unit) {
     Box (
         modifier = Modifier
             .fillMaxWidth()
@@ -176,6 +177,7 @@ fun PreferenceFooter(canConfirm: MutableState<Boolean>, onConfirm: () -> Unit) {
             modifier = Modifier
                 .width(300.dp)
                 .align(Alignment.TopCenter)
+                .testTag(testTag)
         ) {
             Text(
                 text = "CONFIRM",
